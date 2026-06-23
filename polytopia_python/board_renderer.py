@@ -73,7 +73,7 @@ class SpriteCache:
             if raw is None:
                 self._images[name] = None
             else:
-                meta = get_sprite_meta(name.replace(".png", ""))
+                meta = get_sprite_meta(name.replace(".png", ""), self.sprite_dir)
                 if meta is not None:
                     self._images[name] = pad_to_logical(raw, meta)
                     self._pivots[name] = meta.pivot_pil
