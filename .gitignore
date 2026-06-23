@@ -1,0 +1,6 @@
+reverse_engineering/
+board.png/
+
+polytopia_python/__pycache__/
+__pycache__/
+*.py[cod]
