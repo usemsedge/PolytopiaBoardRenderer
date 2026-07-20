@@ -1,0 +1,670 @@
+{
+  "_comment": "Hand-built 7x5 example scene (row=y, col=x). One Imperius player owns all; two level-2 cities. City (2,2) has border growth (border_size 2, 5x5) claiming neutral tiles in range; city (2,5) is still base (3x3).",
+  "current_turn": 1,
+  "current_player_index": 0,
+  "players": [
+    {
+      "id": 1,
+      "tribe": 7,
+      "skin_type": 0,
+      "color": 0,
+      "known_players": [],
+      "available_tech": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50
+      ]
+    }
+  ],
+  "map": {
+    "width": 5,
+    "height": 7,
+    "tiles": [
+      {
+        "x": 0,
+        "y": 0,
+        "terrain": 2,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "unit": {
+          "id": 5,
+          "type": 43,
+          "owner": 1,
+          "x": 0,
+          "y": 0,
+          "health": 10,
+          "passenger_type": 2
+        },
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "terrain": 2,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 2,
+        "y": 0,
+        "terrain": 2,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 3,
+        "y": 0,
+        "terrain": 1,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "resource": {
+          "type": 8
+        },
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 4,
+        "y": 0,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 0,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "resource": {
+          "type": 6
+        }
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "terrain": 2,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "unit": {
+          "id": 1,
+          "type": 44,
+          "owner": 1,
+          "x": 0,
+          "y": 1,
+          "health": 10,
+          "passenger_type": 2
+        },
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 1,
+        "y": 1,
+        "terrain": 2,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "improvement": {
+          "type": 2,
+          "level": 1
+        }
+      },
+      {
+        "x": 2,
+        "y": 1,
+        "terrain": 1,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "resource": {
+          "type": 3
+        }
+      },
+      {
+        "x": 3,
+        "y": 1,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 4,
+        "y": 1,
+        "terrain": 4,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "resource": {
+          "type": 5
+        },
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "terrain": 2,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 1,
+        "y": 2,
+        "terrain": 1,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "resource": {
+          "type": 8
+        }
+      },
+      {
+        "x": 2,
+        "y": 2,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "improvement": {
+          "type": 1,
+          "level": 2,
+          "founder": 1,
+          "border_size": 2
+        },
+        "unit": {
+          "id": 2,
+          "type": 4,
+          "owner": 1,
+          "x": 2,
+          "y": 2,
+          "health": 7
+        }
+      },
+      {
+        "x": 3,
+        "y": 2,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "resource": {
+          "type": 6
+        }
+      },
+      {
+        "x": 4,
+        "y": 2,
+        "terrain": 5,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "resource": {
+          "type": 1
+        },
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "terrain": 2,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 1,
+        "y": 3,
+        "terrain": 1,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "resource": {
+          "type": 9
+        }
+      },
+      {
+        "x": 2,
+        "y": 3,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2,
+        "has_road": true,
+        "improvement": {
+          "type": 5,
+          "level": 1
+        }
+      },
+      {
+        "x": 3,
+        "y": 3,
+        "terrain": 4,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 4,
+        "y": 3,
+        "terrain": 5,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "improvement": {
+          "type": 12,
+          "level": 1
+        },
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "terrain": 1,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 1,
+        "y": 4,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "has_road": true,
+        "ruling_city_x": 2,
+        "ruling_city_y": 5
+      },
+      {
+        "x": 2,
+        "y": 4,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "has_road": true,
+        "ruling_city_x": 2,
+        "ruling_city_y": 5,
+        "resource": {
+          "type": 2
+        }
+      },
+      {
+        "x": 3,
+        "y": 4,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 5,
+        "improvement": {
+          "type": 50,
+          "level": 1
+        },
+        "unit": {
+          "id": 3,
+          "type": 2,
+          "owner": 1,
+          "x": 3,
+          "y": 4,
+          "health": 10
+        }
+      },
+      {
+        "x": 4,
+        "y": 4,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "improvement": {
+          "type": 13,
+          "level": 1
+        },
+        "ruling_city_x": 2,
+        "ruling_city_y": 2
+      },
+      {
+        "x": 0,
+        "y": 5,
+        "terrain": 1,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 0,
+        "explorers": [
+          1
+        ]
+      },
+      {
+        "x": 1,
+        "y": 5,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "has_road": true,
+        "ruling_city_x": 2,
+        "ruling_city_y": 5,
+        "unit": {
+          "id": 4,
+          "type": 38,
+          "owner": 1,
+          "x": 1,
+          "y": 5,
+          "health": 5
+        }
+      },
+      {
+        "x": 2,
+        "y": 5,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 5,
+        "improvement": {
+          "type": 1,
+          "level": 2,
+          "founder": 1,
+          "border_size": 1
+        }
+      },
+      {
+        "x": 3,
+        "y": 5,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 5,
+        "improvement": {
+          "type": 6,
+          "level": 1
+        }
+      },
+      {
+        "x": 4,
+        "y": 5,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 0,
+        "explorers": [
+          1
+        ]
+      },
+      {
+        "x": 0,
+        "y": 6,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 0,
+        "explorers": [
+          1
+        ]
+      },
+      {
+        "x": 1,
+        "y": 6,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 5
+      },
+      {
+        "x": 2,
+        "y": 6,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 5
+      },
+      {
+        "x": 3,
+        "y": 6,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_x": 2,
+        "ruling_city_y": 5,
+        "resource": {
+          "type": 2
+        },
+        "improvement": {
+          "type": 5,
+          "level": 1
+        }
+      },
+      {
+        "x": 4,
+        "y": 6,
+        "terrain": 3,
+        "climate": 7,
+        "skin": 0,
+        "altitude": 1,
+        "owner": 0,
+        "explorers": [
+          1
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+city renders properly
+unit effects
+text for unit health
+unit outlines
+shorelines (needs some tiny fixes still)
+7/3/2026\
+
+
+
+
+7/5
+fully fix shorelines
+resource outlines
+fix borders
+
+correct text and font for healths
+
+starting roads
+
+true north is to the upper left
+trust claude more than yourself
+roads are done (maybe not variants tho)
+

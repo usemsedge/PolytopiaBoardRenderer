@@ -1,0 +1,100 @@
+[
+ {
+  "node": "BaseMarket",
+  "sprite": "Market_base",
+  "tint": false,
+  "pos": [
+   0.0,
+   0.204
+  ],
+  "scale": [
+   0.5,
+   0.5
+  ],
+  "order": 1
+ },
+ {
+  "node": "MetalMarket",
+  "sprite": "Market_forge",
+  "tint": false,
+  "pos": [
+   0.0,
+   0.204
+  ],
+  "scale": [
+   0.5,
+   0.5
+  ],
+  "order": 2
+ },
+ {
+  "node": "FarmersMarket",
+  "sprite": "Market_windmill",
+  "tint": false,
+  "pos": [
+   0.0,
+   0.204
+  ],
+  "scale": [
+   0.5,
+   0.5
+  ],
+  "order": 3
+ },
+ {
+  "node": "WoodMarket",
+  "sprite": "Market_sawmill",
+  "tint": false,
+  "pos": [
+   0.0,
+   0.204
+  ],
+  "scale": [
+   0.5,
+   0.5
+  ],
+  "order": 4
+ },
+ {
+  "node": "Market_part_section1",
+  "sprite": "Market_section",
+  "tint": false,
+  "pos": [
+   -0.0022,
+   0.33
+  ],
+  "scale": [
+   0.5,
+   0.5
+  ],
+  "order": 4
+ },
+ {
+  "node": "Market_part_section2",
+  "sprite": "Market_section",
+  "tint": false,
+  "pos": [
+   -0.0022,
+   0.43
+  ],
+  "scale": [
+   0.5,
+   0.5
+  ],
+  "order": 4
+ },
+ {
+  "node": "Roof",
+  "sprite": "Market_roof",
+  "tint": false,
+  "pos": [
+   0.0,
+   0.4
+  ],
+  "scale": [
+   0.5,
+   0.5
+  ],
+  "order": 5
+ }
+]

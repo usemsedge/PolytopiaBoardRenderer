@@ -1,0 +1,4837 @@
+{
+ "Mermaid Warrior": [
+  {
+   "node": "bodytint_mermaid",
+   "sprite": "bodytint_mermaid",
+   "tint": true,
+   "pos": [
+    0.0121,
+    0.1826
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00899,
+    0.17002
+   ],
+   "scale": [
+    0.37595,
+    0.31076
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_mermaid",
+   "tint": false,
+   "pos": [
+    0.0121,
+    0.1786
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    0.0113,
+    0.2414
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_club",
+   "sprite": "weapon_club",
+   "tint": false,
+   "pos": [
+    -0.0219,
+    0.1656
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Larva": [
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    0.01,
+    0.093
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Larva_tint",
+   "sprite": "Larva_tint",
+   "tint": true,
+   "pos": [
+    0.022,
+    0.1093
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.02739,
+    0.11358
+   ],
+   "scale": [
+    0.27894,
+    0.17745
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Larva",
+   "sprite": "Larva",
+   "tint": false,
+   "pos": [
+    0.018,
+    0.1117
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "HeadScale",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.1043,
+    0.0803
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Scout": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00705,
+    0.14886
+   ],
+   "scale": [
+    0.17323,
+    0.27368
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Heads",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0121,
+    0.2151
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Mantis": [
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    0.01,
+    0.093
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Mantis tint",
+   "sprite": "mantis_tint",
+   "tint": true,
+   "pos": [
+    0.018,
+    0.17
+   ],
+   "scale": [
+    0.7267,
+    0.7267
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.01523,
+    0.18396
+   ],
+   "scale": [
+    0.37314,
+    0.41081
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Mantis",
+   "sprite": "mantis",
+   "tint": false,
+   "pos": [
+    0.018,
+    0.17
+   ],
+   "scale": [
+    0.7267,
+    0.7267
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "HeadScale",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.0542,
+    0.3355
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "shark": [
+  {
+   "node": "sharktint",
+   "sprite": "sharktint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.084
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00033,
+    0.0553
+   ],
+   "scale": [
+    0.40322,
+    0.24397
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Seamonster",
+   "sprite": "shark",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.084
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "jelly": [
+  {
+   "node": "jelly_tint",
+   "sprite": "jelly_tint",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.09
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00437,
+    0.16845
+   ],
+   "scale": [
+    0.35022,
+    0.31084
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Manowar",
+   "sprite": "jelly",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.09
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Raychi_cute": [
+  {
+   "node": "Raychi Head Tint",
+   "sprite": "raychi_head_tint_cute",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body Tint",
+   "sprite": "raychi_body_tint_cute",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0029,
+    0.20336
+   ],
+   "scale": [
+    0.27387,
+    0.3577
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Raychi Body",
+   "sprite": "raychi_body_cute",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Raychi_Cute_Head",
+   "sprite": "raychi_head_cute",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Egg": [
+  {
+   "node": "Egg_tint",
+   "sprite": "elyrion_egg_tint",
+   "tint": true,
+   "pos": [
+    0.0131,
+    0.1774
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.01254,
+    0.17781
+   ],
+   "scale": [
+    0.13533,
+    0.18082
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Egg",
+   "sprite": "elyrion_egg",
+   "tint": false,
+   "pos": [
+    0.0116,
+    0.1402
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Centipede": [
+  {
+   "node": "Centipede_bottom",
+   "sprite": "cymanti_centipede_bottom",
+   "tint": false,
+   "pos": [
+    -0.04,
+    0.06
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Centipede_head_tint",
+   "sprite": "cymanti_centipede_head_tint",
+   "tint": true,
+   "pos": [
+    -0.003,
+    0.169
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0089,
+    0.1778
+   ],
+   "scale": [
+    0.47918,
+    0.3695
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Centipede_head",
+   "sprite": "cymanti_centipede_head",
+   "tint": false,
+   "pos": [
+    -0.003,
+    0.169
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "dagger": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_dagger",
+   "tint": true,
+   "pos": [
+    0.0077,
+    0.1574
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00509,
+    0.17367
+   ],
+   "scale": [
+    0.18305,
+    0.27794
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_dagger",
+   "tint": false,
+   "pos": [
+    0.0077,
+    0.1574
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_dagger",
+   "sprite": "weapon_dagger",
+   "tint": false,
+   "pos": [
+    -0.0612,
+    0.1118
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Ship": [
+  {
+   "node": "ship",
+   "sprite": "unit_ship",
+   "tint": false,
+   "pos": [
+    0.0554,
+    0.0776
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.03974,
+    0.18414
+   ],
+   "scale": [
+    0.44788,
+    0.47228
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "ship_tint",
+   "sprite": "unit_ship_tint",
+   "tint": true,
+   "pos": [
+    0.0683,
+    0.0897
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "ship_sail",
+   "sprite": "unit_ship_sail",
+   "tint": false,
+   "pos": [
+    0.0315,
+    0.2076
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.132
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Swordman": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00756,
+    0.14598
+   ],
+   "scale": [
+    0.1758,
+    0.2832
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0124,
+    0.2168
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_sword",
+   "sprite": "weapon_sword",
+   "tint": false,
+   "pos": [
+    -0.046,
+    0.094
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Archer": [
+  {
+   "node": "Quiver",
+   "sprite": "unit_quiver",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00623,
+    0.14837
+   ],
+   "scale": [
+    0.19542,
+    0.2845
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0138,
+    0.2169
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_Bow",
+   "sprite": "weapon_bow",
+   "tint": false,
+   "pos": [
+    0.02,
+    0.14
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "Gaami": [
+  {
+   "node": "Gaami_tint",
+   "sprite": "polaris_bodytint_gaami",
+   "tint": true,
+   "pos": [
+    -0.02,
+    0.21
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0088,
+    0.1902
+   ],
+   "scale": [
+    0.23509,
+    0.47953
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Gaami",
+   "sprite": "polaris_body_gaami",
+   "tint": false,
+   "pos": [
+    -0.02,
+    0.21
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Rider": [
+  {
+   "node": "Animals",
+   "sprite": "animal_xinxi",
+   "tint": false,
+   "pos": [
+    0.0056,
+    0.092
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 1
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.04481,
+    0.19025
+   ],
+   "scale": [
+    0.36037,
+    0.4327
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_rider",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.267
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_rider",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.267
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.3347
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_club",
+   "sprite": "weapon_club",
+   "tint": false,
+   "pos": [
+    -0.043,
+    0.252
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "Santa": [
+  {
+   "node": "Santa",
+   "sprite": "body_santa",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.2
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00231,
+    0.19867
+   ],
+   "scale": [
+    0.19348,
+    0.3368
+   ],
+   "order": 0,
+   "skinLogic": 0
+  }
+ ],
+ "Priest": [
+  {
+   "node": "Legs",
+   "sprite": "body_legs_priest",
+   "tint": false,
+   "pos": [
+    -0.0095,
+    0.1407
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00519,
+    0.15297
+   ],
+   "scale": [
+    0.18962,
+    0.2663
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_priest",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.1305
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_priest",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.1305
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0094,
+    0.2149
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_priest",
+   "sprite": "weapon_priest",
+   "tint": false,
+   "pos": [
+    0.093,
+    0.098
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Tridention": [
+  {
+   "node": "Animals",
+   "sprite": "animal_aquarion",
+   "tint": false,
+   "pos": [
+    -0.002,
+    0.083
+   ],
+   "scale": [
+    0.8531,
+    0.8531
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0022,
+    0.2203
+   ],
+   "scale": [
+    0.38313,
+    0.42946
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_rider_mermaid",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.267
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_rider_mermaid",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.267
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.335
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_Tridenton",
+   "sprite": "weapon_tridention",
+   "tint": false,
+   "pos": [
+    -0.066,
+    0.169
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "Boat": [
+  {
+   "node": "boat",
+   "sprite": "unit_boat",
+   "tint": false,
+   "pos": [
+    0.0076,
+    0.0886
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.01506,
+    0.11158
+   ],
+   "scale": [
+    0.37662,
+    0.42317
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "boat_tint",
+   "sprite": "unit_boat_tint",
+   "tint": true,
+   "pos": [
+    0.0174,
+    0.1402
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0475,
+    0.1063
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "boat_sail",
+   "sprite": "unit_battleship_sail",
+   "tint": false,
+   "pos": [
+    0.0898,
+    0.1812
+   ],
+   "scale": [
+    0.91,
+    0.91
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Giant": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_giant",
+   "tint": true,
+   "pos": [
+    -0.03,
+    0.23
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.01907,
+    0.21996
+   ],
+   "scale": [
+    0.28561,
+    0.45344
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_giant",
+   "tint": false,
+   "pos": [
+    -0.03,
+    0.23
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    0.0116,
+    0.3284
+   ],
+   "scale": [
+    1.15,
+    1.15
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_sword",
+   "sprite": "weapon_club",
+   "tint": false,
+   "pos": [
+    -0.042,
+    0.169
+   ],
+   "scale": [
+    1.27056,
+    1.27056
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Aquapult": [
+  {
+   "node": "Body_Tint",
+   "sprite": "unit_aquapult_tint",
+   "tint": true,
+   "pos": [
+    -0.045,
+    0.1725
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.02628,
+    0.13716
+   ],
+   "scale": [
+    0.3347,
+    0.31006
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "unit_aquapult_body",
+   "tint": false,
+   "pos": [
+    -0.045,
+    0.1725
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Knight_Wolf": [
+  {
+   "node": "wolf",
+   "sprite": "wolf",
+   "tint": false,
+   "pos": [
+    0.004,
+    0.057
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0058,
+    0.1882
+   ],
+   "scale": [
+    0.49927,
+    0.47353
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_knight",
+   "tint": true,
+   "pos": [
+    -0.015,
+    0.249
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "wolftint",
+   "sprite": "wolftint",
+   "tint": true,
+   "pos": [
+    0.001,
+    -0.014
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_knight",
+   "tint": false,
+   "pos": [
+    -0.015,
+    0.249
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.015,
+    0.35
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "HorseBody_Tint",
+   "sprite": "bodytint_knighthorse",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.253
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  },
+  {
+   "node": "HorseBody",
+   "sprite": "body_knighthorse",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.253
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 5,
+   "skinLogic": 0
+  }
+ ],
+ "Battleship": [
+  {
+   "node": "battleship",
+   "sprite": "unit_battleship",
+   "tint": false,
+   "pos": [
+    -0.0094,
+    0.084
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.01182,
+    0.10969
+   ],
+   "scale": [
+    0.44376,
+    0.43859
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Roofs",
+   "sprite": "roof_xinxi",
+   "tint": false,
+   "pos": [
+    -0.1244,
+    0.2274
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "battleship_tint",
+   "sprite": "unit_battleship_tint",
+   "tint": true,
+   "pos": [
+    -0.0093,
+    0.1298
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "battleship_sail",
+   "sprite": "unit_battleship_sail",
+   "tint": false,
+   "pos": [
+    0.0763,
+    0.1542
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Crab": [
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00884,
+    0.15039
+   ],
+   "scale": [
+    0.47438,
+    0.36006
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Crab_tint",
+   "sprite": "aquarion_crab_tint",
+   "tint": true,
+   "pos": [
+    0.0054,
+    0.151
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Crab",
+   "sprite": "aquarion_crab",
+   "tint": false,
+   "pos": [
+    0.0054,
+    0.151
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "mermaidDagger": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_dagger_mermaid",
+   "tint": true,
+   "pos": [
+    0.0077,
+    0.1574
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0114,
+    0.1679
+   ],
+   "scale": [
+    0.39669,
+    0.32347
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_dagger_mermaid",
+   "tint": false,
+   "pos": [
+    0.0077,
+    0.1574
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_dagger",
+   "sprite": "weapon_dagger",
+   "tint": false,
+   "pos": [
+    -0.0612,
+    0.1118
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Pirate": [
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0125,
+    0.10269
+   ],
+   "scale": [
+    0.34645,
+    0.3143
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "pirate_ship",
+   "sprite": "unit_pirate_ship",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "unit_dagger_head",
+   "sprite": "unit_dagger_head",
+   "tint": false,
+   "pos": [
+    0.02,
+    0.07
+   ],
+   "scale": [
+    0.8,
+    0.8
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "pirate_tint",
+   "sprite": "unit_pirate_ship_tint",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Juggernaut": [
+  {
+   "node": "unit_juggernaut",
+   "sprite": "unit_juggernaut",
+   "tint": false,
+   "pos": [
+    0.0034,
+    0.1511
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "unit_juggernaut_tint_back",
+   "sprite": "unit_juggernaut_tint_back",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.149
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0053,
+    0.1524
+   ],
+   "scale": [
+    0.46823,
+    0.5447
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_giant",
+   "tint": true,
+   "pos": [
+    0.02653,
+    0.14437
+   ],
+   "scale": [
+    0.9605,
+    0.9605
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_giant",
+   "tint": false,
+   "pos": [
+    0.02653,
+    0.14437
+   ],
+   "scale": [
+    0.9605,
+    0.9605
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    0.068,
+    0.234
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  },
+  {
+   "node": "unit_juggernaut_front",
+   "sprite": "unit_juggernaut_front",
+   "tint": false,
+   "pos": [
+    0.003,
+    0.149
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  },
+  {
+   "node": "unit_juggernaut_tint",
+   "sprite": "unit_juggernaut_tint",
+   "tint": true,
+   "pos": [
+    0.004,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 5,
+   "skinLogic": 0
+  }
+ ],
+ "Seamonster": [
+  {
+   "node": "Seamonster",
+   "sprite": "elyrion_seamonster",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.084
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00435,
+    0.08321
+   ],
+   "scale": [
+    0.42658,
+    0.34905
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Seamonster_tint",
+   "sprite": "elyrion_seamonster_tint",
+   "tint": true,
+   "pos": [
+    -0.0192,
+    0.1507
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Catapult": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    0.038,
+    0.247
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00085,
+    0.2068
+   ],
+   "scale": [
+    0.26078,
+    0.35869
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    0.038,
+    0.247
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    0.0376,
+    0.3166
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Catapult",
+   "sprite": "unit_catapult_default",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Hexapod": [
+  {
+   "node": "Hexapod_tint",
+   "sprite": "hexapod_tint",
+   "tint": true,
+   "pos": [
+    0.018,
+    0.126
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    0.01,
+    0.093
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.05295,
+    0.14324
+   ],
+   "scale": [
+    0.26986,
+    0.22152
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Hexapod",
+   "sprite": "hexapod",
+   "tint": false,
+   "pos": [
+    0.018,
+    0.126
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "HeadScale",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.1248,
+    0.0968
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Bunny": [
+  {
+   "node": "Bunny",
+   "sprite": "body_bunny",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.2
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00485,
+    0.20143
+   ],
+   "scale": [
+    0.2503,
+    0.44225
+   ],
+   "order": 0,
+   "skinLogic": 0
+  }
+ ],
+ "Fortress": [
+  {
+   "node": "Fortress_tint",
+   "sprite": "polaris_fortress_tint",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.17588
+   ],
+   "scale": [
+    0.39816,
+    0.35556
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Fortress",
+   "sprite": "polaris_fortress",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Battlesled": [
+  {
+   "node": "Battlesled_tint",
+   "sprite": "polaris_battlesled_tint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.1574
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0216,
+    0.1441
+   ],
+   "scale": [
+    0.41398,
+    0.29144
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Battlesled",
+   "sprite": "polaris_battlesled",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.1574
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Battlesled_weapon",
+   "sprite": "polaris_battlesled_weapon",
+   "tint": false,
+   "pos": [
+    0.164,
+    0.148
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.035,
+    0.198
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "BabyDragon": [
+  {
+   "node": "Dragon_tint",
+   "sprite": "elyrion_dragon_tint",
+   "tint": true,
+   "pos": [
+    0.0051,
+    0.283
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00938,
+    0.2863
+   ],
+   "scale": [
+    0.36116,
+    0.2564
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Dragon_shadow",
+   "sprite": "elyrion_dragon_shadow",
+   "tint": false,
+   "pos": [
+    -0.0007,
+    0.055
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Dragon",
+   "sprite": "elyrion_dragon",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.2832
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Rammership": [
+  {
+   "node": "pirate_tint",
+   "sprite": "unit_rammer_tint",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00246,
+    0.11098
+   ],
+   "scale": [
+    0.37099,
+    0.34304
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "rammer_ship",
+   "sprite": "unit_rammer",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.17
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    0.039,
+    0.073
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Phychi": [
+  {
+   "node": "Phychi_tint",
+   "sprite": "phychi_tint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.254
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    0.004,
+    0.05
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0046,
+    0.2651
+   ],
+   "scale": [
+    0.40978,
+    0.20924
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Phychi",
+   "sprite": "phychi",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.254
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.066,
+    0.218
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Knight": [
+  {
+   "node": "Animals",
+   "sprite": "animal_xinxi",
+   "tint": false,
+   "pos": [
+    -0.001,
+    0.084
+   ],
+   "scale": [
+    1.125,
+    1.125
+   ],
+   "order": 0,
+   "skinLogic": 1
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.04213,
+    0.18885
+   ],
+   "scale": [
+    0.39595,
+    0.47357
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_knight",
+   "tint": true,
+   "pos": [
+    -0.017,
+    0.255
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_knight",
+   "tint": false,
+   "pos": [
+    -0.017,
+    0.255
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.015,
+    0.358
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "HorseBody_Tint",
+   "sprite": "bodytint_knighthorse",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.253
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  },
+  {
+   "node": "HorseBody",
+   "sprite": "body_knighthorse",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.253
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 5,
+   "skinLogic": 0
+  }
+ ],
+ "Ciru": [
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    0.01,
+    0.093
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.01022,
+    0.08475
+   ],
+   "scale": [
+    0.20292,
+    0.16201
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Ciru",
+   "sprite": "ciru",
+   "tint": false,
+   "pos": [
+    0.008,
+    0.087
+   ],
+   "scale": [
+    1.34278,
+    1.34278
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Mermaid Cloak": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_cloak_mermaid",
+   "tint": true,
+   "pos": [
+    0.012,
+    0.124
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0091,
+    0.12584
+   ],
+   "scale": [
+    0.39758,
+    0.31204
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_cloak_mermaid",
+   "tint": false,
+   "pos": [
+    0.012,
+    0.124
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Mermaid Scout": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_mermaid",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0217,
+    0.2029
+   ],
+   "scale": [
+    0.35888,
+    0.28992
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_mermaid",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Heads",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0118,
+    0.2098
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "FireDragon": [
+  {
+   "node": "Dragon_shadow",
+   "sprite": "elyrion_dragon_shadow",
+   "tint": false,
+   "pos": [
+    -0.007,
+    0.036
+   ],
+   "scale": [
+    1.3023,
+    1.3023
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.006,
+    0.2474
+   ],
+   "scale": [
+    0.53389,
+    0.33001
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Dragon_large_tint",
+   "sprite": "elyrion_dragon_large_tint",
+   "tint": true,
+   "pos": [
+    0.0051,
+    0.283
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Dragon_large",
+   "sprite": "elyrion_dragon_large",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.2832
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Boomchi": [
+  {
+   "node": "boomchi_tint",
+   "sprite": "boomchi_tint",
+   "tint": true,
+   "pos": [
+    0.001,
+    0.046
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.01225,
+    0.05871
+   ],
+   "scale": [
+    0.34445,
+    0.31742
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Boomchi",
+   "sprite": "boomchi",
+   "tint": false,
+   "pos": [
+    0.003,
+    0.045
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.102,
+    -0.037
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Moth": [
+  {
+   "node": "Moth_tint",
+   "sprite": "moth_tint",
+   "tint": true,
+   "pos": [
+    0.016,
+    0.239
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    -0.001,
+    0.01912
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.01578,
+    0.26109
+   ],
+   "scale": [
+    0.42857,
+    0.2899
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Moth Body",
+   "sprite": "moth",
+   "tint": false,
+   "pos": [
+    0.016,
+    0.239
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.14,
+    0.169
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Defender": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0021,
+    0.14571
+   ],
+   "scale": [
+    0.2,
+    0.27079
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0134,
+    0.2152
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Shield_tint",
+   "sprite": "unit_shieldtint_defender",
+   "tint": true,
+   "pos": [
+    0.03,
+    0.132
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Shield",
+   "sprite": "unit_shield_defender",
+   "tint": false,
+   "pos": [
+    0.03,
+    0.132
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "BugEgg": [
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    0.01,
+    0.03
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -2,
+   "skinLogic": 0
+  },
+  {
+   "node": "bugEgg_tint",
+   "sprite": "bugEgg_tint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.02
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00076,
+    0.1079
+   ],
+   "scale": [
+    0.16353,
+    0.19696
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Bug Egg",
+   "sprite": "bugEgg",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.02
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Doomux": [
+  {
+   "node": "Doomux_tint",
+   "sprite": "cymanti_doomux_tint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.02
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0244,
+    0.1445
+   ],
+   "scale": [
+    0.62294,
+    0.4303
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Doomux",
+   "sprite": "cymanti_doomux",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.02
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Cloak Boat": [
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.01419,
+    0.05564
+   ],
+   "scale": [
+    0.35578,
+    0.31127
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Cloak_boat_tint",
+   "sprite": "unit_cloak_boat_tint",
+   "tint": true,
+   "pos": [
+    0.0155,
+    0.0531
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Cloak_boat",
+   "sprite": "unit_cloak_boat",
+   "tint": false,
+   "pos": [
+    0.015,
+    0.054
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "jelly_swamp_UIOverride": [
+  {
+   "node": "Tentacles_tint",
+   "sprite": "tentacle_tint_UI_swamp",
+   "tint": true,
+   "pos": [
+    0.002,
+    0.138
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 3
+  },
+  {
+   "node": "Tentacles",
+   "sprite": "tentacle_UI_swamp",
+   "tint": false,
+   "pos": [
+    0.002,
+    0.134
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 3
+  },
+  {
+   "node": "Head_tint",
+   "sprite": "jelly_tint_swamp",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.134
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 3
+  },
+  {
+   "node": "Head",
+   "sprite": "jelly_swamp",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.134
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 3
+  }
+ ],
+ "Mermaid Archer": [
+  {
+   "node": "Quiver",
+   "sprite": "unit_quiver",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0059,
+    0.1461
+   ],
+   "scale": [
+    0.42484,
+    0.3416
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_mermaid",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.151
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_mermaid",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0128,
+    0.2108
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_Bow",
+   "sprite": "weapon_bow",
+   "tint": false,
+   "pos": [
+    0.02,
+    0.14
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "Mooni": [
+  {
+   "node": "Icemaker_Tint",
+   "sprite": "polaris_icemaker_tint",
+   "tint": true,
+   "pos": [
+    0.0,
+    0.18
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0012,
+    0.16473
+   ],
+   "scale": [
+    0.1976,
+    0.26717
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Icemaker",
+   "sprite": "polaris_icemaker",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.18
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "ScoutShip": [
+  {
+   "node": "ship_tint",
+   "sprite": "unit_scoutship_tint",
+   "tint": true,
+   "pos": [
+    -0.0412,
+    0.1979
+   ],
+   "scale": [
+    0.9,
+    0.9
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0559,
+    0.1473
+   ],
+   "scale": [
+    0.37877,
+    0.46868
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "ship",
+   "sprite": "unit_scoutship",
+   "tint": false,
+   "pos": [
+    -0.0403,
+    0.1979
+   ],
+   "scale": [
+    0.9,
+    0.9
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.1321,
+    0.1502
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Kiton": [
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    0.004,
+    0.0904
+   ],
+   "scale": [
+    1.27745,
+    1.27745
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0359,
+    0.1741
+   ],
+   "scale": [
+    0.44902,
+    0.33808
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Kiton_tint",
+   "sprite": "kiton_tint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.1
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Kiton",
+   "sprite": "kiton",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.1
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "HeadScale",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.1147,
+    0.105
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Demon": [
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0098,
+    0.1863
+   ],
+   "scale": [
+    0.23729,
+    0.44144
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "demon",
+   "sprite": "demon",
+   "tint": false,
+   "pos": [
+    0.0401,
+    0.1568
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "demon_tint",
+   "sprite": "demon_tint",
+   "tint": true,
+   "pos": [
+    0.043,
+    0.154
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Siren": [
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.04151,
+    0.1782
+   ],
+   "scale": [
+    0.35513,
+    0.36185
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_priest_mermaid",
+   "tint": true,
+   "pos": [
+    -0.018,
+    0.1295
+   ],
+   "scale": [
+    0.91311,
+    0.93537
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_priest_mermaid",
+   "tint": false,
+   "pos": [
+    -0.018,
+    0.1295
+   ],
+   "scale": [
+    0.91311,
+    0.93537
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.015,
+    0.214
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_priest",
+   "sprite": "weapon_priest",
+   "tint": false,
+   "pos": [
+    0.082,
+    0.093
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Exida": [
+  {
+   "node": "Exida_tint",
+   "sprite": "exida_tint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.1
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "shadow",
+   "sprite": "unit_shadow",
+   "tint": false,
+   "pos": [
+    -0.0054,
+    0.04772
+   ],
+   "scale": [
+    1.11637,
+    1.11637
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0182,
+    0.1967
+   ],
+   "scale": [
+    0.25757,
+    0.33327
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Exida",
+   "sprite": "exida",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.1
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.079,
+    0.096
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Centipede_segment": [
+  {
+   "node": "Centipede bottom",
+   "sprite": "cymanti_centipede_segment_bottom",
+   "tint": false,
+   "pos": [
+    0.025,
+    0.046
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Connection",
+   "sprite": "cymanti_centipede_connector",
+   "tint": false,
+   "pos": [
+    0.021,
+    0.104
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Centipede_segment_tint",
+   "sprite": "cymanti_centipede_segment_tint",
+   "tint": true,
+   "pos": [
+    0.015,
+    0.117
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0217,
+    0.0756
+   ],
+   "scale": [
+    0.47023,
+    0.44944
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Centipede_segment",
+   "sprite": "cymanti_centipede_segment",
+   "tint": false,
+   "pos": [
+    0.015,
+    0.117
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Raychi": [
+  {
+   "node": "Raychi_tint",
+   "sprite": "raychi_tint",
+   "tint": true,
+   "pos": [
+    0.003,
+    0.103
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00367,
+    0.03626
+   ],
+   "scale": [
+    0.40453,
+    0.27252
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Raychi",
+   "sprite": "raychi",
+   "tint": false,
+   "pos": [
+    0.003,
+    0.103
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "insect_head",
+   "tint": false,
+   "pos": [
+    0.1423,
+    -0.0363
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  }
+ ],
+ "Centipede_segment_cute": [
+  {
+   "node": "Connection",
+   "sprite": "cymanti_centipede_connector_cute",
+   "tint": false,
+   "pos": [
+    0.0117,
+    0.1741
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Segment Tint",
+   "sprite": "cymanti_centipede_segment_tint_cute",
+   "tint": true,
+   "pos": [
+    0.0044,
+    0.2
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "legs",
+   "sprite": "cymanti_centipede_segment_bottom_cute",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.2
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0053,
+    0.1974
+   ],
+   "scale": [
+    0.39934,
+    0.4124
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Segment",
+   "sprite": "cymanti_centipede_segment_cute",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.2
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Cloak": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_cloak",
+   "tint": true,
+   "pos": [
+    0.012,
+    0.124
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.03104,
+    0.18304
+   ],
+   "scale": [
+    0.18904,
+    0.28673
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_cloak",
+   "tint": false,
+   "pos": [
+    0.012,
+    0.124
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Warrior": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00936,
+    0.14832
+   ],
+   "scale": [
+    0.1776,
+    0.28407
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.013,
+    0.215
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_club",
+   "sprite": "weapon_club",
+   "tint": false,
+   "pos": [
+    -0.0426,
+    0.1245
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Polytaur": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    0.0007,
+    0.1479
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.00303,
+    0.17288
+   ],
+   "scale": [
+    0.17242,
+    0.31705
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    0.0007,
+    0.1479
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "PolytaurHead",
+   "sprite": "polytaur_xinxi",
+   "tint": false,
+   "pos": [
+    0.013,
+    0.2319
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 2
+  }
+ ],
+ "Mermaid Swordman": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_mermaid",
+   "tint": true,
+   "pos": [
+    -0.013,
+    0.152
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0521,
+    0.1516
+   ],
+   "scale": [
+    0.32702,
+    0.36739
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_mermaid",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.211
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_sword",
+   "sprite": "weapon_sword",
+   "tint": false,
+   "pos": [
+    -0.046,
+    0.094
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Transportship": [
+  {
+   "node": "boat_tint",
+   "sprite": "unit_transportship_tint",
+   "tint": true,
+   "pos": [
+    -0.024,
+    0.14
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0207,
+    0.11765
+   ],
+   "scale": [
+    0.37357,
+    0.37285
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "boat",
+   "sprite": "unit_transportship",
+   "tint": false,
+   "pos": [
+    -0.024,
+    0.141
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Mermaid Defender": [
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_mermaid",
+   "tint": true,
+   "pos": [
+    -0.011,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0308,
+    0.1294
+   ],
+   "scale": [
+    0.36971,
+    0.3239
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_mermaid",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0128,
+    0.2098
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Shield",
+   "sprite": "unit_shield_mermaiddefender",
+   "tint": false,
+   "pos": [
+    0.038,
+    0.095
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "Bombership": [
+  {
+   "node": "battleship_tint",
+   "sprite": "unit_bombership_tint",
+   "tint": true,
+   "pos": [
+    -0.008,
+    0.2673
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.0225,
+    0.1896
+   ],
+   "scale": [
+    0.45609,
+    0.51946
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "battleship",
+   "sprite": "unit_bombership",
+   "tint": false,
+   "pos": [
+    -0.009,
+    0.2683
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Roofs",
+   "sprite": "roof_xinxi",
+   "tint": false,
+   "pos": [
+    -0.067,
+    0.3223
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "battleship_sail",
+   "sprite": "unit_battleship_sail",
+   "tint": false,
+   "pos": [
+    0.0763,
+    0.2055
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ],
+ "Rider_Wolf": [
+  {
+   "node": "Animals",
+   "sprite": "animal_xinxi",
+   "tint": false,
+   "pos": [
+    0.0056,
+    0.092
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "wolf",
+   "sprite": "wolf",
+   "tint": false,
+   "pos": [
+    0.013,
+    0.067
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 1
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0121,
+    0.1827
+   ],
+   "scale": [
+    0.50856,
+    0.44296
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_rider",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.267
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "wolftint",
+   "sprite": "wolftint",
+   "tint": true,
+   "pos": [
+    0.01,
+    0.001
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 1
+  },
+  {
+   "node": "Body",
+   "sprite": "body_rider",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.267
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.014,
+    0.333
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_club",
+   "sprite": "weapon_club",
+   "tint": false,
+   "pos": [
+    -0.043,
+    0.252
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "island": [
+  {
+   "node": "Island_tint_Outline",
+   "sprite": "island_tint_Outline_0",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.082
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": -1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Island_tint",
+   "sprite": "island_tint",
+   "tint": true,
+   "pos": [
+    0.005,
+    0.082
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0188,
+    0.07898
+   ],
+   "scale": [
+    0.56105,
+    0.39181
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Island",
+   "sprite": "island",
+   "tint": false,
+   "pos": [
+    0.005,
+    0.084
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "Shaman": [
+  {
+   "node": "Body_Tint",
+   "sprite": "shaman_tint",
+   "tint": true,
+   "pos": [
+    -0.01,
+    0.22
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    0.0,
+    0.20094
+   ],
+   "scale": [
+    0.2,
+    0.38512
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "shaman",
+   "tint": false,
+   "pos": [
+    -0.01,
+    0.22
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  }
+ ],
+ "IceArcher": [
+  {
+   "node": "Quiver",
+   "sprite": "unit_quiver",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.15
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    -0.00623,
+    0.14837
+   ],
+   "scale": [
+    0.19542,
+    0.2845
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_default",
+   "tint": true,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_default",
+   "tint": false,
+   "pos": [
+    -0.012,
+    0.147
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    -0.0138,
+    0.2169
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_Bow",
+   "sprite": "weapon_icebow",
+   "tint": false,
+   "pos": [
+    0.02,
+    0.14
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 4,
+   "skinLogic": 0
+  }
+ ],
+ "Amphibian": [
+  {
+   "node": "Animals",
+   "sprite": "animal_aquarion",
+   "tint": false,
+   "pos": [
+    51.29458,
+    -10.94086
+   ],
+   "scale": [
+    0.8531,
+    0.8531
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "OverlayFX-BoundingBox",
+   "sprite": "Square",
+   "tint": false,
+   "pos": [
+    51.29357,
+    -10.82142
+   ],
+   "scale": [
+    0.39383,
+    0.40503
+   ],
+   "order": 0,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body_Tint",
+   "sprite": "bodytint_rider_mermaid",
+   "tint": true,
+   "pos": [
+    51.28558,
+    -10.75706
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 1,
+   "skinLogic": 0
+  },
+  {
+   "node": "Body",
+   "sprite": "body_rider_mermaid",
+   "tint": false,
+   "pos": [
+    51.28458,
+    -10.75686
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 2,
+   "skinLogic": 0
+  },
+  {
+   "node": "Head",
+   "sprite": "head",
+   "tint": false,
+   "pos": [
+    51.28478,
+    -10.68836
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  },
+  {
+   "node": "Weapon_Club",
+   "sprite": "weapon_club",
+   "tint": false,
+   "pos": [
+    51.25958,
+    -10.78886
+   ],
+   "scale": [
+    1.0,
+    1.0
+   ],
+   "order": 3,
+   "skinLogic": 0
+  }
+ ]
+}
