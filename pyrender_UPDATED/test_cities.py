@@ -28,15 +28,23 @@ _CITIES = {(1 + i * 2, 1): i + 1 for i in range(8)}
 def _tile(x, y):
     city_level = _CITIES.get((x, y))
     imp = None
+    capital_of = 0
     if city_level is not None:
         idx = list(_CITIES.keys()).index((x, y))
-        imp = GS.ImprovementState(type=int(Improvement.CITY), level=city_level,
-                                  name=_NAMES[idx])
+        # population fills the pop bar; vary so the segment fill is visible.
+        population = (city_level - 1) % (city_level + 1)
+        if city_level == 1:
+            capital_of = OWNER
+        imp = GS.ImprovementState(
+            type=int(Improvement.CITY), level=city_level,
+            name=_NAMES[idx], population=population, xp=population,
+        )
     return GS.TileData(
-        x=x, y=y,
+        coordinates=GS.WorldCoordinates(x, y),
         terrain=int(Terrain.FIELD),
         climate=TRIBE,
         owner=OWNER if city_level is not None else 0,
+        capital_of=capital_of,
         improvement=imp,
     )
 
@@ -46,7 +54,7 @@ def build_gamestate() -> GS.GameState:
     mapdata = GS.MapData(width=WIDTH, height=HEIGHT, tiles=tiles)
     players = [GS.PlayerState(id=OWNER, tribe=TRIBE)]
     # current_player_index out of range → viewer=None → all tiles visible
-    return GS.GameState(map=mapdata, players=players, current_player_index=99)
+    return GS.GameState(map=mapdata, player_states=players, current_player_index=99)
 
 
 if __name__ == "__main__":

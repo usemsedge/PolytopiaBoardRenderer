@@ -23,7 +23,7 @@ City id rules:
     Cities with border growth: level 5, Chebyshev radius 2 (5×5 territory).
     Cities without border growth: level 3, Chebyshev radius 1 (3×3 territory).
   • The first unique id in line 2 is the capital of player 1.
-  • All other player-1 cities get connected_to_capital_of=1.
+  • All other player-1 cities get connected_to_capital_of_player=1.
 
 Other inferences:
   • Player 1 owns every tile inside any city's territory.
@@ -229,8 +229,7 @@ def parse(text: str) -> GS.GameState:
                     level=level,
                     border_size=border_size,
                     founder=1,
-                    is_capital_of=1 if is_capital else 0,
-                    connected_to_capital_of=(
+                    connected_to_capital_of_player=(
                         1 if is_city and not is_capital else 0
                     ),
                 )
@@ -238,13 +237,12 @@ def parse(text: str) -> GS.GameState:
             resource = GS.ResourceState(type=res) if res != 0 else None
 
             tiles.append(GS.TileData(
-                x=x, y=y,
+                coordinates=GS.WorldCoordinates(x, y),
                 terrain=terrain,
                 climate=int(Tribe.IMPERIUS),
                 owner=owner,
                 capital_of=1 if (x, y) == capital_pos else 0,
-                ruling_city_x=rcx,
-                ruling_city_y=rcy,
+                ruling_city_coordinates=GS.WorldCoordinates(rcx, rcy),
                 improvement=improvement,
                 resource=resource,
                 explorers=[1],
@@ -254,7 +252,7 @@ def parse(text: str) -> GS.GameState:
 
     mapdata = GS.MapData(width=w, height=h, tiles=tiles)
     players = [GS.PlayerState(id=1, tribe=int(Tribe.IMPERIUS))]
-    return GS.GameState(map=mapdata, players=players, current_player_index=0)
+    return GS.GameState(map=mapdata, player_states=players, current_player_index=0)
 
 
 def from_file(path: str) -> GS.GameState:

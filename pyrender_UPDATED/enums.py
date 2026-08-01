@@ -59,7 +59,17 @@ class Skin(IntEnum):
 
 
 class TileEffect(IntEnum):
-    NONE = 0; FLOODED = 1; SWAMPED = 2; TENTACLE = 3; ALGAE = 4
+    NONE = 0; FLOODED = 1; SWAMPED = 2; TENTACLE = 3; ALGAE = 4; FOAM = 5
+
+
+class CityReward(IntEnum):
+    NONE = 0; CITY_WALL = 1; PARK = 2; WORKSHOP = 3; EXPLORER = 4
+    BORDER_GROWTH = 5; SUPER_UNIT = 6; RESOURCES = 7; POPULATION_GROWTH = 8
+    REBELLION = 11; POISON = 13; TUTORIAL_EXPLORER = 100
+
+
+class ImprovementEffect(IntEnum):
+    DECOMPOSING = 0; ROBBED = 1
 
 
 class UnitEffect(IntEnum):

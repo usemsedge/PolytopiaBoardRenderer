@@ -46,7 +46,7 @@ def _build_tiles():
 
         # Market tile
         tiles[(mx, my)] = GS.TileData(
-            x=mx, y=my,
+            coordinates=GS.WorldCoordinates(mx, my),
             terrain=int(Terrain.FIELD),
             climate=TRIBE,
             owner=OWNER,
@@ -58,7 +58,7 @@ def _build_tiles():
             dx, dy = _NEIGHBORS[slot]
             nx, ny = mx + dx, my + dy
             tiles[(nx, ny)] = GS.TileData(
-                x=nx, y=ny,
+                coordinates=GS.WorldCoordinates(nx, ny),
                 terrain=int(Terrain.FIELD),
                 climate=TRIBE,
                 owner=OWNER,
@@ -73,7 +73,7 @@ def _build_tiles():
                 result.append(tiles[(x, y)])
             else:
                 result.append(GS.TileData(
-                    x=x, y=y,
+                    coordinates=GS.WorldCoordinates(x, y),
                     terrain=int(Terrain.FIELD),
                     climate=TRIBE,
                 ))
@@ -84,7 +84,7 @@ def build_gamestate():
     tiles = _build_tiles()
     mapdata = GS.MapData(width=WIDTH, height=HEIGHT, tiles=tiles)
     players = [GS.PlayerState(id=OWNER, tribe=TRIBE)]
-    return GS.GameState(map=mapdata, players=players, current_player_index=99)
+    return GS.GameState(map=mapdata, player_states=players, current_player_index=99)
 
 
 if __name__ == "__main__":

@@ -57,7 +57,7 @@ def _retheme(gs: GS.GameState, tribe: int, skin: int = 0) -> GS.GameState:
     for t in gs.map.tiles:
         t.climate = int(tribe)
         t.skin = int(skin)
-    for p in gs.players:
+    for p in gs.player_states:
         p.tribe = int(tribe)
         p.skin_type = int(skin)
         p.color = 0

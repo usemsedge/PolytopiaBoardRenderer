@@ -1,8 +1,8 @@
 {
-  "_comment": "Hand-built 7x5 example scene (row=y, col=x). One Imperius player owns all; two level-2 cities. City (2,2) has border growth (border_size 2, 5x5) claiming neutral tiles in range; city (2,5) is still base (3x3).",
+  "_comment": "Hand-built 5x7 example (canonical GameState JSON). Imperius player; Odum (2,2 capital) and Nobu (2,5). City leveling: starts at level 1; level L→L+1 needs L+1 population (1→2 needs 2, 2→3 needs 3, …). A level-x city has x+1 bar slots (unit capacity). Cumulative pop to just reach level x is the x-th triangle number minus 1 (T(x)-1 = 2+3+…+x). Excess that does not trigger another level-up is stored in population (blue fill); a deficit vs that baseline is a red (negative) fill. Cities always level up when they have enough pop, so population is only the leftover. This scene: Nobu cumulative 6 = 2+3+1 → level 3, population 1 (4 bars); Odum cumulative 11 = 2+3+4+2 → level 4, population 2 (5 bars). Field names match pyrender_UPDATED/gamestate.py (IL2CPP snake_case).",
   "current_turn": 1,
   "current_player_index": 0,
-  "players": [
+  "player_states": [
     {
       "id": 1,
       "tribe": 7,
@@ -68,599 +68,725 @@
     "height": 7,
     "tiles": [
       {
-        "x": 0,
-        "y": 0,
+        "coordinates": {
+          "x": 0,
+          "y": 0
+        },
         "terrain": 2,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "unit": {
           "id": 5,
           "type": 43,
           "owner": 1,
-          "x": 0,
-          "y": 0,
+          "coordinates": {
+            "x": 0,
+            "y": 0
+          },
+          "home": {
+            "x": 2,
+            "y": 2
+          },
           "health": 10,
-          "passenger_type": 2
+          "passenger_unit": {
+            "type": 2
+          }
+        }
+      },
+      {
+        "coordinates": {
+          "x": 1,
+          "y": 0
         },
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
-      },
-      {
-        "x": 1,
-        "y": 0,
         "terrain": 2,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        }
       },
       {
-        "x": 2,
-        "y": 0,
+        "coordinates": {
+          "x": 2,
+          "y": 0
+        },
         "terrain": 2,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        }
       },
       {
-        "x": 3,
-        "y": 0,
+        "coordinates": {
+          "x": 3,
+          "y": 0
+        },
         "terrain": 1,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 8
-        },
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        }
       },
       {
-        "x": 4,
-        "y": 0,
+        "coordinates": {
+          "x": 4,
+          "y": 0
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
-        "owner": 0,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 6
         }
       },
       {
-        "x": 0,
-        "y": 1,
+        "coordinates": {
+          "x": 0,
+          "y": 1
+        },
         "terrain": 2,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "unit": {
           "id": 1,
           "type": 44,
           "owner": 1,
-          "x": 0,
-          "y": 1,
+          "coordinates": {
+            "x": 0,
+            "y": 1
+          },
+          "home": {
+            "x": 2,
+            "y": 2
+          },
           "health": 10,
-          "passenger_type": 2
-        },
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
-      },
-      {
-        "x": 1,
-        "y": 1,
-        "terrain": 2,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
-        "improvement": {
-          "type": 2,
-          "level": 1
+          "passenger_unit": {
+            "type": 2
+          }
         }
       },
       {
-        "x": 2,
-        "y": 1,
-        "terrain": 1,
+        "coordinates": {
+          "x": 1,
+          "y": 1
+        },
+        "terrain": 2,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
+        "improvement": {
+          "type": 2
+        }
+      },
+      {
+        "coordinates": {
+          "x": 2,
+          "y": 1
+        },
+        "terrain": 1,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 3
         }
       },
       {
-        "x": 3,
-        "y": 1,
+        "coordinates": {
+          "x": 3,
+          "y": 1
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        }
       },
       {
-        "x": 4,
-        "y": 1,
+        "coordinates": {
+          "x": 4,
+          "y": 1
+        },
         "terrain": 4,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 5
-        },
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        }
       },
       {
-        "x": 0,
-        "y": 2,
+        "coordinates": {
+          "x": 0,
+          "y": 2
+        },
         "terrain": 2,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        }
       },
       {
-        "x": 1,
-        "y": 2,
+        "coordinates": {
+          "x": 1,
+          "y": 2
+        },
         "terrain": 1,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 8
         }
       },
       {
-        "x": 2,
-        "y": 2,
+        "coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
+        "capital_of": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "improvement": {
           "type": 1,
-          "level": 2,
           "founder": 1,
-          "border_size": 2
+          "level": 4,
+          "xp": 2,
+          "population": 2,
+          "border_size": 2,
+          "name": "Odum"
         },
         "unit": {
           "id": 2,
           "type": 4,
           "owner": 1,
-          "x": 2,
-          "y": 2,
+          "coordinates": {
+            "x": 2,
+            "y": 2
+          },
+          "home": {
+            "x": 2,
+            "y": 2
+          },
           "health": 7
         }
       },
       {
-        "x": 3,
-        "y": 2,
+        "coordinates": {
+          "x": 3,
+          "y": 2
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 6
         }
       },
       {
-        "x": 4,
-        "y": 2,
+        "coordinates": {
+          "x": 4,
+          "y": 2
+        },
         "terrain": 5,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 1
-        },
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        }
       },
       {
-        "x": 0,
-        "y": 3,
+        "coordinates": {
+          "x": 0,
+          "y": 3
+        },
         "terrain": 2,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        }
       },
       {
-        "x": 1,
-        "y": 3,
+        "coordinates": {
+          "x": 1,
+          "y": 3
+        },
         "terrain": 1,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "resource": {
           "type": 9
         }
       },
       {
-        "x": 2,
-        "y": 3,
+        "coordinates": {
+          "x": 2,
+          "y": 3
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2,
-        "has_road": true,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "improvement": {
-          "type": 5,
-          "level": 1
-        }
+          "type": 5
+        },
+        "has_road": true
       },
       {
-        "x": 3,
-        "y": 3,
+        "coordinates": {
+          "x": 3,
+          "y": 3
+        },
         "terrain": 4,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
-      },
-      {
-        "x": 4,
-        "y": 3,
-        "terrain": 5,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "improvement": {
-          "type": 12,
-          "level": 1
-        },
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
-      },
-      {
-        "x": 0,
-        "y": 4,
-        "terrain": 1,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
-      },
-      {
-        "x": 1,
-        "y": 4,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "has_road": true,
-        "ruling_city_x": 2,
-        "ruling_city_y": 5
-      },
-      {
-        "x": 2,
-        "y": 4,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "has_road": true,
-        "ruling_city_x": 2,
-        "ruling_city_y": 5,
-        "resource": {
-          "type": 2
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
         }
       },
       {
-        "x": 3,
-        "y": 4,
-        "terrain": 3,
+        "coordinates": {
+          "x": 4,
+          "y": 3
+        },
+        "terrain": 5,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 5,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        },
         "improvement": {
-          "type": 50,
-          "level": 1
+          "type": 12
+        }
+      },
+      {
+        "coordinates": {
+          "x": 0,
+          "y": 4
+        },
+        "terrain": 1,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
+        }
+      },
+      {
+        "coordinates": {
+          "x": 1,
+          "y": 4
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        },
+        "has_road": true
+      },
+      {
+        "coordinates": {
+          "x": 2,
+          "y": 4
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        },
+        "resource": {
+          "type": 2
+        },
+        "has_road": true
+      },
+      {
+        "coordinates": {
+          "x": 3,
+          "y": 4
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        },
+        "improvement": {
+          "type": 50
         },
         "unit": {
           "id": 3,
           "type": 2,
           "owner": 1,
-          "x": 3,
-          "y": 4,
+          "coordinates": {
+            "x": 3,
+            "y": 4
+          },
+          "home": {
+            "x": 2,
+            "y": 5
+          },
           "health": 10
         }
       },
       {
-        "x": 4,
-        "y": 4,
+        "coordinates": {
+          "x": 4,
+          "y": 4
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "improvement": {
-          "type": 13,
-          "level": 1
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 2
         },
-        "ruling_city_x": 2,
-        "ruling_city_y": 2
+        "improvement": {
+          "type": 13
+        }
       },
       {
-        "x": 0,
-        "y": 5,
+        "coordinates": {
+          "x": 0,
+          "y": 5
+        },
         "terrain": 1,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
-        "owner": 0,
         "explorers": [
           1
         ]
       },
       {
-        "x": 1,
-        "y": 5,
+        "coordinates": {
+          "x": 1,
+          "y": 5
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "has_road": true,
-        "ruling_city_x": 2,
-        "ruling_city_y": 5,
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        },
         "unit": {
           "id": 4,
           "type": 38,
           "owner": 1,
-          "x": 1,
-          "y": 5,
+          "coordinates": {
+            "x": 1,
+            "y": 5
+          },
+          "home": {
+            "x": 2,
+            "y": 5
+          },
           "health": 5
-        }
+        },
+        "has_road": true
       },
       {
-        "x": 2,
-        "y": 5,
+        "coordinates": {
+          "x": 2,
+          "y": 5
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
         "owner": 1,
         "explorers": [
           1
         ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 5,
-        "improvement": {
-          "type": 1,
-          "level": 2,
-          "founder": 1,
-          "border_size": 1
-        }
-      },
-      {
-        "x": 3,
-        "y": 5,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 5,
-        "improvement": {
-          "type": 6,
-          "level": 1
-        }
-      },
-      {
-        "x": 4,
-        "y": 5,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 0,
-        "explorers": [
-          1
-        ]
-      },
-      {
-        "x": 0,
-        "y": 6,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 0,
-        "explorers": [
-          1
-        ]
-      },
-      {
-        "x": 1,
-        "y": 6,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 5
-      },
-      {
-        "x": 2,
-        "y": 6,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 5
-      },
-      {
-        "x": 3,
-        "y": 6,
-        "terrain": 3,
-        "climate": 7,
-        "skin": 0,
-        "altitude": 1,
-        "owner": 1,
-        "explorers": [
-          1
-        ],
-        "ruling_city_x": 2,
-        "ruling_city_y": 5,
-        "resource": {
-          "type": 2
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
         },
         "improvement": {
-          "type": 5,
-          "level": 1
+          "type": 1,
+          "founder": 1,
+          "level": 3,
+          "xp": 1,
+          "population": 1,
+          "border_size": 1,
+          "name": "Nobu"
         }
       },
       {
-        "x": 4,
-        "y": 6,
+        "coordinates": {
+          "x": 3,
+          "y": 5
+        },
         "terrain": 3,
         "climate": 7,
-        "skin": 0,
         "altitude": 1,
-        "owner": 0,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        },
+        "improvement": {
+          "type": 6
+        }
+      },
+      {
+        "coordinates": {
+          "x": 4,
+          "y": 5
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "explorers": [
+          1
+        ]
+      },
+      {
+        "coordinates": {
+          "x": 0,
+          "y": 6
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "explorers": [
+          1
+        ]
+      },
+      {
+        "coordinates": {
+          "x": 1,
+          "y": 6
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        }
+      },
+      {
+        "coordinates": {
+          "x": 2,
+          "y": 6
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        }
+      },
+      {
+        "coordinates": {
+          "x": 3,
+          "y": 6
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
+        "owner": 1,
+        "explorers": [
+          1
+        ],
+        "ruling_city_coordinates": {
+          "x": 2,
+          "y": 5
+        },
+        "improvement": {
+          "type": 5
+        },
+        "resource": {
+          "type": 2
+        }
+      },
+      {
+        "coordinates": {
+          "x": 4,
+          "y": 6
+        },
+        "terrain": 3,
+        "climate": 7,
+        "altitude": 1,
         "explorers": [
           1
         ]

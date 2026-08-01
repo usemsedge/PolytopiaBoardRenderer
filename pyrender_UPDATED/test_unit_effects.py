@@ -64,7 +64,7 @@ def _make_unit(x: int) -> GS.UnitState:
 def _tile(x: int, y: int) -> GS.TileData:
     unit = _make_unit(x) if y == UNIT_ROW and x in _UNIT_POSITIONS else None
     return GS.TileData(
-        x=x, y=y,
+        coordinates=GS.WorldCoordinates(x, y),
         terrain=int(Terrain.FIELD),
         climate=TRIBE,
         explorers=[OWNER],   # fully visible to the viewer
@@ -77,7 +77,7 @@ def build_gamestate() -> GS.GameState:
     mapdata = GS.MapData(width=WIDTH, height=HEIGHT, tiles=tiles)
     # Player 1 is both the warrior owner and the viewer.
     players = [GS.PlayerState(id=OWNER, tribe=TRIBE)]
-    return GS.GameState(map=mapdata, players=players, current_player_index=0)
+    return GS.GameState(map=mapdata, player_states=players, current_player_index=0)
 
 
 if __name__ == "__main__":

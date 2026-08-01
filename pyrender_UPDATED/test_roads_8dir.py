@@ -18,13 +18,14 @@ for y in range(3):
     for x in range(3):
         climate = OUMAJI if (x, y) == (1, 1) else TRIBE
         tiles.append(GS.TileData(
-            x=x, y=y, terrain=int(Terrain.FIELD), climate=climate,
+            coordinates=GS.WorldCoordinates(x, y),
+            terrain=int(Terrain.FIELD), climate=climate,
             owner=OWNER, has_road=True,
         ))
 
 gs = GS.GameState(
     map=GS.MapData(width=3, height=3, tiles=tiles),
-    players=[GS.PlayerState(id=OWNER, tribe=TRIBE)],
+    player_states=[GS.PlayerState(id=OWNER, tribe=TRIBE)],
     current_player_index=99,
 )
 

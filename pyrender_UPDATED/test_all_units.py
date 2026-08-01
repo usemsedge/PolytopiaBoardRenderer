@@ -72,22 +72,31 @@ _IMPERIUS_PLAYER = GS.PlayerState(id=1, tribe=int(Tribe.IMPERIUS))
 def _make_tile(x: int, y: int) -> GS.TileData:
     idx = y * COLS + x
     if idx >= len(_UNITS):
-        return GS.TileData(x=x, y=y, terrain=int(Terrain.FIELD),
+        return GS.TileData(coordinates=GS.WorldCoordinates(x, y),
+                           terrain=int(Terrain.FIELD),
                            climate=int(Tribe.IMPERIUS))
     unit_type = _UNITS[idx]
     # Climate stays per-unit so UseClimate parts (mounts, etc.) resolve correctly.
     climate = _tribe_for(unit_type)
     terrain = Terrain.OCEAN if unit_type in _WATER_UNITS else Terrain.FIELD
-    passenger = int(Unit.WARRIOR) if unit_type in _WATER_UNITS else None
-    unit = GS.UnitState(type=int(unit_type), owner=1, health=10, passenger_type=passenger)
-    return GS.TileData(x=x, y=y, terrain=int(terrain), climate=climate, unit=unit)
+    passenger = None
+    if unit_type in _WATER_UNITS:
+        passenger = GS.UnitState(type=int(Unit.WARRIOR), owner=1, health=10)
+    unit = GS.UnitState(
+        type=int(unit_type), owner=1, health=10,
+        coordinates=GS.WorldCoordinates(x, y),
+        passenger_unit=passenger,
+    )
+    return GS.TileData(coordinates=GS.WorldCoordinates(x, y),
+                       terrain=int(terrain), climate=climate, unit=unit)
 
 
 def build_gamestate() -> GS.GameState:
     tiles = [_make_tile(x, y) for y in range(ROWS) for x in range(COLS)]
     mapdata = GS.MapData(width=COLS, height=ROWS, tiles=tiles)
     # current_player_index out of range → viewer=None → all tiles visible, no outline
-    return GS.GameState(map=mapdata, players=[_IMPERIUS_PLAYER], current_player_index=99)
+    return GS.GameState(map=mapdata, player_states=[_IMPERIUS_PLAYER],
+                        current_player_index=99)
 
 
 if __name__ == "__main__":

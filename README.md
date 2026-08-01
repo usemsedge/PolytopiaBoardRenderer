@@ -13,9 +13,16 @@ pip install -r requirements.txt
 ## Render
 
 ```bash
-python3 polytopia_python/render_board.py --example -o board.png
-python3 polytopia_python/render_board.py --all -o boards/
+python3 pyrender_UPDATED/scenes.py
 ```
 
-Sprites ship in `sprites/` (~27 MB). Optional: install `UnityPy` and place `Polytopia.app` beside this repo for extra per-tribe pivot metadata.
-# PolytopiaBoardRenderer
+Output goes in /tmp
+
+## Details
+
+polytopia_extracted/ contains images
+il2cpp_dump/ contains decompiled source code
+polytopia_files/ contains original polytopia app
+recon/ contains instructions on how to read the source code and dump (may not contain all neccesary info)
+
+

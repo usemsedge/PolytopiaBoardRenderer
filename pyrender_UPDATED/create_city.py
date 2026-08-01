@@ -106,7 +106,7 @@ def _city_items(ctx, tile) -> List[Placement]:
         avail = [1]
 
     cap_house: Optional[int] = None
-    if st.is_capital_of:
+    if tile.capital_of:
         for n in _CAPITAL_HOUSE_PREF:
             if ctx.resolve("House_" + str(n), tribe, skin)[0]:
                 cap_house = n
@@ -169,7 +169,7 @@ def _city_items(ctx, tile) -> List[Placement]:
         ux, uy = cap_placement
         emit_house(ux, uy, 0, cap_house, E.SORT_HOUSES)
 
-    if st.has_wall:
+    if st.has_reward(int(E.CityReward.CITY_WALL)):
         wall, _ = ctx.resolve("CityWallGFX", tribe, skin)
         if wall:
             img = ctx.bake(wall)

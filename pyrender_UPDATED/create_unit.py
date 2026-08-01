@@ -413,7 +413,9 @@ def items(ctx, x, y) -> List[Placement]:
 
     owner = unit.owner
     tribe, pskin = ctx.player_tribe_skin(owner)
-    skin = unit.skin_type if unit.skin_type and unit.skin_type > 0 else pskin
+    skin = (unit.birth_climate_skin_type
+            if unit.birth_climate_skin_type and unit.birth_climate_skin_type > 0
+            else pskin)
 
     prefab = _skinned_prefab(ENUM_TO_PREFAB.get(unit.type), skin)
     ts_overrides = _TRIBE_SKIN_PREFAB.get((int(tribe), int(skin)), {})

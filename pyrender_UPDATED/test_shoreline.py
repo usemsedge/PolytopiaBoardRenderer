@@ -21,7 +21,7 @@ TRIBE = int(Tribe.IMPERIUS)
 def _tile(x, y):
     is_water = (x == 1 and y == 1)
     return GS.TileData(
-        x=x, y=y,
+        coordinates=GS.WorldCoordinates(x, y),
         terrain=int(Terrain.WATER if is_water else Terrain.FIELD),
         climate=TRIBE,
     )
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     tiles = [_tile(x, y) for y in range(3) for x in range(3)]
     gs = GS.GameState(
         map=GS.MapData(width=3, height=3, tiles=tiles),
-        players=[],
+        player_states=[],
         current_player_index=99,
     )
     ctx = CTX.TileContext(gs)
