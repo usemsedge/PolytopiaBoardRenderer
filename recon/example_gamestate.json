@@ -345,6 +345,7 @@
           "level": 4,
           "xp": 2,
           "population": 2,
+          "production": 5,
           "border_size": 2,
           "name": "Odum"
         },
@@ -674,6 +675,7 @@
           "level": 3,
           "xp": 1,
           "population": 1,
+          "production": 2,
           "border_size": 1,
           "name": "Nobu"
         }

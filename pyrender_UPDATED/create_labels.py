@@ -2,7 +2,9 @@
 
 City status — mirrors City.cityOverlay → CityStatusDisplay.SetCity (RVA 0x2A7ED80):
   - NameContainer: JosefinSans-Italic TMP size 18 @ NameLabel scale 0.08 + Shadow;
-    capital underline + crown; team-tinted Square bg (α≈0.5, width from UpdateSize).
+    capital underline + crown; work stars from ImprovementState.production
+    (SetWork / ResourceWidget: Roboto-Light 16 + UI_resource @ 0.2);
+    team-tinted Square bg (α≈0.5, width from UpdateSize).
   - ProgressBar: segmented pop bar (totalFields=level+1, filledFields=population,
     dots=GetCityUnitCount).
 
@@ -35,6 +37,7 @@ except ImportError:
 # ── fonts ─────────────────────────────────────────────────────────────────────
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _FONT_PATH = os.path.join(_HERE, "JosefinSans-Italic.ttf")
+_FONT_WORK_PATH = os.path.join(_HERE, "Roboto-Light.ttf")
 _FONT_SIZE_HP = 24          # unit health badge
 
 # CityStatusNameContainer / NameLabel (prefab GO 2042):
@@ -50,31 +53,40 @@ _CITY_CAP_PX = (
     * _TMP_CAP_LINE * _CITY_LABEL_SCALE * P.PPU
 )  # ≈ 28 px
 
+# ResourceWidget workLabel (prefab Text TMP under ResourceWidget):
+#   Roboto-Light_Numbers Shadow, m_fontSize = 16, localScale = 0.08
+_WORK_TMP_FONT_SIZE = 16.0
+_WORK_CAP_PX = (
+    _WORK_TMP_FONT_SIZE * _TMP_WORLD_FACTOR / _TMP_POINT_SIZE
+    * _TMP_CAP_LINE * _CITY_LABEL_SCALE * P.PPU
+)  # ≈ 25 px
+
 # Drop-shadow offset in pixels: (right, down). TMP Shadow material on city names.
 _SHADOW_OFFSET = (1, 2)
 
 _font_cache: dict = {}
 
 
-def _get_font(size: int):
-    key = f"font_{size}"
+def _get_font(size: int, path: str = _FONT_PATH):
+    key = f"{path}:{size}"
     if key not in _font_cache:
         _font_cache[key] = (
-            PILFont.truetype(_FONT_PATH, size)
-            if _PIL and os.path.exists(_FONT_PATH) else None
+            PILFont.truetype(path, size)
+            if _PIL and os.path.exists(path) else None
         )
     return _font_cache[key]
 
 
-def _pil_size_for_cap_height(target_px: float) -> int:
-    """FreeType size whose 'H' cap-height matches ``target_px``."""
-    if not _PIL or not os.path.exists(_FONT_PATH) or target_px <= 0:
+def _pil_size_for_cap_height(target_px: float, path: str = _FONT_PATH,
+                            probe: str = "H") -> int:
+    """FreeType size whose probe glyph height matches ``target_px``."""
+    if not _PIL or not os.path.exists(path) or target_px <= 0:
         return 18
     tmp = ImageDraw.Draw(PILImage.new("RGBA", (1, 1)))
     best, best_err = 18, 1e9
     for sz in range(max(8, int(target_px * 0.5)), int(target_px * 2.5) + 1):
-        font = PILFont.truetype(_FONT_PATH, sz)
-        bbox = tmp.textbbox((0, 0), "H", font=font)
+        font = PILFont.truetype(path, sz)
+        bbox = tmp.textbbox((0, 0), probe, font=font)
         err = abs((bbox[3] - bbox[1]) - target_px)
         if err < best_err:
             best, best_err = sz, err
@@ -82,14 +94,16 @@ def _pil_size_for_cap_height(target_px: float) -> int:
 
 
 _FONT_SIZE_CITY = _pil_size_for_cap_height(_CITY_CAP_PX)
+_FONT_SIZE_WORK = _pil_size_for_cap_height(_WORK_CAP_PX, _FONT_WORK_PATH, "8")
 
 
 def _render_text(text: str, color: tuple = (255, 255, 255, 255),
-                 size: int = _FONT_SIZE_HP, *, underline: bool = False) -> Image:
-    """JosefinSans-Italic with a black drop shadow (optional TMP underline)."""
-    font = _get_font(size)
+                 size: int = _FONT_SIZE_HP, *, underline: bool = False,
+                 font_path: str = _FONT_PATH) -> Image:
+    """TMP-style text with a black drop shadow (optional underline)."""
+    font = _get_font(size, font_path)
     if font is None:
-        raise RuntimeError(f"Font not found at {_FONT_PATH}")
+        raise RuntimeError(f"Font not found at {font_path}")
     sx, sy = _SHADOW_OFFSET
     tmp = ImageDraw.Draw(PILImage.new("RGBA", (1, 1)))
     bbox = tmp.textbbox((0, 0), text, font=font)
@@ -309,6 +323,11 @@ _CROWN_SPRITE = "UI_crown"
 _CROWN_SCALE = 0.115           # CapitalIcon/Crown localScale
 _CROWN_BG = "circle_30"
 _CROWN_BG_SCALE = 0.48         # CapitalIcon/Background localScale
+# ResourceWidget / SetWork — star icon next to workLabel (Int32.ToString(work)).
+_WORK_STAR = "UI_resource"
+_WORK_STAR_SCALE = 0.20        # ResourceWidget/Star localScale
+_WORK_STAR_SHADOW_DY = 0.02    # StarShadow localPosition.y (world, down in Unity Y-up)
+_WORK_GAP_WORLD = 0.015        # UpdateSize pad when workContainer is active
 _NAME_BG = "Square"
 # Prefab Background localScale Y=4.8 on Square (4×4 @ ppu 100) → fixed plate height.
 # Width is NOT the prefab X=30 default — CityStatusNameContainer.UpdateSize sizes to text
@@ -380,20 +399,52 @@ def _city_unit_count(ctx, cx: int, cy: int) -> int:
     return n
 
 
-def _build_name_plate(ctx, name: str, is_capital: bool,
-                      team: Optional[Tuple[int, int, int]]) -> Optional[Image]:
-    """CityStatusNameContainer — label + optional capital crown on team-tinted Square.
+def _build_work_widget(ctx, work: int) -> Optional[Image]:
+    """CityStatusNameContainer.SetWork — workLabel + UI_resource star.
 
-    Engine (SetCity + UpdateSize, prefab NameContainer GO 1396):
+    Engine: workContainer.SetActive(work > 0); workLabel.text = work.ToString().
+    Prefab: Roboto-Light_Numbers size 16 @ scale 0.08; Star localScale 0.20.
+    """
+    if work <= 0:
+        return None
+    label = _render_text(str(int(work)), (255, 255, 255, 255),
+                         size=_FONT_SIZE_WORK, font_path=_FONT_WORK_PATH)
+    star = _bake_ui(ctx, _WORK_STAR, _WORK_STAR_SCALE)
+    if star is None:
+        return label
+    # StarShadow: same sprite, black, offset down by 0.02 world.
+    shadow = star.tinted((0, 0, 0))
+    sh_dy = max(1, round(_WORK_STAR_SHADOW_DY * P.PPU))
+    gap = max(1, round(0.01 * P.PPU))
+    w = label.w + gap + star.w
+    h = max(label.h, star.h + sh_dy)
+    out = Image.new(w, h)
+    out.paste(label, 0, (h - label.h) // 2)
+    sx = label.w + gap
+    sy = (h - star.h) // 2
+    out.paste(shadow, sx, sy + sh_dy)
+    out.paste(star, sx, sy)
+    return out
+
+
+def _build_name_plate(ctx, name: str, is_capital: bool,
+                      team: Optional[Tuple[int, int, int]],
+                      work: int = 0) -> Optional[Image]:
+    """CityStatusNameContainer — name + optional crown + work stars on Square bg.
+
+    Engine (SetCity + SetWork + UpdateSize, prefab NameContainer GO 1396):
       - NameLabel TMP fontSize 18, localScale 0.08, JosefinSans-Italic + Shadow
       - capital → TMP fontStyle Underline (4) + CapitalIcon (crown @ 0.115)
+      - work → ResourceWidget when work > 0 (CalculateWork / ImprovementState.production)
       - bg SpriteRenderer: GetPlayerColor, alpha kept ≈ 0.502
       - bg width sized to content (UpdateSize); height from scale.y = 4.8
     """
-    if not name:
+    if not name and work <= 0:
         return None
-    text = _render_text(name, (255, 255, 255, 255), size=_FONT_SIZE_CITY,
-                        underline=is_capital)
+    text = None
+    if name:
+        text = _render_text(name, (255, 255, 255, 255), size=_FONT_SIZE_CITY,
+                            underline=is_capital)
 
     crown = None
     if is_capital:
@@ -407,13 +458,29 @@ def _build_name_plate(ctx, name: str, is_capital: bool,
         elif icon is not None:
             crown = icon
 
+    work_img = _build_work_widget(ctx, work)
+
     gap = max(2, round(0.02 * P.PPU))
+    work_gap = max(2, round(_WORK_GAP_WORLD * P.PPU))
     pad_x = max(4, round(_NAME_PAD_BASE_WORLD * P.PPU))
     if crown is not None:
         # LeftIcon path: 2 * leftIconBgWidth + 0.012 (UpdateSize).
         pad_x += max(2, round(_NAME_PAD_ICON_WORLD * P.PPU))
-    content_w = text.w + ((crown.w + gap) if crown else 0)
-    content_h = max(text.h, crown.h if crown else 0)
+
+    content_w = 0
+    content_h = 0
+    if crown is not None:
+        content_w += crown.w + gap
+        content_h = max(content_h, crown.h)
+    if text is not None:
+        content_w += text.w
+        content_h = max(content_h, text.h)
+    if work_img is not None:
+        content_w += work_gap + work_img.w
+        content_h = max(content_h, work_img.h)
+
+    if content_w <= 0:
+        return None
 
     bg_h = max(round(_NAME_BG_HEIGHT_WORLD * P.PPU), content_h + 4)
     bg_w = content_w + 2 * pad_x
@@ -436,7 +503,12 @@ def _build_name_plate(ctx, name: str, is_capital: bool,
     if crown is not None:
         plate.paste(crown, x, y + (content_h - crown.h) // 2)
         x += crown.w + gap
-    plate.paste(text, x, y + (content_h - text.h) // 2)
+    if text is not None:
+        plate.paste(text, x, y + (content_h - text.h) // 2)
+        x += text.w
+    if work_img is not None:
+        x += work_gap
+        plate.paste(work_img, x, y + (content_h - work_img.h) // 2)
     return plate
 
 
@@ -514,6 +586,7 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
       totalFields  = level + 1
       filledFields = population
       dots         = GetCityUnitCount(map, cityCoords)
+      work         = ImprovementState.production  (engine: CalculateWork → SetWork)
     """
     tile = ctx.tile_at(x, y)
     if tile is None or ctx.is_hidden(tile):
@@ -526,6 +599,7 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
     filled_fields = int(imp.population)
     total_fields = level + 1
     dots = _city_unit_count(ctx, x, y)
+    work = int(imp.production)
 
     team = ctx.player_color(tile.owner)
     is_capital = bool(tile.capital_of)
@@ -533,7 +607,7 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
 
     out: List[Placement] = []
 
-    plate = _build_name_plate(ctx, name, is_capital, team) if name else None
+    plate = _build_name_plate(ctx, name, is_capital, team, work=work)
     if plate is not None:
         cy = -_NAME_WORLD_Y * P.PPU  # world y=-0.08 → below centre
         out.append(Placement(
