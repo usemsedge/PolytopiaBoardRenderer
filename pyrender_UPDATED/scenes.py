@@ -19,7 +19,7 @@ import gamestate as GS
 import render
 import tribecolors as TC
 from image import Image
-from enums import Tribe, Skin, TRIBE_THEME, SKIN_THEME
+from enums import Terrain, Improvement, Tribe, Skin, TRIBE_THEME, SKIN_THEME
 
 
 # ---------------------------------------------------------------- theme tables
@@ -45,6 +45,18 @@ def _base_state() -> GS.GameState:
     return GS.load(os.path.join(os.path.dirname(here), "recon", "example_gamestate.json"))
 
 
+def _place_corner_lighthouse(gs: GS.GameState) -> GS.GameState:
+    """Put a LightHouse on the visually top corner of the isometric board.
+
+    Render y is ``-(x+y)``, so the back vertex (max x+y) is the top of the PNG.
+    Terrain is forced to water so the tower seats on a sea tile.
+    """
+    tile = max(gs.map.tiles, key=lambda t: t.x + t.y)
+    tile.terrain = int(Terrain.WATER)
+    tile.improvement = GS.ImprovementState(type=int(Improvement.LIGHTHOUSE))
+    return gs
+
+
 def _retheme(gs: GS.GameState, tribe: int, skin: int = 0) -> GS.GameState:
     """Deep-copy ``gs`` and re-theme every tile and player to (tribe, skin).
 
@@ -65,7 +77,7 @@ def _retheme(gs: GS.GameState, tribe: int, skin: int = 0) -> GS.GameState:
 
 
 def _tribe_scene(tribe: int):
-    return lambda tribe=tribe: _retheme(_base_state(), tribe, 0)
+    return lambda tribe=tribe: _place_corner_lighthouse(_retheme(_base_state(), tribe, 0))
 
 
 def _skin_scene(skin: int):

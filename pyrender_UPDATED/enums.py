@@ -81,7 +81,8 @@ class GridDirection(IntEnum):
     SW = 0; W = 1; NW = 2; N = 3; NE = 4; E = 5; SE = 6; S = 7; NONE = 8
 
 
-# Sub-layer sort offsets (recon/draworder_color.md §2; doc Part E.3)
+# Sub-layer sort offsets (recon/draworder_color.md §2; MapRenderer constants).
+# Within one tile: sortingOrder = rowDepth + offset (0..99 band).
 SORT_BORDERS_BACK = 0
 SORT_TERRAIN = 1
 SORT_TRANSPORT = 2
@@ -92,8 +93,13 @@ SORT_HOUSES = 6
 SORT_WALLS = 97
 SORT_BUILDINGS = 98
 SORT_BORDERS_FRONT = 99
-# Units render as world objects above the tile stack; place just above buildings.
-SORT_UNIT = 98
+
+# Unity Sorting Layers above the world tile stack (TagManager order):
+#   Units → CityStatusDisplays/Text → UnitStatusDisplays/Text
+# Flattened into sublayer ints so a single ascending sort matches layer order.
+SORT_UNIT = 100                 # Units sorting layer
+SORT_CITY_STATUS = 110          # CityStatusDisplays + CityStatusText
+SORT_UNIT_STATUS = 120          # UnitStatusDisplays + UnitStatusText
 
 
 # Tribe value -> lowercase theme suffix (recon/asset_map.json tribe_theme).

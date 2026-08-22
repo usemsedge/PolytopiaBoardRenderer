@@ -1,12 +1,16 @@
-"""Procedural city renderer — emits House_* and CityWallGFX Placements for a city tile.
+"""Procedural city composite — House_* plots + optional CityWallGFX.
 
-Level selects the plot grid size (count = 4/9/16 stacks) and the total house instances:
+Level selects the plot grid size (count = 4/9/16 stacks) and the total house
+instances:
   level 1     → 4  stacks (2×2 diamond), house_count = (8·1²)//5 + 4·1 − 1 = 4
   level 2–4   → 9  stacks (3×3 diamond), instances grow with level (some stacking)
   level 5+    → 16 stacks (4×4 diamond), instances grow quadratically
 
-Each stack position receives one or more houses stacked vertically.  The walk is
+Each stack position receives one or more houses stacked vertically. The walk is
 deterministically seeded from tile x,y so the city layout is stable across renders.
+
+``build`` returns a single composite image with houses then walls baked in
+back-to-front order (same visual as the old multi-Placement emit).
 """
 from __future__ import annotations
 
@@ -15,7 +19,8 @@ from typing import List, Optional, Tuple
 
 import enums as E
 import projection as P
-from context import Placement, FEATURE_FOOT, OBJECT_FOOT
+from context import FEATURE_FOOT, OBJECT_FOOT
+from image import Image
 
 # House art indices that exist in the atlas (recon §3: 1..7, 9 — no 8).
 _HOUSE_NUMS = (1, 2, 3, 4, 5, 6, 7, 9)
@@ -86,10 +91,13 @@ def _next_plot(idx: int, size: int, rng: _Rng) -> Tuple[int, int]:
     return idx, idx - 1
 
 
-# ---------------------------------------------------------------- city items
-def _city_items(ctx, tile) -> List[Placement]:
+def build(ctx, tile) -> Optional[Tuple[Image, float, float]]:
+    """Composite houses (+ wall) into one image.
+
+    Returns ``(image, origin_x, origin_y)`` where the origin is the tile-local
+    diamond centre mapped into the composite, or None if nothing drew.
+    """
     st = tile.improvement
-    out: List[Placement] = []
     tribe, skin = ctx.player_tribe_skin(tile.owner)
 
     level = max(1, st.level)
@@ -119,11 +127,10 @@ def _city_items(ctx, tile) -> List[Placement]:
     # plots, each shifted upward by FLOOR_HEIGHT px relative to the previous floor.
     house_count = (8 * level * level) // 5 + 4 * level - 1
     nplots = len(plots)
-    plot_floors: List[int] = [0] * nplots   # floor index for next house on each plot
+    plot_floors: List[int] = [0] * nplots
     free = list(range(nplots))
     idx = rng.range(nplots)
 
-    # Each placement carries (ux, uy, floor) so the sort and emit can use the floor offset.
     placements: List[Tuple[float, float, int]] = []
     for _ in range(house_count):
         if free:
@@ -145,7 +152,10 @@ def _city_items(ctx, tile) -> List[Placement]:
         idx, _p = _next_plot(idx, nplots, rng)
         cap_placement = (0.0, 0.0)
 
-    def emit_house(ux: float, uy: float, floor: int, hnum: int, sub: int):
+    # Collect seated sprites as (img, left, top), houses first (back-to-front), then wall.
+    seated: List[Tuple[Image, int, int]] = []
+
+    def seat_house(ux: float, uy: float, floor: int, hnum: int):
         name, _ = ctx.resolve("House_" + str(hnum), tribe, skin)
         if not name:
             return
@@ -155,19 +165,17 @@ def _city_items(ctx, tile) -> List[Placement]:
         dx = (ux * plot_dx + 0) * CITY_OUTPUT_SCALE
         dy = (uy * plot_dy - floor * FLOOR_HEIGHT + CITY_Y_LIFT) * CITY_OUTPUT_SCALE
         left, top = ctx.seat_planted(img.w, img.h, foot=HOUSE_FOOT, dx=dx, dy=dy)
-        out.append(Placement(sub, img, left, top))
+        seated.append((img, left, top))
 
-    # Sort back-to-front: primarily by uy (depth), secondarily by floor so lower
-    # floors are drawn before higher floors at the same plot position.
     order = sorted(range(len(placements)), key=lambda i: (placements[i][1], placements[i][2]))
     for i in order:
         ux, uy, floor = placements[i]
         hnum = avail[rng.range(len(avail))]
-        emit_house(ux, uy, floor, hnum, E.SORT_HOUSES)
+        seat_house(ux, uy, floor, hnum)
 
     if cap_placement is not None and cap_house is not None:
         ux, uy = cap_placement
-        emit_house(ux, uy, 0, cap_house, E.SORT_HOUSES)
+        seat_house(ux, uy, 0, cap_house)
 
     if st.has_reward(int(E.CityReward.CITY_WALL)):
         wall, _ = ctx.resolve("CityWallGFX", tribe, skin)
@@ -175,17 +183,16 @@ def _city_items(ctx, tile) -> List[Placement]:
             img = ctx.bake(wall)
             if img is not None:
                 left, top = ctx.seat_planted(img.w, img.h, foot=FEATURE_FOOT)
-                out.append(Placement(E.SORT_WALLS, img, left, top))
+                seated.append((img, left, top))
 
-    return out
+    if not seated:
+        return None
 
-
-# ---------------------------------------------------------------- entry point
-def items(ctx, x: int, y: int) -> List[Placement]:
-    """Tile-local city Placements for tile (x, y). Returns [] for non-city tiles."""
-    tile = ctx.tile_at(x, y)
-    if tile is None or tile.improvement is None:
-        return []
-    if tile.improvement.type != E.Improvement.CITY:
-        return []
-    return _city_items(ctx, tile)
+    minx = min(left for (_img, left, _top) in seated)
+    miny = min(top for (_img, _left, top) in seated)
+    maxx = max(left + img.w for (img, left, _top) in seated)
+    maxy = max(top + img.h for (img, _left, top) in seated)
+    canvas = Image.new(math.ceil(maxx - minx), math.ceil(maxy - miny), (0, 0, 0, 0))
+    for img, left, top in seated:
+        canvas.paste(img, round(left - minx), round(top - miny))
+    return canvas, -minx, -miny

@@ -8,7 +8,8 @@ Two public entry points:
 
   unit_placements(ctx, x, y) → List[Placement]
       Unit + label placements in tile-local space (diamond centre = (0,0)).
-      Called by render.py in its second pass so units sort globally with backgrounds.
+      Sublayers: SORT_UNIT, SORT_CITY_STATUS, SORT_UNIT_STATUS. render.py sorts
+      these globally by layer then depth (Unity: Units → CityStatus → UnitStatus).
 
   items(ctx, x, y) → (image, ox, oy)          [kept for tests / direct use]
       Full composite: background + units + labels in one image.
@@ -28,19 +29,19 @@ import create_shoreline
 import create_transport
 import create_resource
 import create_border
-import create_city
 import create_improvement
 import create_unit
 import create_labels
 
 # Background-only components (no units, no labels).
+# City / market / lighthouse composites come from create_improvement
+# (via generated_improvements/).
 _BG_COMPONENTS = (
     create_terrain,
     create_shoreline,
     create_transport,
     create_resource,
     create_border,
-    create_city,
     create_improvement,
 )
 

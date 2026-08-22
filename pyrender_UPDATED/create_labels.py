@@ -296,8 +296,6 @@ _BADGE_CY = -55      # health badge centre: above diamond centre
 _ICON_CX  = +45      # type icon centre: right of diamond centre
 _ICON_CY  = -55      # type icon centre: same height as health badge
 
-SORT_LABELS = 110
-
 
 # ── city status overlay (CityStatusDisplay) ───────────────────────────────────
 # Prefab local Y under the city transform (Unity Y-up). Tile-local +y is down, so
@@ -400,10 +398,11 @@ def _city_unit_count(ctx, cx: int, cy: int) -> int:
 
 
 def _build_work_widget(ctx, work: int) -> Optional[Image]:
-    """CityStatusNameContainer.SetWork — workLabel + UI_resource star.
+    """CityStatusNameContainer.SetWork — UI_resource star + workLabel.
 
     Engine: workContainer.SetActive(work > 0); workLabel.text = work.ToString().
     Prefab: Roboto-Light_Numbers size 16 @ scale 0.08; Star localScale 0.20.
+    Plate order: name → star → number.
     """
     if work <= 0:
         return None
@@ -416,14 +415,13 @@ def _build_work_widget(ctx, work: int) -> Optional[Image]:
     shadow = star.tinted((0, 0, 0))
     sh_dy = max(1, round(_WORK_STAR_SHADOW_DY * P.PPU))
     gap = max(1, round(0.01 * P.PPU))
-    w = label.w + gap + star.w
+    w = star.w + gap + label.w
     h = max(label.h, star.h + sh_dy)
     out = Image.new(w, h)
-    out.paste(label, 0, (h - label.h) // 2)
-    sx = label.w + gap
     sy = (h - star.h) // 2
-    out.paste(shadow, sx, sy + sh_dy)
-    out.paste(star, sx, sy)
+    out.paste(shadow, 0, sy + sh_dy)
+    out.paste(star, 0, sy)
+    out.paste(label, star.w + gap, (h - label.h) // 2)
     return out
 
 
@@ -448,8 +446,16 @@ def _build_name_plate(ctx, name: str, is_capital: bool,
 
     crown = None
     if is_capital:
-        ring = _bake_ui(ctx, _CROWN_BG, _CROWN_BG_SCALE, tint=team)
-        icon = _bake_ui(ctx, _CROWN_SPRITE, _CROWN_SCALE)
+        # CapitalIcon: Background = circle_30 @ 0.48 with prefab cyan
+        # (r≈0.012, g=0.6, b=1) — same as CityStatusProgressBar fillColor;
+        # Crown = UI_crown @ 0.115. Bake crown from the trimmed PNG (ctx.bake),
+        # not Unity rect meta — meta includes transparent padding, which would
+        # stretch the art to fill the whole circle.
+        fill_rgb = (max(0, min(255, int(_BAR_FILL[0] * 255))),
+                    max(0, min(255, int(_BAR_FILL[1] * 255))),
+                    max(0, min(255, int(_BAR_FILL[2] * 255))))
+        ring = _bake_ui(ctx, _CROWN_BG, _CROWN_BG_SCALE, tint=fill_rgb)
+        icon = ctx.bake(_CROWN_SPRITE, scale=_CROWN_SCALE)
         if ring is not None and icon is not None:
             crown = ring.copy()
             crown.paste(icon,
@@ -611,7 +617,7 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
     if plate is not None:
         cy = -_NAME_WORLD_Y * P.PPU  # world y=-0.08 → below centre
         out.append(Placement(
-            SORT_LABELS, plate,
+            E.SORT_CITY_STATUS, plate,
             round(-plate.w / 2),
             round(cy - plate.h / 2),
         ))
@@ -620,7 +626,7 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
     if bar is not None:
         cy = -_BAR_WORLD_Y * P.PPU
         out.append(Placement(
-            SORT_LABELS, bar,
+            E.SORT_CITY_STATUS, bar,
             round(-bar.w / 2),
             round(cy - bar.h / 2),
         ))
@@ -659,7 +665,7 @@ def items(ctx, x: int, y: int) -> List[Placement]:
             badge = text_img
 
     result.append(Placement(
-        SORT_LABELS, badge,
+        E.SORT_UNIT_STATUS, badge,
         round(_BADGE_CX - badge.w / 2),
         round(_BADGE_CY - badge.h / 2),
     ))
@@ -671,7 +677,7 @@ def items(ctx, x: int, y: int) -> List[Placement]:
     icon_badge = _build_icon_badge(ctx, icon_type, team)
     if icon_badge is not None:
         result.append(Placement(
-            SORT_LABELS, icon_badge,
+            E.SORT_UNIT_STATUS, icon_badge,
             round(_ICON_CX - icon_badge.w / 2),
             round(_ICON_CY - icon_badge.h / 2),
         ))
