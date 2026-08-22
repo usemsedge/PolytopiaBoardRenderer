@@ -237,11 +237,7 @@ _INVISIBLE_ALPHA = 0.5
 
 def _apply_alpha(img: Image, alpha: float) -> Image:
     """Return a copy of img with all pixel alphas multiplied by alpha."""
-    out = bytearray(img.px)
-    a = max(0.0, min(1.0, alpha))
-    for i in range(3, len(out), 4):
-        out[i] = int(out[i] * a)
-    return Image(img.w, img.h, out)
+    return img.multiply_alpha(alpha)
 
 
 # ---------------------------------------------------------------- skinning logic

@@ -243,11 +243,7 @@ def _build_icon_badge(ctx, unit_type: int,
         return outline  # fallback: outline only
     fill = fill.copy()
     if ICON_BG_ALPHA < 1.0:
-        factor = int(ICON_BG_ALPHA * 255)
-        px = fill.px
-        for i in range(3, len(px), 4):
-            px[i] = (px[i] * factor) >> 8
-
+        fill = fill.multiply_alpha(ICON_BG_ALPHA)
     # Punch a transparent hole in the white disk at the fill radius so the
     # white is a true ring (not a disk) — prevents the white bleeding through
     # the semi-transparent fill in the center.
@@ -370,12 +366,7 @@ def _mul_rgba(img: Image, rgba: Tuple[float, float, float, float]) -> Image:
                       max(0, min(255, int(b * 255)))))
     if a >= 0.999:
         return out
-    factor = max(0, min(255, int(a * 255)))
-    px = out.px
-    for i in range(3, len(px), 4):
-        px[i] = (px[i] * factor) >> 8
-    return out
-
+    return out.multiply_alpha(a)
 
 def _city_unit_count(ctx, cx: int, cy: int) -> int:
     """MapDataExtensions.GetCityUnitCount — units whose home == city coords.
@@ -498,10 +489,7 @@ def _build_name_plate(ctx, name: str, is_capital: bool,
         rgb = team or (80, 80, 80)
         bg = Image.new(bg_w, bg_h, (*rgb, 255))
     # ColorUtil.SetAlphaOnColor keeps prefab SpriteRenderer alpha (~0.5).
-    factor = int(_NAME_BG_ALPHA * 255)
-    px = bg.px
-    for i in range(3, len(px), 4):
-        px[i] = (px[i] * factor) >> 8
+    bg = bg.multiply_alpha(_NAME_BG_ALPHA)
 
     plate = bg
     x = pad_x
