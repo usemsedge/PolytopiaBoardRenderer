@@ -19,6 +19,7 @@ from typing import List, Optional, Tuple
 
 import enums as E
 import projection as P
+import spritemeta as SM
 from context import FEATURE_FOOT, OBJECT_FOOT
 from image import Image
 
@@ -40,6 +41,11 @@ CITY_Y_LIFT = -P.HALF_H * 0.30
 # Uniform post-render scale: expands the entire city cluster (positions + sprites)
 # relative to the tile centre. 1.0 = no change, 1.1 = 10% larger.
 CITY_OUTPUT_SCALE = 1.1
+
+# Neutral village atlas sprite. Authored at UI PPU (~100); default ctx.bake
+# (~2.66×) oversizes it. Effective scale is relative to terrain REF (1.0).
+_VILLAGE_SPRITE = "UI_village"
+_VILLAGE_EFFECTIVE_SCALE = 0.60
 
 
 # ---------------------------------------------------------------- deterministic rng
@@ -94,10 +100,34 @@ def _next_plot(idx: int, size: int, rng: _Rng) -> Tuple[int, int]:
 def build(ctx, tile) -> Optional[Tuple[Image, float, float]]:
     """Composite houses (+ wall) into one image.
 
+    Unowned cities (neutral villages) use the ``UI_village`` sprite instead of
+    the tribal house cluster.
+
     Returns ``(image, origin_x, origin_y)`` where the origin is the tile-local
     diamond centre mapped into the composite, or None if nothing drew.
     """
     st = tile.improvement
+    if st is None:
+        return None
+
+    # Neutral village — single atlas sprite, not the owned-city house layout.
+    if not tile.owner and not tile.capital_of:
+        name = _VILLAGE_SPRITE
+        if not ctx.exists(name):
+            return None
+        # Cancel UI PPU inflation, then apply map-tuned effective scale.
+        rs = SM.render_scale(name)
+        img = ctx.bake(
+            name,
+            scale=(_VILLAGE_EFFECTIVE_SCALE / rs) if rs else _VILLAGE_EFFECTIVE_SCALE,
+        )
+        if img is None:
+            return None
+        # Plant on the tile surface like other buildings (not center-pivot UI).
+        left, top = ctx.seat_planted(img.w, img.h, foot=OBJECT_FOOT)
+        return img, -left, -top
+
+    # Owned cities use the owner's tribe.
     tribe, skin = ctx.player_tribe_skin(tile.owner)
 
     level = max(1, st.level)

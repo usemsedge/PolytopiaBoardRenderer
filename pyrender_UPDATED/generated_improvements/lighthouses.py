@@ -2,8 +2,9 @@
 
 One white drum with a tribe-tinted centre gem per discovering player + lantern
 roof. Layer 0 (untinted base drum) is not drawn. Discovery prefers
-``tile.explorers``; if empty, players listing LightHouse in
-``built_unique_improvements``.
+``improvement.discovered_by``; else players listing LightHouse in
+``built_unique_improvements``. ``tile.explorers`` is fog only — empty
+discovery → roof only (0 height) even when the tile is revealed.
 
 Geometry mirrors Market SetupInternal (discoverer drums only, no base layer):
   section i  localY = sectionBaseY + i * sectionHeight
@@ -29,25 +30,41 @@ with open(os.path.join(_ROOT, "sprite_reg.json")) as _f:
 
 _LIGHTHOUSE_MAX = 16
 _LIGHTHOUSE_BASE_Y = 0.05
-_LIGHTHOUSE_SECTION_H = 0.22       # world Y between stacked drums
-_LIGHTHOUSE_ROOF_OFF = 0.16        # roof above the last drum
+_LIGHTHOUSE_SECTION_H = 0.15       # world Y between stacked drums
+_LIGHTHOUSE_ROOF_OFF = 0.15        # roof above the last drum
 _LIGHTHOUSE_SCALE = (0.7, 0.7)
-# Pixel nudge for the lantern roof (top segment), applied after world seating.
-# Positive = down on screen (same convention as shoreline/border knobs).
+
+# Whole-tower screen-space seat nudge after compositing (+ = down).
+# Applied additively when both conditions hold (undiscovered water tower).
+LIGHTHOUSE_ZERO_DY = 30    # 0 discoverers (roof-only)
+LIGHTHOUSE_WATER_DY = 20   # WATER / OCEAN terrain
+
+
+def _tower_dy(tile, n_discoverers: int) -> int:
+    """Pixel dy for this lighthouse (+ = down)."""
+    dy = 0
+    if n_discoverers <= 0:
+        dy += int(LIGHTHOUSE_ZERO_DY)
+    if tile.terrain in (int(E.Terrain.WATER), int(E.Terrain.OCEAN)):
+        dy += int(LIGHTHOUSE_WATER_DY)
+    return dy
 
 
 def _lighthouse_discoverers(ctx, tile) -> List[int]:
     """Player ids who discovered this lighthouse, bottom → top (max 8).
 
-    Prefer ``tile.explorers`` (per-instance visits). If that list is empty,
-    fall back to players who have LightHouse in ``built_unique_improvements``.
+    Prefer ``improvement.discovered_by`` (per-tower). Else players with
+    LightHouse in ``built_unique_improvements``. Never ``tile.explorers``
+    (fog only) so revealed-but-undiscovered corners stay roof-only.
     """
     found: List[int] = []
     seen = set()
-    for pid in tile.explorers:
-        if pid and pid not in seen and ctx.gs.player_by_id(pid) is not None:
-            found.append(pid)
-            seen.add(pid)
+    imp = tile.improvement
+    if imp is not None:
+        for pid in imp.discovered_by:
+            if pid and pid not in seen and ctx.gs.player_by_id(pid) is not None:
+                found.append(pid)
+                seen.add(pid)
     if not found:
         kind = int(E.Improvement.LIGHTHOUSE)
         for p in ctx.gs.player_states:
@@ -129,4 +146,9 @@ def build(ctx, tile) -> Optional[Tuple[Image, float, float]]:
               + max(0, n - 1) * _LIGHTHOUSE_SECTION_H
               + _LIGHTHOUSE_ROOF_OFF)
     draw.append(("lighthouse_roof", 0.0, roof_y, scale, None, 0))
-    return _composite_tower(ctx, draw)
+    built = _composite_tower(ctx, draw)
+    if built is None:
+        return None
+    img, ox, oy = built
+    # Placement seats at (-ox, -oy); +dy on screen ⇒ subtract from oy.
+    return img, ox, oy - _tower_dy(tile, n)

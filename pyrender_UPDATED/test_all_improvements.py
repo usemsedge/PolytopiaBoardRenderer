@@ -88,7 +88,8 @@ def _tile(x: int, y: int) -> GS.TileData:
     has_road = imp == Improvement.ROAD
     # Bridge / port tiles are connectable; also mark ROAD so a lone road still
     # has a chance to show a stub toward city/port/bridge neighbours.
-    explorers = [1, 2, 3] if imp == Improvement.LIGHTHOUSE else []
+    if imp == Improvement.LIGHTHOUSE and st is not None:
+        st.discovered_by = [1, 2, 3]
     return GS.TileData(
         coordinates=GS.WorldCoordinates(x, y),
         terrain=_terrain_for(imp),
@@ -96,7 +97,6 @@ def _tile(x: int, y: int) -> GS.TileData:
         owner=owner,
         capital_of=capital_of,
         has_road=has_road,
-        explorers=explorers,
         improvement=st,
     )
 

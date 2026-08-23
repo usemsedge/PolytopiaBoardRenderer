@@ -63,6 +63,9 @@ class ImprovementState:
     name: str = ""
     rewards: List[int] = field(default_factory=list)   # CityReward
     effects: List[int] = field(default_factory=list)   # ImprovementEffect
+    # Ordered player ids who discovered this LightHouse (tower drums). Empty =
+    # fall back to players' built_unique_improvements. Not fog (tile.explorers).
+    discovered_by: List[int] = field(default_factory=list)
 
     def has_reward(self, reward: int) -> bool:
         """ImprovementDataExtensions.HasReward."""
@@ -230,6 +233,36 @@ class MapData:
 
 
 @dataclass
+class GameSettings:
+    """dump.cs GameSettings (TypeDef 10606) — fields needed for mapgen."""
+    map_preset: int = 0                     # MapPreset
+    map_size: int = 0                       # MapSize or raw width when > 6
+    game_name: str = ""
+    game_type: int = 0
+    opponent_count: int = 0
+    disabled_tribes: List[int] = field(default_factory=list)
+    west_map_placement_user_id: Any = None
+
+    def GetMapGeneratorSettings(self):
+        """GameSettings.GetMapGeneratorSettings → CreateFromPreset(mapPreset)."""
+        # Lazy import: mapgenerator.settings imports gamestate types.
+        from mapgenerator.settings import MapGeneratorSettings
+        return MapGeneratorSettings.CreateFromPreset(self.map_preset)
+
+    def map_width(self) -> int:
+        """Resolve MapSize enum or raw width to tile count (square maps)."""
+        from enums import MAP_SIZE_MAX, MAP_SIZE_MIN, MAP_SIZE_WIDTH, MapSize
+        ms = int(self.map_size)
+        if 0 < ms <= int(MapSize.MASSIVE):
+            w = MAP_SIZE_WIDTH.get(MapSize(ms), 0)
+            if w:
+                return w
+        if MAP_SIZE_MIN <= ms <= MAP_SIZE_MAX:
+            return ms
+        return MAP_SIZE_WIDTH[MapSize.NORMAL]
+
+
+@dataclass
 class GameState:
     """dump.cs GameState (TypeDef 10622)."""
     # GameState.State: Unknown=0 Lobby=1 Started=2 FinalTurn=3 Ended=4
@@ -240,7 +273,7 @@ class GameState:
     current_player_index: int = 0
     current_unit_id: int = 0
     current_state: int = 0
-    settings: Any = None
+    settings: Optional[GameSettings] = None
     map: Optional[MapData] = None
     player_states: List[PlayerState] = field(default_factory=list)
     current_command: int = 0
@@ -263,6 +296,12 @@ class GameState:
         if 0 <= self.current_player_index < len(self.player_states):
             return self.player_states[self.current_player_index]
         return None
+
+    @property
+    def PlayerCount(self) -> int:
+        return sum(1 for p in self.player_states
+                   if p.id != PlayerState.NATURE_PLAYER_ID
+                   and p.id != PlayerState.NO_PLAYER_ID)
 
 
 # ---------------------------------------------------------------------------
@@ -320,6 +359,7 @@ def _improvement(d: Optional[dict]) -> Optional[ImprovementState]:
         name=d.get("name", ""),
         rewards=rewards,
         effects=list(d.get("effects", [])),
+        discovered_by=list(d.get("discovered_by", [])),
     )
 
 

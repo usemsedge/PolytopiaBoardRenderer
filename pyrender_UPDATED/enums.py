@@ -58,6 +58,31 @@ class Skin(IntEnum):
     URKAZ = 13; IKARUS = 14; DARKELF = 15; SWAMP = 17; MAGMA = 18; CUTE = 19
 
 
+class MapPreset(IntEnum):
+    """dump.cs MapPreset (TypeDef 12153)."""
+    NONE = 0; DRYLAND = 1; LAKES = 2; CONTINENTS = 3
+    ARCHIPELAGO = 4; WATER_WORLD = 5; PANGEA = 6
+
+
+class MapSize(IntEnum):
+    """dump.cs MapSize (TypeDef 12155). Widths via MapSizeExtensions."""
+    NONE = 0; TINY = 1; SMALL = 2; NORMAL = 3; LARGE = 4; HUGE = 5; MASSIVE = 6
+
+
+# MapSizeExtensions constants (dump.cs 832027–832036).
+MAP_SIZE_WIDTH = {
+    MapSize.NONE: 0,
+    MapSize.TINY: 11,
+    MapSize.SMALL: 14,
+    MapSize.NORMAL: 16,
+    MapSize.LARGE: 18,
+    MapSize.HUGE: 20,
+    MapSize.MASSIVE: 30,
+}
+MAP_SIZE_MIN = 11
+MAP_SIZE_MAX = 30
+
+
 class TileEffect(IntEnum):
     NONE = 0; FLOODED = 1; SWAMPED = 2; TENTACLE = 3; ALGAE = 4; FOAM = 5
 

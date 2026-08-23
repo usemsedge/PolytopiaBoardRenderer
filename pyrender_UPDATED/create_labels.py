@@ -589,6 +589,10 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
     if imp is None or imp.type != int(E.Improvement.CITY):
         return []
 
+    # Neutral villages: hut sprite only — no name plate or population bar.
+    if not tile.owner and not tile.capital_of:
+        return []
+
     level = max(0, int(imp.level))
     filled_fields = int(imp.population)
     total_fields = level + 1
