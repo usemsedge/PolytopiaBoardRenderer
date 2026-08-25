@@ -55,7 +55,7 @@ def _make_unit(x: int) -> GS.UnitState:
     return GS.UnitState(
         type=int(Unit.WARRIOR),
         owner=OWNER,
-        health=10,
+        health=100,
         moved=moved,
         effects=[int(e) for e in effects],
     )

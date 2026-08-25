@@ -205,7 +205,7 @@ class UnitState:                   # dump.cs 776856
     type: int                      # UnitData.Type
     owner: int                     # byte player id
     x: int; y: int                 # coordinates @0x30
-    health: int = 10               # ushort @0x48
+    health: int = 100              # ushort tenths; display = ceil(health/10)
     promotion_level: int = 0       # ushort @0x4A
     direction: int = 8             # GridDirection @0x50 (default NONE)
     flipped: bool = False          # @0x54  -> horizontal flip

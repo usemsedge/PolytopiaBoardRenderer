@@ -68,12 +68,16 @@ class TileContext:
     Ported from the old render.RenderContext but with a TILE-LOCAL placement API (no board
     Frame here — render.py owns board placement)."""
 
-    def __init__(self, gs, store: Optional[SpriteStore] = None):
+    def __init__(self, gs, store: Optional[SpriteStore] = None,
+                 viewer_id: Optional[int] = None):
         self.gs = gs
         self.map = gs.map
         self.store = store if store is not None else SpriteStore()
-        viewer = getattr(gs, "viewer", None)
-        self.viewer_id = viewer.id if viewer else 0xFF
+        if viewer_id is not None:
+            self.viewer_id = int(viewer_id)
+        else:
+            viewer = getattr(gs, "viewer", None)
+            self.viewer_id = viewer.id if viewer else 0xFF
         self._pivot_cache = {}
 
     # ----------------------------------------------------------------- queries

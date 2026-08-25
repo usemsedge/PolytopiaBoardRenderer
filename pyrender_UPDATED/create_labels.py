@@ -5,12 +5,18 @@ City status — mirrors City.cityOverlay → CityStatusDisplay.SetCity (RVA 0x2A
     capital underline + crown; work stars from ImprovementState.production
     (SetWork / ResourceWidget: Roboto-Light 16 + UI_resource @ 0.2);
     team-tinted Square bg (α≈0.5, width from UpdateSize).
-  - ProgressBar: segmented pop bar (totalFields=level+1, filledFields=population,
-    dots=GetCityUnitCount).
+  - ProgressBar: segmented pop bar (totalFields=level+1,
+    filledFields=pop leftover after levels 1..L, dots=GetCityUnitCount).
+    Engine stores cumulative population; L→L+1 costs L+1 (1→2 needs 2, …).
 
 Unit health badge — mirrors UnitStatusDisplay.SetState:
+  - UnitState.health is stored in tenths; label shows ceil(health/10).
   - healthLabel: JosefinSans-Italic numbers, white ≥5 HP / red <5 HP.
-  - healthBg: UnitHealthGFX_shield_1/_2 (defence tier) or bare text.
+  - healthBg: UnitHealthGFX_shield_1/_2 only when GetDefenceBonus > 1.0×:
+      terrain (GameLogicData defenceBonusUnlocks): forest←Archery,
+      mountain←Climbing, water/ocean←Aquatism (unit owner's tech);
+      city: tile.owner == unit.owner and unit has Fortify → shield,
+      CityWall → fort shield.
 
 Type-icon badge — typeOutline + typeBg (circle_30, team tint) + typeIcon.
 
@@ -19,6 +25,7 @@ Interface (CONTRACT.md):
 """
 from __future__ import annotations
 
+import math
 import os
 from typing import List, Optional, Tuple
 
@@ -127,23 +134,52 @@ def _render_text(text: str, color: tuple = (255, 255, 255, 255),
     return Image(canvas.width, canvas.height, bytearray(canvas.tobytes()))
 
 # ── defence-bonus tier (health badge background) ──────────────────────────────
+# Mirrors GameState.GetDefenceBonus(Unit) + TechData.defenceBonusUnlocks.
 _BG_SPRITE = {
-    "shield": "UnitHealthGFX_shield_1",
-    "fort":   "UnitHealthGFX_shield_2",
+    "shield": "UnitHealthGFX_shield_1",  # 1.5× (terrain / city without walls)
+    "fort":   "UnitHealthGFX_shield_2",  # 4.0× (own city + Fortify + CityWall)
 }
-_SHIELD_TERRAIN = {
-    int(E.Terrain.FOREST), int(E.Terrain.MOUNTAIN),
-    int(E.Terrain.WETLAND), int(E.Terrain.MANGROVE),
+
+# TechData.Type (dump.cs / GameLogicData28 techData.*.defenceBonusUnlocks).
+_TECH_AQUATISM = 12
+_TECH_ARCHERY = 18
+_TECH_CLIMBING = 20
+
+_TERRAIN_DEFENCE_TECH = {
+    int(E.Terrain.FOREST): _TECH_ARCHERY,
+    int(E.Terrain.MOUNTAIN): _TECH_CLIMBING,
+    int(E.Terrain.WATER): _TECH_AQUATISM,
+    int(E.Terrain.OCEAN): _TECH_AQUATISM,
+}
+
+# UnitData.unitAbilities contains "fortify" (GameLogicData28).
+_FORTIFY_UNITS = {
+    int(E.Unit.WARRIOR), int(E.Unit.RIDER), int(E.Unit.KNIGHT),
+    int(E.Unit.DEFENDER), int(E.Unit.ARCHER), int(E.Unit.POLYTAUR),
+    int(E.Unit.DRAGON_EGG), int(E.Unit.ICE_ARCHER),
+    int(E.Unit.MERMAID_WARRIOR), int(E.Unit.MERMAID_ARCHER),
+    int(E.Unit.MERMAID_DEFENDER),
 }
 
 
-def _defence_tier(tile) -> str:
+def _defence_tier(ctx, tile, unit) -> str:
+    """Return 'none' | 'shield' | 'fort' for the HP badge background."""
     imp = tile.improvement
     if imp is not None and imp.type == int(E.Improvement.CITY):
-        return "fort" if imp.has_reward(int(E.CityReward.CITY_WALL)) else "shield"
-    if tile.terrain in _SHIELD_TERRAIN:
-        return "shield"
-    return "none"
+        # Own city + Fortify ability → 1.5×, or 4× with CityWall.
+        if tile.owner == unit.owner and int(unit.type) in _FORTIFY_UNITS:
+            if imp.has_reward(int(E.CityReward.CITY_WALL)):
+                return "fort"
+            return "shield"
+        return "none"
+
+    required = _TERRAIN_DEFENCE_TECH.get(int(tile.terrain))
+    if required is None:
+        return "none"
+    player = ctx.gs.player_by_id(unit.owner)
+    if player is None or required not in player.available_tech:
+        return "none"
+    return "shield"
 
 
 # ── unit-type icon mapping ────────────────────────────────────────────────────
@@ -523,6 +559,20 @@ def _opaque_center(img: Image, alpha_min: int = 30) -> Tuple[float, float]:
     return (minx + maxx) / 2.0, (miny + maxy) / 2.0
 
 
+def _city_pop_fill(level: int, population: int) -> int:
+    """Bar fill from cumulative population for a city at ``level``.
+
+    Level L→L+1 costs L+1 pop (1→2 needs 2, 2→3 needs 3, …). Cumulative pop
+    spent to reach level L is 2+3+…+L = L(L+1)/2 − 1 (0 for L≤1). Only the
+    remainder toward the next level is rendered (negative → red deficit fill).
+
+    Example: level 3 with total pop 6 → spent 2+3=5 → fill 1 of 4 bars.
+    """
+    level = max(0, int(level))
+    baseline = max(0, level * (level + 1) // 2 - 1)
+    return int(population) - baseline
+
+
 def _build_progress_bar(ctx, total_fields: int, filled_fields: int,
                         dots: int) -> Optional[Image]:
     """CityStatusProgressBar.UpdateFields — Left/Middle/Right segments + dots."""
@@ -578,9 +628,12 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
 
     Faithful to CityStatusDisplay.SetCity:
       totalFields  = level + 1
-      filledFields = population
+      filledFields = population leftover after paying 2+3+…+level
+                     (ImprovementState.population is cumulative total)
       dots         = GetCityUnitCount(map, cityCoords)
       work         = ImprovementState.production  (engine: CalculateWork → SetWork)
+      own cities   = full plate (crown/underline/stars) + pop bar
+      enemy cities = name only (no crown, underline, stars, or pop bar)
     """
     tile = ctx.tile_at(x, y)
     if tile is None or ctx.is_hidden(tile):
@@ -594,13 +647,15 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
         return []
 
     level = max(0, int(imp.level))
-    filled_fields = int(imp.population)
+    filled_fields = _city_pop_fill(level, imp.population)
     total_fields = level + 1
     dots = _city_unit_count(ctx, x, y)
-    work = int(imp.production)
 
+    # Own / omniscient: full status. Enemy: name plate only (no crown, stars, bar).
+    own = ctx.viewer_id == 0xFF or tile.owner == ctx.viewer_id
+    work = int(imp.production) if own else 0
+    is_capital = bool(tile.capital_of) if own else False
     team = ctx.player_color(tile.owner)
-    is_capital = bool(tile.capital_of)
     name = (imp.name or "").strip()
 
     out: List[Placement] = []
@@ -614,14 +669,15 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
             round(cy - plate.h / 2),
         ))
 
-    bar = _build_progress_bar(ctx, total_fields, filled_fields, dots)
-    if bar is not None:
-        cy = -_BAR_WORLD_Y * P.PPU
-        out.append(Placement(
-            E.SORT_CITY_STATUS, bar,
-            round(-bar.w / 2),
-            round(cy - bar.h / 2),
-        ))
+    if own:
+        bar = _build_progress_bar(ctx, total_fields, filled_fields, dots)
+        if bar is not None:
+            cy = -_BAR_WORLD_Y * P.PPU
+            out.append(Placement(
+                E.SORT_CITY_STATUS, bar,
+                round(-bar.w / 2),
+                round(cy - bar.h / 2),
+            ))
 
     return out
 
@@ -640,8 +696,9 @@ def items(ctx, x: int, y: int) -> List[Placement]:
         return result
 
     # ── health badge ──────────────────────────────────────────────────────────
-    health = max(0, int(unit.health))
-    tier = _defence_tier(tile)
+    # Wire/format health is tenths; client does ceil(health * 0.1) for the label.
+    health = max(0, int(math.ceil(int(unit.health) / 10.0)))
+    tier = _defence_tier(ctx, tile, unit)
     color = (255, 60, 60, 255) if health <= 4 else (255, 255, 255, 255)
     text_img = _render_text(str(health), color)
 

@@ -1,5 +1,5 @@
 {
-  "_comment": "Hand-built 5x7 example (canonical GameState JSON). Imperius player; Odum (2,2 capital) and Nobu (2,5). City leveling: starts at level 1; level L→L+1 needs L+1 population (1→2 needs 2, 2→3 needs 3, …). A level-x city has x+1 bar slots (unit capacity). Cumulative pop to just reach level x is the x-th triangle number minus 1 (T(x)-1 = 2+3+…+x). Excess that does not trigger another level-up is stored in population (blue fill); a deficit vs that baseline is a red (negative) fill. Cities always level up when they have enough pop, so population is only the leftover. This scene: Nobu cumulative 6 = 2+3+1 → level 3, population 1 (4 bars); Odum cumulative 11 = 2+3+4+2 → level 4, population 2 (5 bars). Field names match pyrender_UPDATED/gamestate.py (IL2CPP snake_case).",
+  "_comment": "Hand-built 5x7 example (canonical GameState JSON). Imperius player; Odum (2,2 capital) and Nobu (2,5). City leveling: starts at level 1; level L→L+1 needs L+1 population (1→2 needs 2, 2→3 needs 3, …). A level-x city has x+1 bar slots (unit capacity). ImprovementState.population is cumulative total; renderer subtracts baseline T(x)-1 = 2+3+…+x to get blue/red bar fill. This scene: Nobu population 6 = 2+3+1 → level 3, fill 1 (4 bars); Odum population 11 = 2+3+4+2 → level 4, fill 2 (5 bars). Field names match pyrender_UPDATED/gamestate.py (IL2CPP snake_case).",
   "current_turn": 1,
   "current_player_index": 0,
   "player_states": [
@@ -95,7 +95,7 @@
             "x": 2,
             "y": 2
           },
-          "health": 10,
+          "health": 100,
           "passenger_unit": {
             "type": 2
           }
@@ -202,7 +202,7 @@
             "x": 2,
             "y": 2
           },
-          "health": 10,
+          "health": 100,
           "passenger_unit": {
             "type": 2
           }
@@ -344,7 +344,7 @@
           "founder": 1,
           "level": 4,
           "xp": 2,
-          "population": 2,
+          "population": 11,
           "production": 5,
           "border_size": 2,
           "name": "Odum"
@@ -361,7 +361,7 @@
             "x": 2,
             "y": 2
           },
-          "health": 7
+          "health": 70
         }
       },
       {
@@ -586,7 +586,7 @@
             "x": 2,
             "y": 5
           },
-          "health": 10
+          "health": 100
         }
       },
       {
@@ -649,7 +649,7 @@
             "x": 2,
             "y": 5
           },
-          "health": 5
+          "health": 50
         },
         "has_road": true
       },
@@ -674,7 +674,7 @@
           "founder": 1,
           "level": 3,
           "xp": 1,
-          "population": 1,
+          "population": 6,
           "production": 2,
           "border_size": 1,
           "name": "Nobu"

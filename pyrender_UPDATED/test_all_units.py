@@ -81,9 +81,9 @@ def _make_tile(x: int, y: int) -> GS.TileData:
     terrain = Terrain.OCEAN if unit_type in _WATER_UNITS else Terrain.FIELD
     passenger = None
     if unit_type in _WATER_UNITS:
-        passenger = GS.UnitState(type=int(Unit.WARRIOR), owner=1, health=10)
+        passenger = GS.UnitState(type=int(Unit.WARRIOR), owner=1, health=100)
     unit = GS.UnitState(
-        type=int(unit_type), owner=1, health=10,
+        type=int(unit_type), owner=1, health=100,
         coordinates=GS.WorldCoordinates(x, y),
         passenger_unit=passenger,
     )

@@ -5,8 +5,7 @@ _water_recess, _ppu_scaled, fog_items, _trim_pivot) onto the create_* interface
 in context.py. Replaces the old Item/global-sort design: this returns baked
 Images placed at tile-local top-lefts (diamond centre = origin (0,0), +y down).
 
-Faithful to Tile.RenderTerrain (0x2CDC828) + TerrainRenderer.UpdateGraphics
-(0x2CDBD9C):
+Faithful to Tile.RenderTerrain + TerrainRenderer.UpdateGraphics:
   - base terrain (or `hidden` fog when the tile is hidden)  -> SORT_TERRAIN (1)
   - mountain / forest / algae feature toppers               -> SORT_TERRAIN_FEATURE (3)
 
@@ -21,9 +20,8 @@ extra scale beyond render_scale). The base terrain sprite was NOT ppu-scaled in 
 old code, but bake applies render_scale uniformly — for terrain base sprites that is
 the measured world scale, which is the correct local size to tessellate.
 
-Tint: RenderTerrain's desaturation trigger is not reverse-engineered, so base/toppers
-render untinted (the engine's behaviour when shouldDesaturate is false) — matching the
-old code which also emitted no tint.
+Tint: enemy-owned land (not water/ocean/ice) gets a mild opaque dim (~0.85×)
+matching live boards; own / unowned / omniscient view stay full bright.
 """
 from __future__ import annotations
 
@@ -52,6 +50,13 @@ except Exception:
 # +y = down. (0, 0) = exactly the trim-corrected pivot placement. Hand-tuned offset only.
 FOG_OFFSET_PX = (0, 10)
 
+# RenderTerrain desaturate tint (packed ARGB 0x7FF3F3F3 ÷ 255).
+# Engine multiplies sprite by RGBA(0.953, 0.953, 0.953, 0.498). Over a dark
+# clear that would crush to ~0.48×; live boards read ~0.84× on enemy grass, so
+# bake a mild opaque RGB scale that matches the screenshot (keep alpha solid
+# for isometric paste on a transparent canvas).
+_DESAT_FACTOR = 1.00
+
 
 def _trim_pivot(name: str) -> Tuple[float, float]:
     """Trimmed-PNG pivot (bottom-left origin, normalized); falls back to rect pivot then centre."""
@@ -59,6 +64,25 @@ def _trim_pivot(name: str) -> Tuple[float, float]:
     if r:
         return tuple(r["pivot"])
     return SM.pivot(name) or (0.5, 0.5)
+
+
+def _should_desaturate(ctx: context.TileContext, tile) -> bool:
+    """Enemy-owned land dim — RenderTerrain ownership / IsWater / Ice gates."""
+    if ctx.viewer_id == 0xFF:
+        return False
+    owner = int(tile.owner)
+    if owner == 0 or owner == ctx.viewer_id:
+        return False
+    if tile.terrain in (E.Terrain.WATER, E.Terrain.OCEAN, E.Terrain.ICE):
+        return False
+    return True
+
+
+def _maybe_desat(img: Image, desat: bool) -> Image:
+    if not desat:
+        return img
+    c = max(0, min(255, int(round(_DESAT_FACTOR * 255))))
+    return img.tinted((c, c, c))
 
 
 def _base_terrain_name(ctx: context.TileContext, tile) -> Optional[str]:
@@ -118,6 +142,7 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
     out: List[Placement] = []
     tribe, skin = ctx.tile_theme(tile)
     is_water_surface = tile.terrain in (E.Terrain.WATER, E.Terrain.OCEAN)
+    desat = _should_desaturate(ctx, tile)
 
     # --- base surface (SORT_TERRAIN +1) ---
     recess = 0
@@ -125,6 +150,7 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
     if name:
         img = ctx.bake(name)
         if img is not None:
+            img = _maybe_desat(img, desat)
             left, top = ctx.seat_base(name, img.w, img.h)
             if is_water_surface:
                 # Recess by the art-derived block-height difference so a recessed water
@@ -143,6 +169,7 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
         if feat:
             fimg = ctx.bake(feat)
             if fimg is not None:
+                fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_base(feat, fimg.w, fimg.h)
                 out.append(Placement(E.SORT_TERRAIN_FEATURE, fimg, fl, ft))
     elif tile.terrain == E.Terrain.FOREST:
@@ -151,6 +178,7 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
         if feat:
             fimg = ctx.bake(feat)
             if fimg is not None:
+                fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_planted(fimg.w, fimg.h, foot=context.FEATURE_FOOT)
                 out.append(Placement(E.SORT_TERRAIN_FEATURE, fimg, fl, ft))
 
@@ -161,6 +189,7 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
         if alg:
             aimg = ctx.bake(alg)
             if aimg is not None:
+                aimg = _maybe_desat(aimg, desat)
                 al, at = ctx.seat_base(alg, aimg.w, aimg.h)
                 out.append(Placement(E.SORT_TERRAIN_FEATURE, aimg, al, at + recess))
 

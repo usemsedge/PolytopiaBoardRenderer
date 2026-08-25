@@ -31,13 +31,15 @@ def _tile(x, y):
     capital_of = 0
     if city_level is not None:
         idx = list(_CITIES.keys()).index((x, y))
-        # population fills the pop bar; vary so the segment fill is visible.
-        population = (city_level - 1) % (city_level + 1)
+        # Cumulative pop: baseline to reach this level + leftover fill for the bar.
+        leftover = (city_level - 1) % (city_level + 1)
+        baseline = max(0, city_level * (city_level + 1) // 2 - 1)
+        population = baseline + leftover
         if city_level == 1:
             capital_of = OWNER
         imp = GS.ImprovementState(
             type=int(Improvement.CITY), level=city_level,
-            name=_NAMES[idx], population=population, xp=population,
+            name=_NAMES[idx], population=population, xp=leftover,
         )
     return GS.TileData(
         coordinates=GS.WorldCoordinates(x, y),

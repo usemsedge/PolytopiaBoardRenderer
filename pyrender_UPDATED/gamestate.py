@@ -91,7 +91,7 @@ class UnitState:
     coordinates: WorldCoordinates = field(default_factory=WorldCoordinates)
     home: WorldCoordinates = field(default_factory=WorldCoordinates)
     passenger_unit: Optional["UnitState"] = None
-    health: int = 10
+    health: int = 100                       # tenths (display HP = ceil(health/10))
     promotion_level: int = 0
     xp: int = 0
     moved: bool = False
@@ -263,6 +263,31 @@ class GameSettings:
 
 
 @dataclass
+class CommandTrigger:
+    """dump.cs CommandTrigger (TypeDef 10610)."""
+    player_id: int = 0
+    opponent_id: int = 0
+    type: int = 0  # CommandTriggerType
+    coordinates: WorldCoordinates = field(default_factory=WorldCoordinates)
+
+
+@dataclass
+class CommandRecord:
+    """One entry from GameState.CommandStack (type ushort + CommandBase body)."""
+    type: int  # CommandType
+    player_id: int = 0
+    fields: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ActionRecord:
+    """One entry from GameState.ActionStack (type ushort + ActionBase body)."""
+    type: int  # ActionType
+    player_id: int = 0
+    fields: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class GameState:
     """dump.cs GameState (TypeDef 10622)."""
     # GameState.State: Unknown=0 Lobby=1 Started=2 FinalTurn=3 Ended=4
@@ -277,9 +302,9 @@ class GameState:
     map: Optional[MapData] = None
     player_states: List[PlayerState] = field(default_factory=list)
     current_command: int = 0
-    command_stack: List[Any] = field(default_factory=list)
-    action_stack: List[Any] = field(default_factory=list)
-    pending_command_triggers: List[Any] = field(default_factory=list)
+    command_stack: List[CommandRecord] = field(default_factory=list)
+    action_stack: List[ActionRecord] = field(default_factory=list)
+    pending_command_triggers: List[CommandTrigger] = field(default_factory=list)
     has_flagged_need_for_update_routes: bool = False
     random_hash: Any = None
     village_name_hash: Any = None
@@ -389,7 +414,7 @@ def _unit(d: Optional[dict]) -> Optional[UnitState]:
         coordinates=_coords(coords),
         home=_coords(home, -1, -1) if home is not None else WorldCoordinates(-1, -1),
         passenger_unit=_unit(passenger),
-        health=d.get("health", 10),
+        health=d.get("health", 100),
         promotion_level=d.get("promotion_level", 0),
         xp=d.get("xp", 0),
         moved=bool(d.get("moved", False)),
@@ -474,6 +499,29 @@ def from_dict(d: dict) -> GameState:
     )
     # Accept legacy "players" key as alias for player_states.
     plist = d.get("player_states", d.get("players", []))
+
+    def _trigger(t: dict) -> CommandTrigger:
+        return CommandTrigger(
+            player_id=int(t.get("player_id", 0)),
+            opponent_id=int(t.get("opponent_id", 0)),
+            type=int(t.get("type", 0)),
+            coordinates=_coords(t.get("coordinates")),
+        )
+
+    def _command(c: dict) -> CommandRecord:
+        return CommandRecord(
+            type=int(c["type"]),
+            player_id=int(c.get("player_id", 0)),
+            fields=dict(c.get("fields") or {}),
+        )
+
+    def _action(a: dict) -> ActionRecord:
+        return ActionRecord(
+            type=int(a["type"]),
+            player_id=int(a.get("player_id", 0)),
+            fields=dict(a.get("fields") or {}),
+        )
+
     return GameState(
         version=d.get("version", 0),
         seed=d.get("seed", 0),
@@ -482,8 +530,17 @@ def from_dict(d: dict) -> GameState:
         current_player_index=d.get("current_player_index", 0),
         current_unit_id=d.get("current_unit_id", 0),
         current_state=d.get("current_state", 0),
+        current_command=d.get("current_command", 0),
         map=mapdata,
         player_states=[_player(p) for p in plist],
+        pending_command_triggers=[
+            _trigger(t) for t in d.get("pending_command_triggers", [])
+        ],
+        command_stack=[_command(c) for c in d.get("command_stack", [])],
+        action_stack=[_action(a) for a in d.get("action_stack", [])],
+        has_flagged_need_for_update_routes=bool(
+            d.get("has_flagged_need_for_update_routes", False)
+        ),
     )
 
 

@@ -11,12 +11,13 @@ tiles paste last and cover the upper/back ones they overlap.
 Foreground uses Unity sorting-layer bands (Units → CityStatus → UnitStatus) so
 city/unit UI never interleaves under units on front tiles.
 
-    python3 render.py <gamestate.json> [out.png] [--pad N]
+    python3 render.py <gamestate.json> [out.png] [--pad N] [--player ID]
 """
 from __future__ import annotations
 
 import sys
 import os
+from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -86,8 +87,11 @@ def _paste_board(bg_ops, fg_ops, pad: int):
     return canvas, off_x, off_y
 
 
-def render_with_meta(gs, pad: int = 200):
+def render_with_meta(gs, pad: int = 200, player_id: Optional[int] = None):
     """Same composite as render(), but also returns tile metadata.
+
+    ``player_id`` — render from that player's perspective (fog, own-city pop bars).
+    When omitted, uses ``gs.viewer`` from ``current_player_index`` (or omniscient).
 
     Returns
     -------
@@ -100,7 +104,7 @@ def render_with_meta(gs, pad: int = 200):
                             so a full tile fits in 2*tile_size × 2*tile_size
     """
     frame = P.Frame(gs.map.width, gs.map.height, pad=pad)
-    ctx   = context.TileContext(gs)
+    ctx   = context.TileContext(gs, viewer_id=player_id)
     tiles = _board_tiles(gs)
 
     bg_ops, fg_ops = _collect_ops(ctx, frame, tiles)
@@ -116,8 +120,11 @@ def render_with_meta(gs, pad: int = 200):
     return canvas, tile_centers, int(P.HALF_W)
 
 
-def render(gs, pad: int = 200) -> Image:
+def render(gs, pad: int = 200, player_id: Optional[int] = None) -> Image:
     """Composite every tile of ``gs`` onto a single board canvas, back-to-front.
+
+    ``player_id`` — render from that player's perspective (fog, own-city pop bars).
+    When omitted, uses ``gs.viewer`` from ``current_player_index`` (or omniscient).
 
     Paint order mirrors Unity sorting layers:
       Pass 1 — all tile backgrounds (terrain … borders)
@@ -129,7 +136,7 @@ def render(gs, pad: int = 200) -> Image:
     tall buildings, edge tiles, and large units are never clipped.
     """
     frame = P.Frame(gs.map.width, gs.map.height, pad=pad)
-    ctx   = context.TileContext(gs)
+    ctx   = context.TileContext(gs, viewer_id=player_id)
     tiles = _board_tiles(gs)
 
     bg_ops, fg_ops = _collect_ops(ctx, frame, tiles)
@@ -147,10 +154,13 @@ def main(argv):
     out = argv[1] if len(argv) > 1 and not argv[1].startswith("--") else \
         os.path.splitext(os.path.basename(src))[0] + ".png"
     pad = 200
+    player_id = None
     if "--pad" in argv:
         pad = int(argv[argv.index("--pad") + 1])
+    if "--player" in argv:
+        player_id = int(argv[argv.index("--player") + 1])
     gs = GS.load(src)
-    img = render(gs, pad=pad)
+    img = render(gs, pad=pad, player_id=player_id)
     img.save_png(out)
     print(f"rendered {gs.map.width}x{gs.map.height} board -> {out} ({img.w}x{img.h})")
     return 0
