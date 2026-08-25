@@ -2,6 +2,10 @@
 
 Isometric board renderer for [The Battle of Polytopia](https://polytopia.io/), reverse-engineered from the Unity client.
 
+(Reverse-engineered too)
+Also contains replayextractor (input polytopia jwt + share link, output GameState of the final position)
+Also contains mapgenerator (output GameState like a real random map)
+
 ## Setup
 
 ```bash
