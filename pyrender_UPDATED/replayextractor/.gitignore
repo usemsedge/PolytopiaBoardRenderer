@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+out.bin
+*.gamestate.bin
+state.json
+*.jwt
+jwtToken

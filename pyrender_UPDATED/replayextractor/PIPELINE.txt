@@ -1,0 +1,40 @@
+Replay extractor
+================
+
+Pull a finished game from a share link and turn it into a Python GameState
+(same path the client takes for OpenReplay, minus UI).
+
+You need Polytopia installed and logged in on this Mac so there's a jwtToken
+sitting under Application Support. get_jwt.py just finds the newest one.
+
+Pipeline
+--------
+From this folder:
+
+  python3 get_game_data.py https://share.polytopia.io/g/<uuid> --bin game.bin
+  python3 deserialize_gamestate.py game.bin -o state.json --summary
+  python3 ../render.py state.json board.png   # optional
+
+get_game_data hits polytopia-prod (get_game_view_model, falls back to
+spectate_game). By default it only accepts ended games (state 4); pass
+--allow-unfinished if you know what you're doing. Without --bin you get
+JSON with the blob base64'd instead.
+
+deserialize_gamestate reads that BinaryWriter dump into gamestate.GameState.
+history_layouts.py has the command/action field orders; enums are in
+../enums.py.
+
+What's in the blob
+------------------
+Uncompressed little-endian. Outer version int, then GameState.Serialize
+(which writes version again — yeah, twice), then roughly:
+
+  header (current command, turn, player, unit, state, seed)
+  settings / map / tiles / players
+  pending command triggers
+  command stack   ← player intents, this is the "replay"
+  action stack    ← often empty on ended downloads, weirdly
+  a couple of trailing fields on newer versions (route flag, village seed)
+
+Not a perfect client clone — no SignalR, no deep links — but the board data
+and command history match what the API gives the real app.
