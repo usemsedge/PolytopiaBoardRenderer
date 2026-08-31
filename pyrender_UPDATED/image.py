@@ -151,7 +151,18 @@ class Image:
         return Image.from_array(out)
 
     def paste(self, src: "Image", x: int, y: int, opacity: float = 1.0) -> None:
-        """Source-over alpha composite ``src`` onto self at integer (x, y)."""
+        """Source-over alpha composite ``src`` onto self at integer (x, y).
+
+        Composites only the overlapping ROI through Pillow's C ``alpha_composite``
+        so large canvases stay fast (full-buffer round-trips would dominate).
+        """
+        op = max(0.0, min(1.0, float(opacity)))
+        if op <= 0.0:
+            return
+        if op < 1.0:
+            src = src.multiply_alpha(op)
+
+        x, y = int(x), int(y)
         dw, dh = self.w, self.h
         sw, sh = src.w, src.h
         x0 = max(0, x)
@@ -162,32 +173,11 @@ class Image:
             return
         sx0 = x0 - x
         sy0 = y0 - y
-        sx1 = sx0 + (x1 - x0)
-        sy1 = sy0 + (y1 - y0)
+        cw, ch = x1 - x0, y1 - y0
 
-        dst = self._arr[y0:y1, x0:x1].astype(np.float32)
-        src_c = src._arr[sy0:sy1, sx0:sx1].astype(np.float32)
-        op = max(0.0, min(1.0, float(opacity)))
-        sa = src_c[..., 3] * op
-        da = dst[..., 3]
-        ia = 255.0 - sa
-        oa = sa + (da * ia + 127.0) / 255.0
-        dca = (da * ia + 127.0) / 255.0
-
-        out = dst.copy()
-        opaque = sa >= 254.5
-        empty = sa < 0.5
-        mid = ~opaque & ~empty
-
-        out[opaque, :3] = src_c[opaque, :3]
-        out[opaque, 3] = 255.0
-
-        if np.any(mid):
-            denom = np.maximum(oa[mid], 1e-6)
-            for c in range(3):
-                out[mid, c] = (
-                    src_c[mid, c] * sa[mid] + dst[mid, c] * dca[mid] + oa[mid] * 0.5
-                ) / denom
-            out[mid, 3] = oa[mid]
-
-        self._arr[y0:y1, x0:x1] = np.clip(np.rint(out), 0, 255).astype(np.uint8)
+        dst_roi = PILImage.fromarray(self._arr[y0:y1, x0:x1], mode="RGBA")
+        src_roi = PILImage.fromarray(
+            src._arr[sy0:sy0 + ch, sx0:sx0 + cw], mode="RGBA"
+        )
+        dst_roi.alpha_composite(src_roi, dest=(0, 0))
+        self._arr[y0:y1, x0:x1] = np.asarray(dst_roi, dtype=np.uint8)

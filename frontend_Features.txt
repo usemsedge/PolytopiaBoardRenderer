@@ -1,0 +1,19 @@
+
+
+A menu on the right hand side of the board
+displays a modification in a box
+clicking on a board tile applies that modification
+
+also displays the selected player in a box
+which can be edited, placing a modification places it as if it were that selected player
+ (placing a unit will place a unit of that player's tribe and color)
+
+several main menus, opening each gives sub-menus
+main menus:
+- set terrain/improvement/resource/road/unit
+
+under each menu:
+- a choice of all the things in that category 
+- example: under terrain: field/water/ocean/mountain/etc. (all terrain types)
+- under unit: all units sorted by star cost
+- ALSO OPTION TO REMOVE the specific category while keeping all others

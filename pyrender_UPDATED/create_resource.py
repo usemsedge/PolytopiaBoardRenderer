@@ -6,10 +6,18 @@ A tile draws at most one resource sprite from TileData.resource.type (1..9).
 The base name comes from SpriteData.ResourceToString(type) and is resolved through
 DoSpriteLookup(base, tribe, skin) where tribe/skin come from the tile's climate theme.
 
-Cyan glow: when the viewer (ctx.viewer_id) owns the tile (or for Starfish, regardless
-of ownership), AND the viewer's player has the corresponding harvesting tech in
-`available_tech`, the resource's _Outline companion sprite is emitted tinted cyan
-(#00F5F5, recovered from data.unity3d) at SORT_RESOURCE_OUTLINE, below the resource.
+When rendering from a player id (ctx.viewer_id != 0xFF), some resources are hidden
+until the viewer has the matching tech / tribe (mirrors GameLogicData.IsResourceVisibleToPlayer
+at a coarse level):
+  Metal     → Climbing
+  Crop      → Organization
+  AquaCrop  → Fishing + Aquarion
+  Starfish  → Sailing
+  Spores    → Cymanti
+
+Cyan glow: when the viewer owns the tile (or for Starfish, regardless of ownership),
+AND the viewer has the corresponding harvesting tech in `available_tech`, the resource's
+_Outline companion sprite is emitted tinted cyan (#00F5F5) at SORT_RESOURCE_OUTLINE.
 """
 from __future__ import annotations
 
@@ -35,6 +43,12 @@ _RESOURCE_BASE = {
 # The Game resource ("animal") art reads oversized; render it at reduced size.
 ANIMAL_RESOURCE_SCALE = 0.67
 
+# TechData.Type (dump.cs TechData.Type).
+_TECH_ORGANIZATION = 6
+_TECH_FISHING = 10
+_TECH_SAILING = 13
+_TECH_CLIMBING = 20
+
 # Resource → ImprovementData.Type that harvests it (dump.cs line 777946+).
 # When this improvement is already built on the tile, the resource is consumed
 # and the glow is suppressed.
@@ -51,7 +65,7 @@ _RESOURCE_IMPROVEMENT = {
 }
 
 # Resource → required TechData.Type int (PlayerState.availableTech list).
-# Values from TechData.Type enum (dump.cs line 778329+).
+# Values from TechData.Type enum (dump.cs line 778329+). Used for cyan harvest glow.
 _RESOURCE_TECH = {
     E.Resource.GAME:     15,   # Hunting
     E.Resource.CROP:     8,    # Farming
@@ -94,6 +108,33 @@ RESOURCE_GLOW_OFFSET = {
 }
 
 
+def _resource_visible(ctx, res_type: int) -> bool:
+    """Whether ``res_type`` should be drawn for the current viewer.
+
+    Omniscient renders (viewer_id == 0xFF) show every resource. Player-perspective
+    renders hide tribe/tech-gated deposits until the viewer qualifies.
+    """
+    if ctx.viewer_id == 0xFF:
+        return True
+    player = ctx.gs.player_by_id(ctx.viewer_id)
+    if player is None:
+        return True
+    techs = player.available_tech or ()
+    tribe = int(player.tribe)
+    t = int(res_type)
+    if t == int(E.Resource.METAL):
+        return _TECH_CLIMBING in techs
+    if t == int(E.Resource.CROP):
+        return _TECH_ORGANIZATION in techs
+    if t == int(E.Resource.AQUACROP):
+        return tribe == int(E.Tribe.AQUARION) and _TECH_FISHING in techs
+    if t == int(E.Resource.STARFISH):
+        return _TECH_SAILING in techs
+    if t == int(E.Resource.SPORES):
+        return tribe == int(E.Tribe.CYMANTI)
+    return True
+
+
 def _glow_eligible(ctx, tile, res_type: int) -> bool:
     """True when the cyan harvestable glow should be drawn."""
     viewer = ctx.viewer_id
@@ -129,6 +170,8 @@ def items(ctx, x: int, y: int) -> List[Placement]:
         return []
     res = tile.resource
     if res is None or tile.improvement is not None:
+        return []
+    if not _resource_visible(ctx, res.type):
         return []
     base = _RESOURCE_BASE.get(res.type)
     if base is None:

@@ -79,6 +79,8 @@ class TileContext:
             viewer = getattr(gs, "viewer", None)
             self.viewer_id = viewer.id if viewer else 0xFF
         self._pivot_cache = {}
+        # (name, tint, flip, scale) → baked Image. Bake is pure; reuse across tiles.
+        self._bake_cache: dict = {}
 
     # ----------------------------------------------------------------- queries
     def tile_at(self, x: int, y: int):
@@ -126,22 +128,31 @@ class TileContext:
     def bake(self, name: str, tint: Optional[Tuple[int, int, int]] = None,
              flip: bool = False, scale: float = 1.0) -> Optional[Image]:
         """Load ``name`` and apply (a) measured render-scale * ``scale`` about its own size,
-        (b) team ``tint`` multiply, (c) horizontal ``flip`` — returning a fresh Image ready to
-        composite. Returns None if the sprite is missing."""
+        (b) team ``tint`` multiply, (c) horizontal ``flip`` — returning a baked Image ready to
+        composite. Results are cached and shared — callers must not mutate the returned Image
+        (``paste`` / in-place pixel writes); use ``.copy()`` first if you need to edit.
+        Returns None if the sprite is missing."""
+        key = (name, tint, bool(flip), round(float(scale), 5))
+        hit = self._bake_cache.get(key)
+        if hit is not None:
+            return hit
         if not self.store.exists(name):
             return None
         try:
-            img = self.store.get(name)
+            base = self.store.get(name)
         except KeyError:
             return None
         s = SM.render_scale(name) * scale
-        nw, nh = max(1, round(img.w * s)), max(1, round(img.h * s))
-        if (nw, nh) != (img.w, img.h):
-            img = img.resized(nw, nh)
+        nw, nh = max(1, round(base.w * s)), max(1, round(base.h * s))
+        if (nw, nh) != (base.w, base.h):
+            img = base.resized(nw, nh)
+        else:
+            img = base.copy()
         if tint is not None:
             img = img.tinted(tint)
         if flip:
             img = img.flipped_x()
+        self._bake_cache[key] = img
         return img
 
     # ----------------------------------------------------------- local seating

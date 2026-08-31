@@ -1,10 +1,8 @@
 """Render all 62 unit types on an 8×8 grid, one per tile.
 
 Units are placed in enum order (SCOUT→LARVA). Water/naval units get OCEAN
-terrain; land units get FIELD. Climate per tile is set to the unit's native
-tribe so UseClimate parts (rider mount, etc.) resolve correctly.
-
-All units are owned by a single Imperius player (blue tint, Imperius head).
+terrain; land units get FIELD. Each unit is owned by a player whose tribe
+matches the unit's native tribe so paper-doll / UseClimate parts resolve.
 
 Output: /tmp/test_all_units.png
 """
@@ -66,7 +64,16 @@ def _tribe_for(unit: Unit) -> int:
 # --------------------------------------------------------------------- grid
 _UNITS = [u for u in Unit if u != Unit.NONE]   # 62 units, enum order
 
-_IMPERIUS_PLAYER = GS.PlayerState(id=1, tribe=int(Tribe.IMPERIUS))
+# One player per native tribe so owner-based theming hits the right heads/mounts.
+_TRIBE_PLAYERS = {
+    int(Tribe.IMPERIUS): GS.PlayerState(id=1, tribe=int(Tribe.IMPERIUS)),
+    int(Tribe.CYMANTI):  GS.PlayerState(id=2, tribe=int(Tribe.CYMANTI)),
+    int(Tribe.POLARIS):  GS.PlayerState(id=3, tribe=int(Tribe.POLARIS)),
+    int(Tribe.ELYRION):  GS.PlayerState(id=4, tribe=int(Tribe.ELYRION)),
+    int(Tribe.AQUARION): GS.PlayerState(id=5, tribe=int(Tribe.AQUARION)),
+    int(Tribe.HOODRICK): GS.PlayerState(id=6, tribe=int(Tribe.HOODRICK)),
+    int(Tribe.BARDUR):   GS.PlayerState(id=7, tribe=int(Tribe.BARDUR)),
+}
 
 
 def _make_tile(x: int, y: int) -> GS.TileData:
@@ -76,26 +83,27 @@ def _make_tile(x: int, y: int) -> GS.TileData:
                            terrain=int(Terrain.FIELD),
                            climate=int(Tribe.IMPERIUS))
     unit_type = _UNITS[idx]
-    # Climate stays per-unit so UseClimate parts (mounts, etc.) resolve correctly.
-    climate = _tribe_for(unit_type)
+    tribe = _tribe_for(unit_type)
+    owner = _TRIBE_PLAYERS[tribe].id
     terrain = Terrain.OCEAN if unit_type in _WATER_UNITS else Terrain.FIELD
     passenger = None
     if unit_type in _WATER_UNITS:
-        passenger = GS.UnitState(type=int(Unit.WARRIOR), owner=1, health=100)
+        passenger = GS.UnitState(type=int(Unit.WARRIOR), owner=owner, health=100)
     unit = GS.UnitState(
-        type=int(unit_type), owner=1, health=100,
+        type=int(unit_type), owner=owner, health=100,
         coordinates=GS.WorldCoordinates(x, y),
         passenger_unit=passenger,
     )
     return GS.TileData(coordinates=GS.WorldCoordinates(x, y),
-                       terrain=int(terrain), climate=climate, unit=unit)
+                       terrain=int(terrain), climate=tribe, unit=unit)
 
 
 def build_gamestate() -> GS.GameState:
     tiles = [_make_tile(x, y) for y in range(ROWS) for x in range(COLS)]
     mapdata = GS.MapData(width=COLS, height=ROWS, tiles=tiles)
     # current_player_index out of range → viewer=None → all tiles visible, no outline
-    return GS.GameState(map=mapdata, player_states=[_IMPERIUS_PLAYER],
+    return GS.GameState(map=mapdata,
+                        player_states=list(_TRIBE_PLAYERS.values()),
                         current_player_index=99)
 
 

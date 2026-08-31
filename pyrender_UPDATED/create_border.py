@@ -46,7 +46,7 @@ BORDER_Y_SHIFT = -10
 # N = upper-left back edge, E = upper-right back edge,
 # S = lower-right front edge, W = lower-left front edge.
 N_DX, N_DY = 9, 4
-E_DX, E_DY = -3, 6
+E_DX, E_DY = -8, 8
 S_DX, S_DY = 0, 0
 W_DX, W_DY = 0, 0
 

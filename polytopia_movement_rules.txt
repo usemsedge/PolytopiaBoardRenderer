@@ -1,0 +1,67 @@
+All units starts off each turn able to do either of the following:
+- Move to a tile
+--- A move is made up of multiple steps from one tile to another
+--- (Land unit) Step from any tile to a mountain/forest costs infinite move range
+--- (Land unit) Step from ally road to ally road costs 0.5 move range (ally cities count as roads) (overrides forest rule if forest contains a road)
+--- (Water/amphibious unit) which is landable stepping onto land costs infinite move range
+--- (Land unit) which is port-able stepping into port costs infinite move range
+--- All other steps costs 1 move range
+--- Special abilities (fly, creep, etc.) override rules
+--- A unit may step onto the next tile 8-directionally if it has positive move range left AND it is allowed
+----- Land -> Land/port
+----- Water -> Water
+----- Amphibious -> 
+----- Air -> Any tile
+--- A unit may move from start to end if there exists a sequence of steps
+
+
+
+- Attack an enemy unit
+--- Attack allowed if enemy is within 8-directional attack range 
+    
+    public const UnitAbility.Type None = 0;
+	public const UnitAbility.Type Dash = 1;
+	public const UnitAbility.Type Escape = 2;
+	public const UnitAbility.Type Scout = 3;
+	public const UnitAbility.Type Sneak = 4;
+	public const UnitAbility.Type Hide = 5;
+	public const UnitAbility.Type Persist = 7;
+	public const UnitAbility.Type Convert = 8;
+	public const UnitAbility.Type Heal = 9;
+	public const UnitAbility.Type Swim = 10;
+	public const UnitAbility.Type Carry = 11;
+	public const UnitAbility.Type Grow = 12;
+	public const UnitAbility.Type Fly = 13;
+	public const UnitAbility.Type Splash = 14;
+	public const UnitAbility.Type Navigate = 16;
+	public const UnitAbility.Type Crush = 17;
+	public const UnitAbility.Type Freeze = 18;
+	public const UnitAbility.Type FreezeArea = 19;
+	public const UnitAbility.Type AutoFreeze = 20;
+	public const UnitAbility.Type Skate = 21;
+	public const UnitAbility.Type Fortify = 22;
+	public const UnitAbility.Type Creep = 23;
+	public const UnitAbility.Type Boost = 24;
+	public const UnitAbility.Type Independent = 25;
+	public const UnitAbility.Type Poison = 26;
+	public const UnitAbility.Type Eat = 27;
+	public const UnitAbility.Type Unique = 29;
+	public const UnitAbility.Type Explode = 30;
+	public const UnitAbility.Type Surprise = 31;
+	public const UnitAbility.Type Infiltrate = 35;
+	public const UnitAbility.Type Detect = 36;
+	public const UnitAbility.Type Stiff = 38;
+	public const UnitAbility.Type Protect = 39;
+	public const UnitAbility.Type Stomp = 40;
+	public const UnitAbility.Type AutoHeal = 41;
+	public const UnitAbility.Type Static = 42;
+	public const UnitAbility.Type Tentacles = 44;
+	public const UnitAbility.Type AutoFlood = 45;
+	public const UnitAbility.Type Drench = 46;
+	public const UnitAbility.Type Amphibious = 47;
+	public const UnitAbility.Type Water = 48;
+	public const UnitAbility.Type Land = 49;
+	public const UnitAbility.Type Algae = 51;
+	public const UnitAbility.Type Consumed = 52;
+	public const UnitAbility.Type Swarm = 53;
+	public const UnitAbility.Type DoubleAttack = 54;

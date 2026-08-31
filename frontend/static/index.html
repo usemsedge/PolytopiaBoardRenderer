@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Polytopia Board Editor</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div id="app">
+    <main id="board-pane">
+      <div id="board-wrap">
+        <img id="board" alt="Board" draggable="false" />
+        <canvas id="hit" width="1" height="1"></canvas>
+      </div>
+      <p id="status"></p>
+    </main>
+
+    <aside id="sidebar">
+      <header>
+        <h1>Editor</h1>
+        <p class="sub">Pick a brush, then click a tile.</p>
+      </header>
+
+      <section class="panel" id="player-panel">
+        <h2>Selected player</h2>
+        <div id="player-box" class="box">
+          <label class="sr-only" for="player-select">Player</label>
+          <select id="player-select"></select>
+          <div id="player-swatch" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="mod-panel">
+        <h2>Modification</h2>
+        <div id="mod-box" class="box">
+          <span id="mod-label">None selected</span>
+        </div>
+      </section>
+
+      <section class="panel" id="menus-panel">
+        <h2>Brushes</h2>
+        <div id="menus"></div>
+      </section>
+    </aside>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

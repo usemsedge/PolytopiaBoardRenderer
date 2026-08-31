@@ -45,7 +45,7 @@ except ImportError:
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _FONT_PATH = os.path.join(_HERE, "JosefinSans-Italic.ttf")
 _FONT_WORK_PATH = os.path.join(_HERE, "Roboto-Light.ttf")
-_FONT_SIZE_HP = 24          # unit health badge
+_FONT_SIZE_HP = 30        # unit health badge
 
 # CityStatusNameContainer / NameLabel (prefab GO 2042):
 #   TMP m_fontSize = 18, NameLabel localScale = (0.08, 0.08, 0.1)
@@ -253,9 +253,9 @@ UNIT_ICON_NAME = {
 _ICON_BG            = "circle_30"
 ICON_BG_SCALE       = 0.55    # typeBg  — circle fill scale relative to render_scale
 ICON_BG_ALPHA       = 0.5     # typeBg  — fill opacity
-ICON_OUTLINE_SCALE  = 0.60    # typeOutline — white ring; ~2 px wide at fill scale
+ICON_OUTLINE_SCALE  = 0.62    # typeOutline — white ring; ~2 px wide at fill scale
 #                               (exact ratio baked in prefab; TBD pixel verification)
-ICON_SCALE          = 0.60    # typeIcon — icon fills this fraction of the circle
+ICON_SCALE          = 0.8    # typeIcon — icon fills this fraction of the circle
 
 
 def _build_icon_badge(ctx, unit_type: int,
@@ -320,13 +320,13 @@ def _build_icon_badge(ctx, unit_type: int,
 
 
 # ── placement knobs ───────────────────────────────────────────────────────────
-BADGE_SCALE = 0.55   # shield sprite scale
+BADGE_SCALE = 0.7   # shield sprite scale
 
-_BADGE_CX = -50      # health badge centre: left of diamond centre
-_BADGE_CY = -55      # health badge centre: above diamond centre
+_BADGE_CX = -65      # health badge centre: left of diamond centre
+_BADGE_CY = -65      # health badge centre: above diamond centre
 
-_ICON_CX  = +45      # type icon centre: right of diamond centre
-_ICON_CY  = -55      # type icon centre: same height as health badge
+_ICON_CX  = +58      # type icon centre: right of diamond centre
+_ICON_CY  = -68      # type icon centre: same height as health badge
 
 
 # ── city status overlay (CityStatusDisplay) ───────────────────────────────────

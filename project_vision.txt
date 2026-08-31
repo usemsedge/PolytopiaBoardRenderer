@@ -1,0 +1,35 @@
+Project vision
+
+Input: arbitrary polytopia screenshot
+Output: encoding of each tile through image recognition
+- Only tiles will be encoded: terrain, unit, improvement, resource
+- Other things like border growths, players, etc. are future work 
+
+
+Input board is first sliced into individual tiles, must recognize where to slice
+- Hough transform to find lines
+- Find most common line lengths which are parallel, these are likely tile borders
+- Use those as origin and size, slice with them
+
+
+
+
+Individual tiles are classified with (some image model)
+Board tiles are assembled, but multi-tile impact things must be done by the user for now
+
+Image model is fine-tuned with synthetic polytopia data
+(Hand-labeling polytopia boards is really hard)
+- Scrape polytopia replay links from discord to get representative training data
+- Use reverse-engineered API pulling tool and decoder to get a GameState
+- Use custom built renderer with visual parity to convert to screenshot
+- Use known dimensions to slice to labeled tiles, apply blur & translation randomly to simulate bad slices & zooms
+- Train model (pre-trained?) with those labeled tiles
+
+Will evaluate on both synthetic and real screenshots
+
+
+Consumes the encoding
+- Market calculator (already built, needs refining)
+- Analysis board
+- Gameplay AI
+

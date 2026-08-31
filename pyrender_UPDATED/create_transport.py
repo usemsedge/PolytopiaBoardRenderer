@@ -122,7 +122,6 @@ def items(ctx, x: int, y: int) -> List[Placement]:
             if not _has_matching_transport_path(tile, nb):
                 continue
             name = f"{base}{d}"
-            print(f"tile {tile.x, tile.y} dir_delta {ddx, ddy}, new tile {nb.x, nb.y} road {name}")
             if not is_road and skin_suffix:
                 skinned = name + skin_suffix
                 if ctx.exists(skinned):

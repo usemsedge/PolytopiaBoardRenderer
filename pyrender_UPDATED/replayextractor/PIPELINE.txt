@@ -4,8 +4,9 @@ Replay extractor
 Pull a finished game from a share link and turn it into a Python GameState
 (same path the client takes for OpenReplay, minus UI).
 
-You need Polytopia installed and logged in on this Mac so there's a jwtToken
-sitting under Application Support. get_jwt.py just finds the newest one.
+Need Polytopia installed and logged in (on Mac) to create jwtToken
+under Application Support. get_jwt.py just finds the newest one.
+You may need to find the jwtToken yourself if this doesn't work
 
 Pipeline
 --------

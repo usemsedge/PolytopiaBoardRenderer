@@ -48,7 +48,33 @@ except Exception:
 
 # Manual pixel nudge applied on top of the source-faithful fog seat: (dx, dy), +x = right,
 # +y = down. (0, 0) = exactly the trim-corrected pivot placement. Hand-tuned offset only.
-FOG_OFFSET_PX = (0, 10)
+FOG_OFFSET_PX = (3, 17)
+
+# Per-mountain-sprite vertical nudge (pixels, + = down) on top of seat_base.
+# Keyed by the resolved sprite name from DoSpriteLookup("mountain", …); missing → 0.
+MOUNTAIN_DY = {
+    "mountain_aimo": 0,
+    "mountain_aquarion": 0,
+    "mountain_bardur": 0,
+    "mountain_cute": 0,
+    "mountain_cymanti": 0,
+    "mountain_darkelf": 0,
+    "mountain_elyrion": 0,
+    "mountain_hoodrick": 0,
+    "mountain_imperius": 0,
+    "mountain_kickoo": -20,
+    "mountain_luxidoor": 0,
+    "mountain_magma": 0,
+    "mountain_mercenary": 0,
+    "mountain_oumaji": 0,
+    "mountain_polaris": 0,
+    "mountain_quetzali": 0,
+    "mountain_swamp": 0,
+    "mountain_vengir": 0,
+    "mountain_xinxi": 0,
+    "mountain_yadakk": 0,
+    "mountain_zebasi": 0,
+}
 
 # RenderTerrain desaturate tint (packed ARGB 0x7FF3F3F3 ÷ 255).
 # Engine multiplies sprite by RGBA(0.953, 0.953, 0.953, 0.498). Over a dark
@@ -171,6 +197,7 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
             if fimg is not None:
                 fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_base(feat, fimg.w, fimg.h)
+                ft += MOUNTAIN_DY.get(feat, 0)
                 out.append(Placement(E.SORT_TERRAIN_FEATURE, fimg, fl, ft))
     elif tile.terrain == E.Terrain.FOREST:
         # Forest is a tree cluster planted on the diamond surface (foot = FEATURE_FOOT).

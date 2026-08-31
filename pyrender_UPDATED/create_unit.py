@@ -65,7 +65,7 @@ UNIT_OFFSET_PX = (0, 25)
 
 # Uniform scale applied to the entire unit composite after rendering.
 # 1.0 = native size; 0.9 = shrink 10%; does NOT affect the outline (resampled separately).
-UNIT_SCALE = 0.95
+UNIT_SCALE = 1
 
 # Outline colour recovered from data.unity3d (4-float RGBA at 0x111A8F8):
 # R=0.000, G=0.961, B=0.961, A=0.959  →  #00F5F5, nearly opaque cyan.
@@ -243,8 +243,8 @@ def _apply_alpha(img: Image, alpha: float) -> Image:
 # ---------------------------------------------------------------- skinning logic
 # SkinningLogic (SkinVisualsReference.SkinningLogic): governs how each part is re-skinned.
 SKIN_USE_TRIBE = 0       # owner tribe (+ skin) — the normal paper-doll parts
-SKIN_USE_CLIMATE = 1     # the tile's climate tribe (+ skin) — e.g. the rider's mount
-SKIN_USE_BIRTH_CLIMATE = 2  # the unit's birth climate (we approximate with tile climate)
+SKIN_USE_CLIMATE = 1     # owner tribe (+ skin) — engine uses tile climate; we follow owner
+SKIN_USE_BIRTH_CLIMATE = 2  # unit.birth_climate when set, else owner tribe
 SKIN_DONT_CHANGE = 3     # keep the prefab's literal sprite (no re-skin at all)
 
 # (tribe, skin) pairs whose ``animal_<skin>`` sprite is a placeholder, not a real mount.
@@ -260,15 +260,16 @@ _TRIBE_SKIN_PREFAB = {
 }
 
 
-def _resolve_part(ctx, part, tribe, skin, climate):
+def _resolve_part(ctx, part, tribe, skin, climate, birth_climate):
     """Resolve a part's themed sprite name per its SkinningLogic (engine: SkinWorldObject,
     which looks up the TribeAndSkin pair selected by the part's skinLogic and passes BOTH
     its tribe and skin to DoSpriteLookup).
 
-    UseTribe -> owner tribe + skin; UseClimate/UseBirthClimate -> the tile-climate tribe,
-    but STILL with the player's skin -> so a skin that ships its own mount (``animal_<skin>``,
-    e.g. Zebasi/Arty) swaps the animal, while a skin without one falls back to the climate's
-    ``animal_<tribe>``; DontChangeSkin (or a ``fixed`` part) -> the literal prefab sprite."""
+    UseTribe / UseClimate -> owner tribe + skin; UseBirthClimate -> unit birth climate
+    (falling back to owner tribe) + owner skin — so a skin that ships its own mount
+    (``animal_<skin>``, e.g. Zebasi/Arty) swaps the animal, while a skin without one falls
+    back to ``animal_<tribe>``; DontChangeSkin (or a ``fixed`` part) -> literal prefab sprite.
+    Unit art never themes from the tile's climate/skin."""
     sl = part.get("skinLogic", SKIN_USE_TRIBE)
     if part.get("fixed"):
         # Locked to its own tribe's art (Aquarion mount: never re-themed to the owner),
@@ -277,7 +278,12 @@ def _resolve_part(ctx, part, tribe, skin, climate):
     if sl == SKIN_DONT_CHANGE:
         return ctx.resolve(part["sprite"], 0, 0)[0]
     base = _debase(part["sprite"])
-    eff_tribe = climate if sl in (SKIN_USE_CLIMATE, SKIN_USE_BIRTH_CLIMATE) else tribe
+    if sl == SKIN_USE_BIRTH_CLIMATE:
+        eff_tribe = birth_climate
+    elif sl == SKIN_USE_CLIMATE:
+        eff_tribe = climate
+    else:
+        eff_tribe = tribe
     # Skip the skin for placeholder mounts so the tribe's real animal is kept (DarkElf).
     eff_skin = 0 if (base == "animal" and (int(eff_tribe), int(skin)) in _ANIMAL_KEEP_TRIBE) else skin
     return ctx.resolve(base, eff_tribe, eff_skin)[0]
@@ -285,7 +291,8 @@ def _resolve_part(ctx, part, tribe, skin, climate):
 
 # ---------------------------------------------------------------- compositor
 
-def _build_outline(ctx, parts, tribe, skin, team, climate) -> Optional[Tuple[Image, float, float]]:
+def _build_outline(ctx, parts, tribe, skin, team, climate, birth_climate
+                   ) -> Optional[Tuple[Image, float, float]]:
     """Composite _Outline companion sprites into one image at the same positions as
     the main unit parts.  Each outline sprite uses its OWN render_scale and pivot
     (distinct from the base sprite's — they are low-res PNGs that scale up to the
@@ -295,7 +302,7 @@ def _build_outline(ctx, parts, tribe, skin, team, climate) -> Optional[Tuple[Ima
     minx = miny = 1e18
     maxx = maxy = -1e18
     for part in parts:
-        name = _resolve_part(ctx, part, tribe, skin, climate)
+        name = _resolve_part(ctx, part, tribe, skin, climate, birth_climate)
         if not name:
             continue
         oname = name + "_Outline"
@@ -339,17 +346,19 @@ def _build_outline(ctx, parts, tribe, skin, team, climate) -> Optional[Tuple[Ima
     return canvas, -minx, -miny
 
 
-def _build_unit(ctx, parts, tribe, skin, team, climate) -> Optional[Tuple[Image, float, float]]:
+def _build_unit(ctx, parts, tribe, skin, team, climate, birth_climate
+                ) -> Optional[Tuple[Image, float, float]]:
     """Composite the prefab parts into one image. Returns (image, origin_x, origin_y) where
     (origin_x, origin_y) is the SpriteContainer world origin within the image (the point that
     seats on the tile). Each part's sprite pivot lands at part.pos * PPU; size = ppu-scale *
-    prefab local scale; tinted parts get the team colour. ``climate`` themes UseClimate parts."""
+    prefab local scale; tinted parts get the team colour. ``climate`` / ``birth_climate``
+    theme UseClimate / UseBirthClimate parts (both owner-derived, never the tile)."""
     PPU = P.PPU
     placed = []                                  # (img, tlx, tly) in origin-relative px
     minx = miny = 1e18
     maxx = maxy = -1e18
     for part in parts:
-        name = _resolve_part(ctx, part, tribe, skin, climate)
+        name = _resolve_part(ctx, part, tribe, skin, climate, birth_climate)
         if not name or not ctx.store.exists(name):
             continue
         try:
@@ -408,10 +417,14 @@ def items(ctx, x, y) -> List[Placement]:
             return []
 
     owner = unit.owner
-    tribe, pskin = ctx.player_tribe_skin(owner)
-    skin = (unit.birth_climate_skin_type
-            if unit.birth_climate_skin_type and unit.birth_climate_skin_type > 0
-            else pskin)
+    # Unit art themes from the owning player only — never the tile's climate/skin.
+    # (birth_climate_skin_type of Skin.NONE is serialized as 65535 and must not win over
+    # the owner's skin_type.)
+    tribe, skin = ctx.player_tribe_skin(owner)
+    climate = tribe
+    birth = (unit.birth_climate
+             if unit.birth_climate and unit.birth_climate > 0
+             else tribe)
 
     prefab = _skinned_prefab(ENUM_TO_PREFAB.get(unit.type), skin)
     ts_overrides = _TRIBE_SKIN_PREFAB.get((int(tribe), int(skin)), {})
@@ -424,8 +437,6 @@ def items(ctx, x, y) -> List[Placement]:
 
     team = ctx.player_color(owner)
     flip = bool(unit.flipped)
-    # UseClimate parts (the rider's mount, etc.) follow the tile's climate, not the skin.
-    climate = tile.climate if tile.climate else tribe
 
     # Outline: baseline-only — viewer's own unit, not yet moved, no active effects.
     # Engine: ShowOutline / SetOutlineColor(team colour) in Unit.UpdateObject.
@@ -450,7 +461,7 @@ def items(ctx, x, y) -> List[Placement]:
         overlay_rgb, overlay_strength = _EXHAUSTED_OVERLAY
 
     # Build main unit composite.
-    built = _build_unit(ctx, parts, tribe, skin, team, climate)
+    built = _build_unit(ctx, parts, tribe, skin, team, climate, birth)
     if built is None:
         return []
     img, ox, oy = built
@@ -484,7 +495,7 @@ def items(ctx, x, y) -> List[Placement]:
 
     # Outline: composite _Outline sprites placed one sub-layer below the unit.
     if show_outline:
-        ob = _build_outline(ctx, parts, tribe, skin, OUTLINE_COLOR, climate)
+        ob = _build_outline(ctx, parts, tribe, skin, OUTLINE_COLOR, climate, birth)
         if ob is not None:
             oimg, oox, ooy = ob
             if flip:
