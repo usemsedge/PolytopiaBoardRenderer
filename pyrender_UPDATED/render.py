@@ -175,6 +175,7 @@ def _tile_bg_key(tile, viewer_id: int) -> tuple:
         return ("hidden",)
     res = int(tile.resource.type) if tile.resource is not None else None
     return (
+        int(viewer_id),
         int(tile.terrain), int(tile.climate), int(tile.skin),
         int(tile.owner), int(tile.capital_of),
         tuple(sorted(int(e) for e in tile.effects)),

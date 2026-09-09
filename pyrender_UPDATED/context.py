@@ -54,6 +54,13 @@ _SEAT_PIVOT_OVERRIDE = {
     "MarketIcon": (0.58333, 0.56588),
 }
 
+# Enemy-land colour: not a straight multiply.
+#   1. RGB *= 0xF3/255  (packed 0x7FF3F3F3; white 255 → 243)
+#   2. lerp toward Rec.709 luma by 0.4  (chroma lift: (51,0,0) → G,B=4)
+# Recovered from (153,51,51)→(115,57,57), (51,0,0)→(33,4,4), (255,255,255)→(243,243,243).
+DESAT_RGB = (0xF3, 0xF3, 0xF3)
+DESAT_LUMA_BLEND = 0.4
+
 
 class Placement(NamedTuple):
     sublayer: int          # enums.SORT_* (lower drawn first / further back)
@@ -101,15 +108,56 @@ class TileContext:
             return False
         return self.viewer_id not in tile.explorers
 
+    def should_desaturate(self, tile) -> bool:
+        """Enemy-owned land — RenderTerrain ownership / IsWater / Ice gates."""
+        if tile is None or self.viewer_id == 0xFF:
+            return False
+        owner = int(tile.owner)
+        if owner == 0 or owner == self.viewer_id:
+            return False
+        if tile.terrain in (E.Terrain.WATER, E.Terrain.OCEAN, E.Terrain.ICE):
+            return False
+        return True
+
+    def apply_desat(self, img: Image) -> Image:
+        """Enemy-land colour: × 0xF3/255, then lerp Rec.709 luma by 0.4."""
+        return img.multiply_lerp_luma(DESAT_RGB, DESAT_LUMA_BLEND)
+
     def tile_theme(self, tile) -> Tuple[int, int]:
         """(tribe, skin) for a tile's terrain art.
 
         ``tile.climate`` is a TribeType (deserialize maps the live-game climate
         style through ``GetTribeTypeFromLegacyIndex`` first).
+
+        Elyrion climate tiles keep the normal (default) skin even when the
+        stored tile skin is DarkElf. That is overridden when the tile sits
+        inside the border of a city currently owned by a DarkElf player:
+        any climate then uses the DarkElf tile skin.
         """
         tribe = tile.climate if tile.climate else 0
         skin = tile.skin if tile.skin and tile.skin > 0 else 0
+        if int(tribe) == int(E.Tribe.ELYRION) and int(skin) == int(E.Skin.DARKELF):
+            skin = 0
+        if self._ruled_by_darkelf_city(tile):
+            skin = int(E.Skin.DARKELF)
         return tribe, skin
+
+    def _ruled_by_darkelf_city(self, tile) -> bool:
+        """True when this tile is in the territory of a DarkElf-owned city."""
+        rc = getattr(tile, "ruling_city_coordinates", None)
+        if rc is None or int(rc.x) < 0 or int(rc.y) < 0:
+            return False
+        city = self.tile_at(int(rc.x), int(rc.y))
+        if city is None:
+            return False
+        imp = city.improvement
+        if imp is None or int(imp.type) != int(E.Improvement.CITY):
+            return False
+        owner = int(city.owner or 0)
+        if not owner:
+            return False
+        _tribe, pskin = self.player_tribe_skin(owner)
+        return int(pskin) == int(E.Skin.DARKELF)
 
     def player_color(self, pid: int) -> Optional[Tuple[int, int, int]]:
         p = self.gs.player_by_id(pid)

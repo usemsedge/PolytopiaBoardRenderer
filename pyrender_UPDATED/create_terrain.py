@@ -20,8 +20,9 @@ extra scale beyond render_scale). The base terrain sprite was NOT ppu-scaled in 
 old code, but bake applies render_scale uniformly — for terrain base sprites that is
 the measured world scale, which is the correct local size to tessellate.
 
-Tint: enemy-owned land (not water/ocean/ice) gets a mild opaque dim (~0.85×)
-matching live boards; own / unowned / omniscient view stay full bright.
+Tint: enemy-owned land (not water/ocean/ice) is dimmed by create_tile:
+RGB × 0xF3/255, then lerp toward Rec.709 luma by 0.4. Fog, own / unowned /
+omniscient view stay full bright. This module emits untinted art.
 """
 from __future__ import annotations
 
@@ -34,7 +35,6 @@ import enums as E
 import projection as P
 import spritemeta as SM
 from context import Placement
-from image import Image
 
 # Trim-corrected sprite pivots (against the alpha-trimmed PNG). m_Pivot in the bundle is
 # normalized to the UNtrimmed rect, so the raw centre (0.5,0.5) misplaces trimmed art;
@@ -170,13 +170,6 @@ ALGAE_DY = {
     "algae_cute": 0,
 }
 
-# RenderTerrain desaturate tint (packed ARGB 0x7FF3F3F3 ÷ 255).
-# Engine multiplies sprite by RGBA(0.953, 0.953, 0.953, 0.498). Over a dark
-# clear that would crush to ~0.48×; live boards read ~0.84× on enemy grass, so
-# bake a mild opaque RGB scale that matches the screenshot (keep alpha solid
-# for isometric paste on a transparent canvas).
-_DESAT_FACTOR = 1.00
-
 
 def _trim_pivot(name: str) -> Tuple[float, float]:
     """Trimmed-PNG pivot (bottom-left origin, normalized); falls back to rect pivot then centre."""
@@ -184,25 +177,6 @@ def _trim_pivot(name: str) -> Tuple[float, float]:
     if r:
         return tuple(r["pivot"])
     return SM.pivot(name) or (0.5, 0.5)
-
-
-def _should_desaturate(ctx: context.TileContext, tile) -> bool:
-    """Enemy-owned land dim — RenderTerrain ownership / IsWater / Ice gates."""
-    if ctx.viewer_id == 0xFF:
-        return False
-    owner = int(tile.owner)
-    if owner == 0 or owner == ctx.viewer_id:
-        return False
-    if tile.terrain in (E.Terrain.WATER, E.Terrain.OCEAN, E.Terrain.ICE):
-        return False
-    return True
-
-
-def _maybe_desat(img: Image, desat: bool) -> Image:
-    if not desat:
-        return img
-    c = max(0, min(255, int(round(_DESAT_FACTOR * 255))))
-    return img.tinted((c, c, c))
 
 
 def _water_sprite_variant(base: str, x: int, y: int, ctx: context.TileContext) -> str:
@@ -340,7 +314,6 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
     out: List[Placement] = []
     tribe, skin = ctx.tile_theme(tile)
     is_water_surface = tile.terrain in (E.Terrain.WATER, E.Terrain.OCEAN)
-    desat = _should_desaturate(ctx, tile)
 
     # --- base surface (SORT_TERRAIN +1) ---
     recess = 0
@@ -348,7 +321,6 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
     if name:
         img = ctx.bake(name)
         if img is not None:
-            img = _maybe_desat(img, desat)
             left, top = ctx.seat_base(name, img.w, img.h)
             if is_water_surface or is_wetland_surface(tile):
                 # Recess by the art-derived block-height difference so a recessed water
@@ -368,7 +340,6 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
         if feat:
             fimg = ctx.bake(feat)
             if fimg is not None:
-                fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_base(feat, fimg.w, fimg.h)
                 fl += MOUNTAIN_OFFSET_DX + MOUNTAIN_DX.get(feat, 0)
                 ft += MOUNTAIN_OFFSET_DY + MOUNTAIN_DY.get(feat, 0)
@@ -379,7 +350,6 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
         if feat:
             fimg = ctx.bake(feat)
             if fimg is not None:
-                fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_planted(fimg.w, fimg.h, foot=context.FEATURE_FOOT)
                 fl += FOREST_OFFSET_DX + FOREST_DX.get(feat, 0)
                 ft += FOREST_OFFSET_DY + FOREST_DY.get(feat, 0)
@@ -392,7 +362,6 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
         if alg:
             aimg = ctx.bake(alg)
             if aimg is not None:
-                aimg = _maybe_desat(aimg, desat)
                 al, at = ctx.seat_base(alg, aimg.w, aimg.h)
                 al += ALGAE_OFFSET_DX + ALGAE_DX.get(alg, 0)
                 at += ALGAE_OFFSET_DY + ALGAE_DY.get(alg, 0)

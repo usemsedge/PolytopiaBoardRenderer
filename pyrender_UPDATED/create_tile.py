@@ -24,6 +24,7 @@ from __future__ import annotations
 import math
 
 from image import Image
+from context import Placement
 
 import create_terrain
 import create_shoreline
@@ -46,6 +47,33 @@ _BG_COMPONENTS = (
     create_improvement,
 )
 
+# Enemy-land desat (packed ARGB 0x7FF3F3F3) applies to every background layer
+# except territory borders. Units and labels are a separate pass and stay full colour.
+_NO_DESAT_COMPONENTS = (create_border,)
+
+
+def _desat_placements(ctx, tile, placements):
+    """Tint placements with RenderTerrain 0x7FF3F3F3 when the tile is enemy land."""
+    if not placements or ctx.is_hidden(tile) or not ctx.should_desaturate(tile):
+        return placements
+    return [
+        Placement(p.sublayer, ctx.apply_desat(p.image), p.dx, p.dy)
+        for p in placements
+    ]
+
+
+def _background_placements(ctx, x, y, tile):
+    """All background-layer placements, with enemy-land desat except borders."""
+    if ctx.is_hidden(tile):
+        return list(create_terrain.items(ctx, x, y))
+    placements = []
+    for comp in _BG_COMPONENTS:
+        comp_items = list(comp.items(ctx, x, y))
+        if comp not in _NO_DESAT_COMPONENTS:
+            comp_items = _desat_placements(ctx, tile, comp_items)
+        placements.extend(comp_items)
+    return placements
+
 
 def _composite(placements):
     """Bake a sorted placement list into (image, origin_x, origin_y)."""
@@ -67,13 +95,7 @@ def background(ctx, x, y):
     tile = ctx.tile_at(x, y)
     if tile is None:
         return Image.new(1, 1, (0, 0, 0, 0)), 0, 0
-    if ctx.is_hidden(tile):
-        placements = list(create_terrain.items(ctx, x, y))
-    else:
-        placements = []
-        for comp in _BG_COMPONENTS:
-            placements.extend(comp.items(ctx, x, y))
-    return _composite(placements)
+    return _composite(_background_placements(ctx, x, y, tile))
 
 
 def unit_placements(ctx, x, y):
@@ -94,12 +116,8 @@ def items(ctx, x, y):
     tile = ctx.tile_at(x, y)
     if tile is None:
         return Image.new(1, 1, (0, 0, 0, 0)), 0, 0
-    if ctx.is_hidden(tile):
-        placements = list(create_terrain.items(ctx, x, y))
-    else:
-        placements = []
-        for comp in _BG_COMPONENTS:
-            placements.extend(comp.items(ctx, x, y))
+    placements = _background_placements(ctx, x, y, tile)
+    if not ctx.is_hidden(tile):
         placements.extend(create_unit.connector_items(ctx, x, y))
         placements.extend(create_unit.items(ctx, x, y))
         placements.extend(create_labels.items(ctx, x, y))

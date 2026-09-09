@@ -131,6 +131,26 @@ class Image:
         result[~a, :3] = out[~a, :3]
         return Image.from_array(np.clip(result, 0, 255).astype(np.uint8))
 
+    def multiply_lerp_luma(self, rgb, luma_blend: float) -> "Image":
+        """RGB *= rgb/255, then lerp toward Rec.709 luma. Alpha unchanged.
+
+        Single-pass (no intermediate 8-bit round) so recovered sample colours
+        stay exact: (153,51,51)→(115,57,57), (51,0,0)→(33,4,4), white→(243,243,243).
+        """
+        tr, tg, tb = (c / 255.0 for c in rgb)
+        t = float(luma_blend)
+        out = self._arr.astype(np.float32)
+        r = out[..., 0] * tr
+        g = out[..., 1] * tg
+        b = out[..., 2] * tb
+        y = r * 0.2126 + g * 0.7152 + b * 0.0722
+        inv = 1.0 - t
+        mask = out[..., 3] > 0
+        out[mask, 0] = r[mask] * inv + y[mask] * t
+        out[mask, 1] = g[mask] * inv + y[mask] * t
+        out[mask, 2] = b[mask] * inv + y[mask] * t
+        return Image.from_array(np.clip(np.rint(out), 0, 255).astype(np.uint8))
+
     def colorized(self, rgb, strength: float) -> "Image":
         """Additive lerp toward rgb: result = original*(1-s) + rgb*s."""
         tr, tg, tb = rgb
