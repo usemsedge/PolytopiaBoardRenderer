@@ -78,6 +78,9 @@ class TileContext:
         else:
             viewer = getattr(gs, "viewer", None)
             self.viewer_id = viewer.id if viewer else 0xFF
+        # Whose turn/UI perspective for unit outlines / typeOutline. Defaults to
+        # viewer_id; the editor keeps them in sync with the selected player.
+        self.perspective_id = self.viewer_id
         self._pivot_cache = {}
         # (name, tint, flip, scale) → baked Image. Bake is pure; reuse across tiles.
         self._bake_cache: dict = {}
@@ -85,6 +88,13 @@ class TileContext:
     # ----------------------------------------------------------------- queries
     def tile_at(self, x: int, y: int):
         return self.map.tile_at(x, y)
+
+    def is_perspective_owner(self, owner_id: int) -> bool:
+        """True when ``owner_id`` is the local/perspective player (unit action UI)."""
+        pid = int(self.perspective_id)
+        if pid == 0xFF:
+            return False
+        return int(owner_id) == pid
 
     def is_hidden(self, tile) -> bool:
         if self.viewer_id == 0xFF:

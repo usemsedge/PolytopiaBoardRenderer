@@ -5,3 +5,4 @@ out.bin
 state.json
 *.jwt
 jwtToken
+.share_cache/

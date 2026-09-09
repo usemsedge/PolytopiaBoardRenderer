@@ -173,6 +173,15 @@ class TileData:
     def y(self) -> int:
         return self.coordinates.y
 
+    def is_owner_capital(self) -> bool:
+        """True when this is the current owner's own capital, not a captured one.
+
+        ``capital_of`` is the founding player and stays set after capture; the
+        crown/icon only belongs to that player while they still own the tile.
+        """
+        cap = int(self.capital_of or 0)
+        return cap != 0 and cap == int(self.owner or 0)
+
 
 @dataclass
 class PlayerState:

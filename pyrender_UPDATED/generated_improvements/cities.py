@@ -144,7 +144,7 @@ def build(ctx, tile) -> Optional[Tuple[Image, float, float]]:
         avail = [1]
 
     cap_house: Optional[int] = None
-    if tile.capital_of:
+    if tile.is_owner_capital():
         for n in _CAPITAL_HOUSE_PREF:
             if ctx.resolve("House_" + str(n), tribe, skin)[0]:
                 cap_house = n

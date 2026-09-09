@@ -14,6 +14,13 @@
         <canvas id="hit" width="1" height="1"></canvas>
       </div>
       <p id="status"></p>
+      <aside id="debug-panel" hidden>
+        <header>
+          <h2 id="debug-title">Tile inspect</h2>
+          <button type="button" id="debug-close" aria-label="Close debug">×</button>
+        </header>
+        <pre id="debug-body">Click a tile to inspect.</pre>
+      </aside>
     </main>
 
     <aside id="sidebar">
@@ -21,6 +28,22 @@
         <h1>Editor</h1>
         <p class="sub">Pick a brush, then click a tile.</p>
       </header>
+
+      <section class="panel" id="share-panel">
+        <h2>Load share link</h2>
+        <div class="box share-box">
+          <label class="sr-only" for="share-input">Polytopia share link</label>
+          <input
+            id="share-input"
+            type="url"
+            placeholder="https://share.polytopia.io/g/…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" id="share-load" class="primary-btn">Load</button>
+        </div>
+        <p id="share-hint" class="hint">Replaces the current board with that game’s state.</p>
+      </section>
 
       <section class="panel" id="player-panel">
         <h2>Selected player</h2>

@@ -1,19 +1,20 @@
 """Render one Imperius warrior per column, each carrying a different visual modifier.
 
-Column layout (x = 0..10, all in middle row y=1):
-  x=0   baseline      untouched, no effects → outline visible (viewer owns unit)
-  x=1   exhausted     unit.moved=True, no effects → grey overlay, no outline
-  x=2   Frozen        effect 0 → blue-white overlay
-  x=3   Poisoned      effect 1 → green overlay
-  x=4   Boosted       effect 2 → purple overlay
-  x=5   Petrified     effect 5 → near-black overlay
-  x=6   Invisible     effect 3 → translucent (viewer = owner; enemy view skips render)
-  x=7   Swift         effect 6 → no body overlay in current impl
-  x=8   DoubleReady   effect 7 → no body overlay in current impl
-  x=9   Charmed       effect 8 → no body overlay in current impl
-  x=10  moved+Frozen  unit.moved=True + effect 0 → Frozen takes priority over grey
+Column layout (x = 0..11, all in middle row y=1):
+  x=0   untouched     !moved !attacked → cyan outline + white icon ring
+  x=1   moved only    moved, no adjacent enemy → grey wash (dash needs a target)
+  x=2   attacked only !moved, attacked → cyan outline, no white ring
+  x=3   exhausted     moved+attacked → grey wash, no outline, no white ring
+  x=4   Frozen        tint + UnitFrozen frame
+  x=5   Poisoned      tint + UnitPoisoned frame
+  x=6   Boosted       orange tint + UnitBoosted frame
+  x=7   Petrified     dark tint + UnitPetrified frame
+  x=8   Invisible     translucent (owner view)
+  x=9   Swift         tint + UnitSwift frame
+  x=10  Bubble        bubble frame
+  x=11  moved+Frozen  Frozen RGB @ strength 0.4
 
-Viewer is set to the warrior owner (player 1) so outline and invisible-alpha both fire.
+Viewer/perspective is the warrior owner (player 1) so outline and icon ring fire.
 Output: /tmp/test_unit_effects.png
 """
 import os
@@ -26,24 +27,25 @@ from enums import Terrain, Tribe, Unit, UnitEffect
 
 TRIBE  = int(Tribe.IMPERIUS)
 OWNER  = 1           # player id — also the viewer
-WIDTH  = 11
+WIDTH  = 12
 HEIGHT = 3           # units in middle row y=1
 UNIT_ROW = 1
 
-# Per-column (warrior, effects list, moved flag)
+# Per-column (warrior, effects list, moved flag, attacked flag)
 _COLUMNS = [
-    # x   effects                        moved
-    (0,   [],                             False),   # baseline (outline shown)
-    (1,   [],                             True),    # exhausted grey
-    (2,   [UnitEffect.FROZEN],            False),   # blue-white
-    (3,   [UnitEffect.POISONED],          False),   # green
-    (4,   [UnitEffect.BOOSTED],           False),   # purple
-    (5,   [UnitEffect.PETRIFIED],         False),   # near-black
-    (6,   [UnitEffect.INVISIBLE],         False),   # translucent (owner view)
-    (7,   [UnitEffect.SWIFT],             False),   # no body overlay
-    (8,   [UnitEffect.DOUBLE_READY],      False),   # no body overlay
-    (9,   [UnitEffect.CHARMED],           False),   # no body overlay
-    (10,  [UnitEffect.FROZEN],            True),    # Frozen wins over grey
+    # x   effects                        moved  attacked
+    (0,   [],                             False, False),
+    (1,   [],                             True,  False),
+    (2,   [],                             False, True),
+    (3,   [],                             True,  True),
+    (4,   [UnitEffect.FROZEN],            False, False),
+    (5,   [UnitEffect.POISONED],          False, False),
+    (6,   [UnitEffect.BOOSTED],           False, False),
+    (7,   [UnitEffect.PETRIFIED],         False, False),
+    (8,   [UnitEffect.INVISIBLE],         False, False),
+    (9,   [UnitEffect.SWIFT],             False, False),
+    (10,  [UnitEffect.BUBBLE],            False, False),
+    (11,  [UnitEffect.FROZEN],            True,  False),
 ]
 
 _UNIT_POSITIONS = {x for x, *_ in _COLUMNS}
@@ -51,12 +53,13 @@ _UNIT_POSITIONS = {x for x, *_ in _COLUMNS}
 
 def _make_unit(x: int) -> GS.UnitState:
     entry = next(row for row in _COLUMNS if row[0] == x)
-    _, effects, moved = entry
+    _, effects, moved, attacked = entry
     return GS.UnitState(
         type=int(Unit.WARRIOR),
         owner=OWNER,
         health=100,
         moved=moved,
+        attacked=attacked,
         effects=[int(e) for e in effects],
     )
 
@@ -83,13 +86,15 @@ def build_gamestate() -> GS.GameState:
 if __name__ == "__main__":
     out = "/tmp/test_unit_effects.png"
     gs = build_gamestate()
-    img = render.render(gs, pad=40)
+    img = render.render(gs, pad=40, player_id=OWNER)
     img.save_png(out)
     print(f"rendered {WIDTH}x{HEIGHT} board -> {out} ({img.w}x{img.h} px)")
     print()
     print("Columns left→right:")
-    for x, effects, moved in _COLUMNS:
+    for x, effects, moved, attacked in _COLUMNS:
         tags = [e.name for e in effects]
         if moved:
             tags.insert(0, "moved")
-        print(f"  x={x:2d}  {', '.join(tags) or 'baseline'}")
+        if attacked:
+            tags.insert(0, "attacked")
+        print(f"  x={x:2d}  {', '.join(tags) or 'untouched'}")

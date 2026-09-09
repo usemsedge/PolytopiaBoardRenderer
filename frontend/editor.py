@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import os
 import sys
-from dataclasses import dataclass
+import traceback
+from dataclasses import dataclass, fields, is_dataclass
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -15,7 +16,10 @@ if _PY not in sys.path:
 import gamestate as GS  # noqa: E402
 import projection as P  # noqa: E402
 import render as R  # noqa: E402
-from enums import Improvement, Resource, Terrain, Tribe  # noqa: E402
+from enums import (  # noqa: E402
+    CityReward, Improvement, ImprovementEffect, Resource, Skin, Terrain,
+    TileEffect, Tribe, Unit, UnitEffect,
+)
 from image import Image as RImage  # noqa: E402
 
 try:
@@ -24,7 +28,6 @@ except ImportError:
     from catalog import build_catalog, unit_max_health  # noqa: E402
 
 DEFAULT_STATE = os.path.join(_PY, "replayextractor", "state.json")
-OMNISCIENT = 0xFF
 PAD = 200
 JPEG_QUALITY = 80
 
@@ -72,6 +75,42 @@ class Modification:
         return f"Set {self.category} = {self.value}"
 
 
+def _jsonable(obj: Any, skip: frozenset = frozenset()) -> Any:
+    """Dataclass / container → JSON-safe dict (skip non-serializable fields)."""
+    if obj is None or isinstance(obj, (bool, int, float, str)):
+        return obj
+    if is_dataclass(obj) and not isinstance(obj, type):
+        out = {}
+        for f in fields(obj):
+            if f.name in skip:
+                continue
+            out[f.name] = _jsonable(getattr(obj, f.name), skip)
+        return out
+    if isinstance(obj, dict):
+        return {str(k): _jsonable(v, skip) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_jsonable(v, skip) for v in obj]
+    return str(obj)
+
+
+def _enum_name(cls, value) -> Optional[str]:
+    try:
+        return cls(int(value)).name
+    except Exception:
+        return None
+
+
+def _enum_names(cls, values) -> List[str]:
+    names = []
+    for v in values or ():
+        n = _enum_name(cls, v)
+        names.append(n if n is not None else str(v))
+    return names
+
+
+_DUMP_SKIP = frozenset({"continent", "unit_data"})
+
+
 def _encode_jpeg(img: RImage, quality: int = JPEG_QUALITY) -> bytes:
     """Opaque JPEG — much faster / smaller than PNG for interactive previews."""
     from PIL import Image as PILImage
@@ -95,7 +134,7 @@ class EditorSession:
         self.selected_player_id = self._default_player_id()
         self.modification = Modification()
         self.catalog = build_catalog()
-        self._live = R.LiveBoard(self.gs, pad=PAD, player_id=OMNISCIENT)
+        self._live = self._make_live()
         self._board_cache: Optional[Tuple[bytes, dict]] = None
         self._board_dirty = True
 
@@ -105,13 +144,92 @@ class EditorSession:
                 return p.id
         return GS.PlayerState.NO_PLAYER_ID
 
+    def _make_live(self) -> R.LiveBoard:
+        """Live board from the selected player's fog + action-chrome perspective."""
+        pid = int(self.selected_player_id)
+        live = R.LiveBoard(self.gs, pad=PAD, player_id=pid)
+        live.ctx.perspective_id = pid
+        return live
+
+    def _sync_perspective(self) -> None:
+        """Fog + unit chrome follow the selected player; flush cached tile backgrounds."""
+        pid = int(self.selected_player_id)
+        self._live.player_id = pid
+        self._live.ctx.viewer_id = pid
+        self._live.ctx.perspective_id = pid
+        self._live.invalidate_all()
+
     def reload(self, path: Optional[str] = None) -> None:
         if path:
             self.state_path = path
         self.gs = GS.load(self.state_path)
         self.selected_player_id = self._default_player_id()
-        self._live = R.LiveBoard(self.gs, pad=PAD, player_id=OMNISCIENT)
+        self._live = self._make_live()
         self._invalidate()
+
+    def load_game_state(self, gs: GS.GameState, source: str) -> None:
+        """Replace the session board with an in-memory GameState."""
+        self.gs = gs
+        self.state_path = source
+        self.selected_player_id = self._default_player_id()
+        self.modification = Modification()
+        self._live = self._make_live()
+        self._invalidate()
+
+    def load_from_share(
+        self,
+        share_link: str,
+        *,
+        allow_unfinished: bool = True,
+    ) -> dict:
+        """Fetch a share URL/UUID via replayextractor and populate the session."""
+        link = (share_link or "").strip()
+        if not link:
+            raise ValueError("share link is required")
+
+        # replayextractor lives under pyrender_UPDATED (already on sys.path).
+        from replayextractor import (
+            deserialize,
+            fetch_game_data,
+            game_state_bytes,
+            parse_game_id,
+        )
+        import urllib.error
+
+        try:
+            game_id = parse_game_id(link)
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
+        try:
+            raw = fetch_game_data(link, allow_unfinished=allow_unfinished)
+            gs = deserialize(game_state_bytes(raw))
+        except Exception as e:
+            print(f"[load_from_share] fetch failed for {game_id}: {e}", file=sys.stderr)
+            traceback.print_exc()
+            if isinstance(e, FileNotFoundError):
+                raise RuntimeError(
+                    f"{e}. Log into Polytopia on this Mac so a jwtToken is available."
+                ) from e
+            if isinstance(e, urllib.error.HTTPError):
+                if e.code in (401, 403):
+                    raise RuntimeError(
+                        f"Polytopia API returned {e.code}. Refresh your local jwtToken "
+                        "(open the Polytopia client while logged in), then try again."
+                    ) from e
+                raise RuntimeError(f"Polytopia API HTTP {e.code}: {e.reason}") from e
+            raise RuntimeError(str(e)) from e
+
+        source = f"https://share.polytopia.io/g/{game_id}"
+        self.load_game_state(gs, source)
+        return {
+            "game_id": str(game_id),
+            "share_link": source,
+            "current_turn": gs.current_turn,
+            "map_width": gs.map.width,
+            "map_height": gs.map.height,
+            "from_cache": bool(raw.get("_from_cache")),
+        }
 
     def _invalidate(self) -> None:
         self._board_dirty = True
@@ -143,6 +261,8 @@ class EditorSession:
         if not any(p.id == player_id for p in self.gs.player_states):
             raise ValueError(f"unknown player_id {player_id}")
         self.selected_player_id = int(player_id)
+        self._sync_perspective()
+        self._invalidate()
 
     def set_modification(
         self,
@@ -330,6 +450,36 @@ class EditorSession:
         """Alias kept for callers; payload is JPEG now."""
         return self.board_image_and_meta()
 
+    def inspect_tile(self, x: int, y: int) -> Dict[str, Any]:
+        """Full tile + unit dump for the debug inspector."""
+        tile = self.gs.map.tile_at(int(x), int(y))
+        if tile is None:
+            raise ValueError(f"tile ({x},{y}) out of bounds")
+        data = _jsonable(tile, _DUMP_SKIP)
+        data["terrain_name"] = _enum_name(Terrain, tile.terrain)
+        data["climate_name"] = _enum_name(Tribe, tile.climate)
+        data["skin_name"] = _enum_name(Skin, tile.skin)
+        data["effect_names"] = _enum_names(TileEffect, tile.effects)
+        if tile.resource is not None:
+            data["resource"]["type_name"] = _enum_name(Resource, tile.resource.type)
+        if tile.improvement is not None:
+            imp = data["improvement"]
+            imp["type_name"] = _enum_name(Improvement, tile.improvement.type)
+            imp["reward_names"] = _enum_names(CityReward, tile.improvement.rewards)
+            imp["effect_names"] = _enum_names(
+                ImprovementEffect, tile.improvement.effects
+            )
+        unit = None
+        if tile.unit is not None:
+            unit = data.get("unit")
+            unit["type_name"] = _enum_name(Unit, tile.unit.type)
+            unit["birth_climate_name"] = _enum_name(Tribe, tile.unit.birth_climate)
+            unit["birth_skin_name"] = _enum_name(
+                Skin, tile.unit.birth_climate_skin_type
+            )
+            unit["effect_names"] = _enum_names(UnitEffect, tile.unit.effects)
+        return {"x": tile.x, "y": tile.y, "tile": data, "unit": unit}
+
     def snapshot(self) -> Dict[str, Any]:
         return {
             "players": self.players(),
@@ -340,4 +490,5 @@ class EditorSession:
             "state_path": self.state_path,
             "map_width": self.gs.map.width,
             "map_height": self.gs.map.height,
+            "current_turn": getattr(self.gs, "current_turn", None),
         }

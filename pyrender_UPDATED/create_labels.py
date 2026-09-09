@@ -2,9 +2,10 @@
 
 City status — mirrors City.cityOverlay → CityStatusDisplay.SetCity (RVA 0x2A7ED80):
   - NameContainer: JosefinSans-Italic TMP size 18 @ NameLabel scale 0.08 + Shadow;
-    capital underline + crown; work stars from ImprovementState.production
-    (SetWork / ResourceWidget: Roboto-Light 16 + UI_resource @ 0.2);
-    team-tinted Square bg (α≈0.5, width from UpdateSize).
+    capital underline + crown; connected-to-capital road icon (UI_connected)
+    when ImprovementState.connected_to_capital_of_player != 0; work stars from
+    ImprovementState.production (SetWork / ResourceWidget: Roboto-Light 16 +
+    UI_resource @ 0.2); team-tinted Square bg (α≈0.5, width from UpdateSize).
   - ProgressBar: segmented pop bar (totalFields=level+1,
     filledFields=pop leftover after levels 1..L, dots=GetCityUnitCount).
     Engine stores cumulative population; L→L+1 costs L+1 (1→2 needs 2, …).
@@ -19,6 +20,9 @@ Unit health badge — mirrors UnitStatusDisplay.SetState:
       CityWall → fort shield.
 
 Type-icon badge — typeOutline + typeBg (circle_30, team tint) + typeIcon.
+  White typeOutline ring only for the perspective player's untouched units
+  (CanMove && CanAttack). Moved units (even dash-ready) and exhausted units
+  keep the icon but drop the ring.
 
 Interface (CONTRACT.md):
     def items(ctx, x, y) -> list[Placement]
@@ -32,6 +36,7 @@ from typing import List, Optional, Tuple
 import enums as E
 import projection as P
 import spritemeta as SM
+import create_unit as CU
 from context import Placement
 from image import Image
 
@@ -41,11 +46,16 @@ try:
 except ImportError:
     _PIL = False
 
-# ── fonts ─────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# Constants
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── fonts / TMP ───────────────────────────────────────────────────────────────
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _FONT_PATH = os.path.join(_HERE, "JosefinSans-Italic.ttf")
 _FONT_WORK_PATH = os.path.join(_HERE, "Roboto-Light.ttf")
 _FONT_SIZE_HP = 30        # unit health badge
+# _FONT_SIZE_CITY / _FONT_SIZE_WORK are derived after _pil_size_for_cap_height.
 
 # CityStatusNameContainer / NameLabel (prefab GO 2042):
 #   TMP m_fontSize = 18, NameLabel localScale = (0.08, 0.08, 0.1)
@@ -71,74 +81,13 @@ _WORK_CAP_PX = (
 # Drop-shadow offset in pixels: (right, down). TMP Shadow material on city names.
 _SHADOW_OFFSET = (1, 2)
 
-_font_cache: dict = {}
-
-
-def _get_font(size: int, path: str = _FONT_PATH):
-    key = f"{path}:{size}"
-    if key not in _font_cache:
-        _font_cache[key] = (
-            PILFont.truetype(path, size)
-            if _PIL and os.path.exists(path) else None
-        )
-    return _font_cache[key]
-
-
-def _pil_size_for_cap_height(target_px: float, path: str = _FONT_PATH,
-                            probe: str = "H") -> int:
-    """FreeType size whose probe glyph height matches ``target_px``."""
-    if not _PIL or not os.path.exists(path) or target_px <= 0:
-        return 18
-    tmp = ImageDraw.Draw(PILImage.new("RGBA", (1, 1)))
-    best, best_err = 18, 1e9
-    for sz in range(max(8, int(target_px * 0.5)), int(target_px * 2.5) + 1):
-        font = PILFont.truetype(path, sz)
-        bbox = tmp.textbbox((0, 0), probe, font=font)
-        err = abs((bbox[3] - bbox[1]) - target_px)
-        if err < best_err:
-            best, best_err = sz, err
-    return best
-
-
-_FONT_SIZE_CITY = _pil_size_for_cap_height(_CITY_CAP_PX)
-_FONT_SIZE_WORK = _pil_size_for_cap_height(_WORK_CAP_PX, _FONT_WORK_PATH, "8")
-
-
-def _render_text(text: str, color: tuple = (255, 255, 255, 255),
-                 size: int = _FONT_SIZE_HP, *, underline: bool = False,
-                 font_path: str = _FONT_PATH) -> Image:
-    """TMP-style text with a black drop shadow (optional underline)."""
-    font = _get_font(size, font_path)
-    if font is None:
-        raise RuntimeError(f"Font not found at {font_path}")
-    sx, sy = _SHADOW_OFFSET
-    tmp = ImageDraw.Draw(PILImage.new("RGBA", (1, 1)))
-    bbox = tmp.textbbox((0, 0), text, font=font)
-    pad_l, pad_t = 1, 1
-    pad_r = sx + 1
-    pad_b = sy + 1 + (3 if underline else 0)
-    ox0 = pad_l - bbox[0]
-    oy0 = pad_t - bbox[1]
-    w = bbox[2] - bbox[0] + pad_l + pad_r
-    h = bbox[3] - bbox[1] + pad_t + pad_b
-    canvas = PILImage.new("RGBA", (max(1, w), max(1, h)), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(canvas)
-    draw.text((ox0 + sx, oy0 + sy), text, font=font, fill=(0, 0, 0, 200))
-    draw.text((ox0, oy0), text, font=font, fill=color)
-    if underline:
-        # TMP fontStyle Underline (4) — SetCity when City.IsCapital.
-        y = oy0 + (bbox[3] - bbox[1]) + 1
-        x0, x1 = ox0, ox0 + (bbox[2] - bbox[0])
-        draw.line([(x0 + sx, y + sy), (x1 + sx, y + sy)], fill=(0, 0, 0, 200), width=2)
-        draw.line([(x0, y), (x1, y)], fill=color, width=2)
-    return Image(canvas.width, canvas.height, bytearray(canvas.tobytes()))
-
-# ── defence-bonus tier (health badge background) ──────────────────────────────
+# ── health / defence badge ────────────────────────────────────────────────────
 # Mirrors GameState.GetDefenceBonus(Unit) + TechData.defenceBonusUnlocks.
 _BG_SPRITE = {
     "shield": "UnitHealthGFX_shield_1",  # 1.5× (terrain / city without walls)
     "fort":   "UnitHealthGFX_shield_2",  # 4.0× (own city + Fortify + CityWall)
 }
+BADGE_SCALE = 0.7   # shield sprite scale
 
 # TechData.Type (dump.cs / GameLogicData28 techData.*.defenceBonusUnlocks).
 _TECH_AQUATISM = 12
@@ -161,28 +110,7 @@ _FORTIFY_UNITS = {
     int(E.Unit.MERMAID_DEFENDER),
 }
 
-
-def _defence_tier(ctx, tile, unit) -> str:
-    """Return 'none' | 'shield' | 'fort' for the HP badge background."""
-    imp = tile.improvement
-    if imp is not None and imp.type == int(E.Improvement.CITY):
-        # Own city + Fortify ability → 1.5×, or 4× with CityWall.
-        if tile.owner == unit.owner and int(unit.type) in _FORTIFY_UNITS:
-            if imp.has_reward(int(E.CityReward.CITY_WALL)):
-                return "fort"
-            return "shield"
-        return "none"
-
-    required = _TERRAIN_DEFENCE_TECH.get(int(tile.terrain))
-    if required is None:
-        return "none"
-    player = ctx.gs.player_by_id(unit.owner)
-    if player is None or required not in player.available_tech:
-        return "none"
-    return "shield"
-
-
-# ── unit-type icon mapping ────────────────────────────────────────────────────
+# ── type-icon badge ───────────────────────────────────────────────────────────
 # UnitData.Type → "<name>_icon" sprite (GetUnitIconAddress, stringliteral.json).
 UNIT_ICON_NAME = {
     E.Unit.WARRIOR:         "warrior_icon",
@@ -247,39 +175,199 @@ UNIT_ICON_NAME = {
     E.Unit.ISLAND:           "island_icon",
 }
 
-# Background circle sprite for the type badge.
 # Engine: UnitStatusDisplay has three layers — typeOutline (white ring, back),
 #         typeBg (team-colour fill), typeIcon (unit icon, front).
 _ICON_BG            = "circle_30"
 ICON_BG_SCALE       = 0.55    # typeBg  — circle fill scale relative to render_scale
 ICON_BG_ALPHA       = 0.5     # typeBg  — fill opacity
 ICON_OUTLINE_SCALE  = 0.62    # typeOutline — white ring; ~2 px wide at fill scale
-#                               (exact ratio baked in prefab; TBD pixel verification)
-ICON_SCALE          = 0.8    # typeIcon — icon fills this fraction of the circle
+ICON_SCALE          = 0.8     # typeIcon — icon fills this fraction of the circle
+
+# ── unit-status placement (tile-local px from diamond centre; +x right, +y down)
+# Shield centre = health-number centre + (_SHIELD_DX, _SHIELD_DY).
+_HP_DX = -65          # health number centre
+_HP_DY = -65
+_SHIELD_DX = 0        # added to _HP_DX
+_SHIELD_DY = 3        # added to _HP_DY
+_ICON_DX = +58        # type-icon badge centre
+_ICON_DY = -68
+
+# ── city status overlay (CityStatusDisplay) ───────────────────────────────────
+# Prefab local Y under the city transform (Unity Y-up). Tile-local +y is down, so
+# dy_px = -world_y * PPU.
+_NAME_WORLD_Y = -0.08          # NameContainer localPosition.y
+_BAR_WORLD_Y = -0.25           # ProgressBar localPosition.y
+
+# CityStatusProgressBar.ctor / serialized defaults (sharedassets1 MB 9478).
+_BAR_MIN_WIDTH = 0.59          # runtime minWidth @0x70
+_BAR_CENTER_FIELD = 0.27       # runtime centerFieldWidth @0x74
+_BAR_MAX_WIDTH = 0.9           # serialized maxWidth
+_BAR_SEG_HEIGHT = 0.16         # Segment.Render y-scale (sprite h/ppu = 32/200)
+
+# Prefab colours (baseColor / fillColor / negativeColor).
+_BAR_BASE = (0.896, 0.896, 0.896, 1.0)
+_BAR_FILL = (0.0, 0.6, 1.0, 1.0)
+_BAR_NEG = (1.0, 0.2, 0.0, 1.0)
+
+_SEG_SPRITES = ("cityProgressBg_0", "cityProgressBg_1", "cityProgressBg_2")  # L/M/R
+_DOT_SPRITE = "cityProgressDots"
+_DOT_SCALE = 0.80             # CityStatusSegment/Dot localScale
+_CROWN_SPRITE = "UI_crown"
+_CONNECTED_SPRITE = "UI_connected"
+_CROWN_SCALE = 0.115           # CapitalIcon/Crown (and Connected) localScale
+_CROWN_BG = "circle_30"
+_CROWN_BG_SCALE = 0.48         # CapitalIcon/Background localScale
+# ResourceWidget / SetWork — star icon next to workLabel (Int32.ToString(work)).
+_WORK_STAR = "UI_resource"
+_WORK_STAR_SCALE = 0.20        # ResourceWidget/Star localScale
+_WORK_STAR_SHADOW_DY = 0.02    # StarShadow localPosition.y (world, down in Unity Y-up)
+_WORK_GAP_WORLD = 0.015        # UpdateSize pad when workContainer is active
+_NAME_BG = "Square"
+# Prefab Background localScale Y=4.8 on Square (4×4 @ ppu 100) → fixed plate height.
+# Width is NOT the prefab X=30 default — CityStatusNameContainer.UpdateSize sizes to text
+# via bg.localScale.x = contentWidth * 26.4 → world ≈ content * 1.056.
+_NAME_BG_HEIGHT_WORLD = 4.0 / 100.0 * 4.8          # 0.192
+# UpdateSize: base pad 0.03; when LeftIcon active add 2*iconWidth + 0.012.
+_NAME_PAD_BASE_WORLD = 0.03
+_NAME_PAD_ICON_WORLD = 0.012
+_NAME_BG_ALPHA = 0.502                              # SpriteRenderer.color.a on Background
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_font_cache: dict = {}
 
 
-def _build_icon_badge(ctx, unit_type: int,
-                      team: Optional[Tuple[int, int, int]]) -> Optional[Image]:
+def _get_font(size: int, path: str = _FONT_PATH):
+    key = f"{path}:{size}"
+    if key not in _font_cache:
+        _font_cache[key] = (
+            PILFont.truetype(path, size)
+            if _PIL and os.path.exists(path) else None
+        )
+    return _font_cache[key]
+
+
+def _pil_size_for_cap_height(target_px: float, path: str = _FONT_PATH,
+                            probe: str = "H") -> int:
+    """FreeType size whose probe glyph height matches ``target_px``."""
+    if not _PIL or not os.path.exists(path) or target_px <= 0:
+        return 18
+    tmp = ImageDraw.Draw(PILImage.new("RGBA", (1, 1)))
+    best, best_err = 18, 1e9
+    for sz in range(max(8, int(target_px * 0.5)), int(target_px * 2.5) + 1):
+        font = PILFont.truetype(path, sz)
+        bbox = tmp.textbbox((0, 0), probe, font=font)
+        err = abs((bbox[3] - bbox[1]) - target_px)
+        if err < best_err:
+            best, best_err = sz, err
+    return best
+
+
+_FONT_SIZE_CITY = _pil_size_for_cap_height(_CITY_CAP_PX)
+_FONT_SIZE_WORK = _pil_size_for_cap_height(_WORK_CAP_PX, _FONT_WORK_PATH, "8")
+
+
+def _render_text(text: str, color: tuple = (255, 255, 255, 255),
+                 size: int = _FONT_SIZE_HP, *, underline: bool = False,
+                 font_path: str = _FONT_PATH) -> Image:
+    """TMP-style text with a black drop shadow (optional underline)."""
+    font = _get_font(size, font_path)
+    if font is None:
+        raise RuntimeError(f"Font not found at {font_path}")
+    sx, sy = _SHADOW_OFFSET
+    tmp = ImageDraw.Draw(PILImage.new("RGBA", (1, 1)))
+    bbox = tmp.textbbox((0, 0), text, font=font)
+    pad_l, pad_t = 1, 1
+    pad_r = sx + 1
+    pad_b = sy + 1 + (3 if underline else 0)
+    ox0 = pad_l - bbox[0]
+    oy0 = pad_t - bbox[1]
+    w = bbox[2] - bbox[0] + pad_l + pad_r
+    h = bbox[3] - bbox[1] + pad_t + pad_b
+    canvas = PILImage.new("RGBA", (max(1, w), max(1, h)), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    draw.text((ox0 + sx, oy0 + sy), text, font=font, fill=(0, 0, 0, 200))
+    draw.text((ox0, oy0), text, font=font, fill=color)
+    if underline:
+        # TMP fontStyle Underline (4) — SetCity when City.IsCapital.
+        y = oy0 + (bbox[3] - bbox[1]) + 1
+        x0, x1 = ox0, ox0 + (bbox[2] - bbox[0])
+        draw.line([(x0 + sx, y + sy), (x1 + sx, y + sy)], fill=(0, 0, 0, 200), width=2)
+        draw.line([(x0, y), (x1, y)], fill=color, width=2)
+    return Image(canvas.width, canvas.height, bytearray(canvas.tobytes()))
+
+
+def _defence_tier(ctx, tile, unit) -> str:
+    """Return 'none' | 'shield' | 'fort' for the HP badge background."""
+    imp = tile.improvement
+    if imp is not None and imp.type == int(E.Improvement.CITY):
+        # Own city + Fortify ability → 1.5×, or 4× with CityWall.
+        if tile.owner == unit.owner and int(unit.type) in _FORTIFY_UNITS:
+            if imp.has_reward(int(E.CityReward.CITY_WALL)):
+                return "fort"
+            return "shield"
+        return "none"
+
+    required = _TERRAIN_DEFENCE_TECH.get(int(tile.terrain))
+    if required is None:
+        return "none"
+    player = ctx.gs.player_by_id(unit.owner)
+    if player is None or required not in player.available_tech:
+        return "none"
+    return "shield"
+
+
+def _build_icon_badge(
+    ctx,
+    unit_type: int,
+    team: Optional[Tuple[int, int, int]],
+    *,
+    show_outline: bool = True,
+) -> Optional[Image]:
     """Composite typeOutline (white ring) + typeBg (team fill) + typeIcon.
 
-    The white outline ring (typeOutline SpriteRenderer at field 0x60 in
-    UnitStatusDisplay) is always rendered when the badge is visible.
-    Visibility is governed by items(): enemy invisible units are never
-    shown; invisible own units are handled by create_unit's alpha pass.
+    ``show_outline`` mirrors UnitStatusDisplay.SetState enabling typeOutline only
+    when CanMove && CanAttack && the unit belongs to the local player.
     """
-    # --- typeOutline: white ring drawn behind the fill ---
-    outline = ctx.bake(_ICON_BG, scale=ICON_OUTLINE_SCALE)  # white (circle_30 is white)
-    if outline is None:
-        return None
-    outline = outline.copy()
-
-    # --- typeBg: team-coloured fill ---
     fill = ctx.bake(_ICON_BG, tint=team, scale=ICON_BG_SCALE)
     if fill is None:
-        return outline  # fallback: outline only
+        return None
     fill = fill.copy()
     if ICON_BG_ALPHA < 1.0:
         fill = fill.multiply_alpha(ICON_BG_ALPHA)
+
+    if not show_outline:
+        # Icon + team fill only (no white ring).
+        icon_name = UNIT_ICON_NAME.get(E.Unit(unit_type))
+        if icon_name and ctx.exists(icon_name):
+            target_w = max(1, round(fill.w * ICON_SCALE))
+            target_h = max(1, round(fill.h * ICON_SCALE))
+            icon = ctx.bake(icon_name)
+            if icon is not None:
+                ratio = min(target_w / icon.w, target_h / icon.h)
+                iw = max(1, round(icon.w * ratio))
+                ih = max(1, round(icon.h * ratio))
+                if (iw, ih) != (icon.w, icon.h):
+                    icon = icon.resized(iw, ih)
+                canvas = fill
+                # May need larger canvas if icon exceeds fill.
+                if iw > fill.w or ih > fill.h:
+                    W = max(fill.w, iw)
+                    H = max(fill.h, ih)
+                    canvas = Image.new(W, H, (0, 0, 0, 0))
+                    canvas.paste(fill, (W - fill.w) // 2, (H - fill.h) // 2)
+                ix = (canvas.w - iw) // 2
+                iy = (canvas.h - ih) // 2
+                canvas.paste(icon, ix, iy)
+                return canvas
+        return fill
+
+    # --- typeOutline: white ring drawn behind the fill ---
+    outline = ctx.bake(_ICON_BG, scale=ICON_OUTLINE_SCALE)  # white (circle_30 is white)
+    if outline is None:
+        return fill
+    outline = outline.copy()
+
     # Punch a transparent hole in the white disk at the fill radius so the
     # white is a true ring (not a disk) — prevents the white bleeding through
     # the semi-transparent fill in the center.
@@ -317,56 +405,6 @@ def _build_icon_badge(ctx, unit_type: int,
             outline.paste(icon, ix, iy)
 
     return outline
-
-
-# ── placement knobs ───────────────────────────────────────────────────────────
-BADGE_SCALE = 0.7   # shield sprite scale
-
-_BADGE_CX = -65      # health badge centre: left of diamond centre
-_BADGE_CY = -65      # health badge centre: above diamond centre
-
-_ICON_CX  = +58      # type icon centre: right of diamond centre
-_ICON_CY  = -68      # type icon centre: same height as health badge
-
-
-# ── city status overlay (CityStatusDisplay) ───────────────────────────────────
-# Prefab local Y under the city transform (Unity Y-up). Tile-local +y is down, so
-# dy_px = -world_y * PPU.
-_NAME_WORLD_Y = -0.08          # NameContainer localPosition.y
-_BAR_WORLD_Y = -0.25           # ProgressBar localPosition.y
-
-# CityStatusProgressBar.ctor / serialized defaults (sharedassets1 MB 9478).
-_BAR_MIN_WIDTH = 0.59          # runtime minWidth @0x70
-_BAR_CENTER_FIELD = 0.27       # runtime centerFieldWidth @0x74
-_BAR_MAX_WIDTH = 0.9           # serialized maxWidth
-_BAR_SEG_HEIGHT = 0.16         # Segment.Render y-scale (sprite h/ppu = 32/200)
-
-# Prefab colours (baseColor / fillColor / negativeColor).
-_BAR_BASE = (0.896, 0.896, 0.896, 1.0)
-_BAR_FILL = (0.0, 0.6, 1.0, 1.0)
-_BAR_NEG = (1.0, 0.2, 0.0, 1.0)
-
-_SEG_SPRITES = ("cityProgressBg_0", "cityProgressBg_1", "cityProgressBg_2")  # L/M/R
-_DOT_SPRITE = "cityProgressDots"
-_DOT_SCALE = 0.80             # CityStatusSegment/Dot localScale
-_CROWN_SPRITE = "UI_crown"
-_CROWN_SCALE = 0.115           # CapitalIcon/Crown localScale
-_CROWN_BG = "circle_30"
-_CROWN_BG_SCALE = 0.48         # CapitalIcon/Background localScale
-# ResourceWidget / SetWork — star icon next to workLabel (Int32.ToString(work)).
-_WORK_STAR = "UI_resource"
-_WORK_STAR_SCALE = 0.20        # ResourceWidget/Star localScale
-_WORK_STAR_SHADOW_DY = 0.02    # StarShadow localPosition.y (world, down in Unity Y-up)
-_WORK_GAP_WORLD = 0.015        # UpdateSize pad when workContainer is active
-_NAME_BG = "Square"
-# Prefab Background localScale Y=4.8 on Square (4×4 @ ppu 100) → fixed plate height.
-# Width is NOT the prefab X=30 default — CityStatusNameContainer.UpdateSize sizes to text
-# via bg.localScale.x = contentWidth * 26.4 → world ≈ content * 1.056.
-_NAME_BG_HEIGHT_WORLD = 4.0 / 100.0 * 4.8          # 0.192
-# UpdateSize: base pad 0.03; when LeftIcon active add 2*iconWidth + 0.012.
-_NAME_PAD_BASE_WORLD = 0.03
-_NAME_PAD_ICON_WORLD = 0.012
-_NAME_BG_ALPHA = 0.502                              # SpriteRenderer.color.a on Background
 
 
 def _bake_ui(ctx, name: str, local_scale: float,
@@ -424,6 +462,26 @@ def _city_unit_count(ctx, cx: int, cy: int) -> int:
     return n
 
 
+def _build_left_icon(ctx, sprite_name: str) -> Optional[Image]:
+    """CapitalIcon slot — cyan circle_30 @ 0.48 plus crown or connected sprite.
+
+    Engine: LeftIcon Background uses prefab cyan (r≈0.012, g=0.6, b=1), same as
+    CityStatusProgressBar fillColor. Crown/connected art is baked from the
+    trimmed PNG (ctx.bake), not Unity rect meta — meta includes transparent
+    padding, which would stretch the art to fill the whole circle.
+    """
+    fill_rgb = (max(0, min(255, int(_BAR_FILL[0] * 255))),
+                max(0, min(255, int(_BAR_FILL[1] * 255))),
+                max(0, min(255, int(_BAR_FILL[2] * 255))))
+    ring = _bake_ui(ctx, _CROWN_BG, _CROWN_BG_SCALE, tint=fill_rgb)
+    icon = ctx.bake(sprite_name, scale=_CROWN_SCALE)
+    if ring is not None and icon is not None:
+        out = ring.copy()
+        out.paste(icon, (out.w - icon.w) // 2, (out.h - icon.h) // 2)
+        return out
+    return icon
+
+
 def _build_work_widget(ctx, work: int) -> Optional[Image]:
     """CityStatusNameContainer.SetWork — UI_resource star + workLabel.
 
@@ -454,12 +512,13 @@ def _build_work_widget(ctx, work: int) -> Optional[Image]:
 
 def _build_name_plate(ctx, name: str, is_capital: bool,
                       team: Optional[Tuple[int, int, int]],
-                      work: int = 0) -> Optional[Image]:
-    """CityStatusNameContainer — name + optional crown + work stars on Square bg.
+                      work: int = 0, is_connected: bool = False) -> Optional[Image]:
+    """CityStatusNameContainer — name + optional left icon + work stars on Square bg.
 
     Engine (SetCity + SetWork + UpdateSize, prefab NameContainer GO 1396):
       - NameLabel TMP fontSize 18, localScale 0.08, JosefinSans-Italic + Shadow
       - capital → TMP fontStyle Underline (4) + CapitalIcon (crown @ 0.115)
+      - connected → same CapitalIcon slot with UI_connected (no underline)
       - work → ResourceWidget when work > 0 (CalculateWork / ImprovementState.production)
       - bg SpriteRenderer: GetPlayerColor, alpha kept ≈ 0.502
       - bg width sized to content (UpdateSize); height from scale.y = 4.8
@@ -471,40 +530,26 @@ def _build_name_plate(ctx, name: str, is_capital: bool,
         text = _render_text(name, (255, 255, 255, 255), size=_FONT_SIZE_CITY,
                             underline=is_capital)
 
-    crown = None
+    left_icon = None
     if is_capital:
-        # CapitalIcon: Background = circle_30 @ 0.48 with prefab cyan
-        # (r≈0.012, g=0.6, b=1) — same as CityStatusProgressBar fillColor;
-        # Crown = UI_crown @ 0.115. Bake crown from the trimmed PNG (ctx.bake),
-        # not Unity rect meta — meta includes transparent padding, which would
-        # stretch the art to fill the whole circle.
-        fill_rgb = (max(0, min(255, int(_BAR_FILL[0] * 255))),
-                    max(0, min(255, int(_BAR_FILL[1] * 255))),
-                    max(0, min(255, int(_BAR_FILL[2] * 255))))
-        ring = _bake_ui(ctx, _CROWN_BG, _CROWN_BG_SCALE, tint=fill_rgb)
-        icon = ctx.bake(_CROWN_SPRITE, scale=_CROWN_SCALE)
-        if ring is not None and icon is not None:
-            crown = ring.copy()
-            crown.paste(icon,
-                        (crown.w - icon.w) // 2,
-                        (crown.h - icon.h) // 2)
-        elif icon is not None:
-            crown = icon
+        left_icon = _build_left_icon(ctx, _CROWN_SPRITE)
+    elif is_connected:
+        left_icon = _build_left_icon(ctx, _CONNECTED_SPRITE)
 
     work_img = _build_work_widget(ctx, work)
 
     gap = max(2, round(0.02 * P.PPU))
     work_gap = max(2, round(_WORK_GAP_WORLD * P.PPU))
     pad_x = max(4, round(_NAME_PAD_BASE_WORLD * P.PPU))
-    if crown is not None:
+    if left_icon is not None:
         # LeftIcon path: 2 * leftIconBgWidth + 0.012 (UpdateSize).
         pad_x += max(2, round(_NAME_PAD_ICON_WORLD * P.PPU))
 
     content_w = 0
     content_h = 0
-    if crown is not None:
-        content_w += crown.w + gap
-        content_h = max(content_h, crown.h)
+    if left_icon is not None:
+        content_w += left_icon.w + gap
+        content_h = max(content_h, left_icon.h)
     if text is not None:
         content_w += text.w
         content_h = max(content_h, text.h)
@@ -530,9 +575,9 @@ def _build_name_plate(ctx, name: str, is_capital: bool,
     plate = bg
     x = pad_x
     y = (plate.h - content_h) // 2
-    if crown is not None:
-        plate.paste(crown, x, y + (content_h - crown.h) // 2)
-        x += crown.w + gap
+    if left_icon is not None:
+        plate.paste(left_icon, x, y + (content_h - left_icon.h) // 2)
+        x += left_icon.w + gap
     if text is not None:
         plate.paste(text, x, y + (content_h - text.h) // 2)
         x += text.w
@@ -632,8 +677,8 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
                      (ImprovementState.population is cumulative total)
       dots         = GetCityUnitCount(map, cityCoords)
       work         = ImprovementState.production  (engine: CalculateWork → SetWork)
-      own cities   = full plate (crown/underline/stars) + pop bar
-      enemy cities = name only (no crown, underline, stars, or pop bar)
+      own cities   = full plate (crown or connected icon / underline / stars) + pop bar
+      enemy cities = name only (no crown, connected icon, underline, stars, or pop bar)
     """
     tile = ctx.tile_at(x, y)
     if tile is None or ctx.is_hidden(tile):
@@ -654,13 +699,18 @@ def render_city_status(ctx, x: int, y: int) -> List[Placement]:
     # Own / omniscient: full status. Enemy: name plate only (no crown, stars, bar).
     own = ctx.viewer_id == 0xFF or tile.owner == ctx.viewer_id
     work = int(imp.production) if own else 0
-    is_capital = bool(tile.capital_of) if own else False
+    is_capital = own and tile.is_owner_capital()
+    is_connected = (
+        own and not is_capital
+        and int(getattr(imp, "connected_to_capital_of_player", 0) or 0) != 0
+    )
     team = ctx.player_color(tile.owner)
     name = (imp.name or "").strip()
 
     out: List[Placement] = []
 
-    plate = _build_name_plate(ctx, name, is_capital, team, work=work)
+    plate = _build_name_plate(ctx, name, is_capital, team, work=work,
+                              is_connected=is_connected)
     if plate is not None:
         cy = -_NAME_WORLD_Y * P.PPU  # world y=-0.08 → below centre
         out.append(Placement(
@@ -697,38 +747,41 @@ def items(ctx, x: int, y: int) -> List[Placement]:
 
     # ── health badge ──────────────────────────────────────────────────────────
     # Wire/format health is tenths; client does ceil(health * 0.1) for the label.
+    # Number sits at (_HP_DX, _HP_DY). Shield uses that origin plus
+    # (_SHIELD_DX, _SHIELD_DY) and is drawn first so the number stays on top.
     health = max(0, int(math.ceil(int(unit.health) / 10.0)))
     tier = _defence_tier(ctx, tile, unit)
     color = (255, 60, 60, 255) if health <= 4 else (255, 255, 255, 255)
     text_img = _render_text(str(health), color)
 
-    if tier == "none":
-        badge = text_img
-    else:
-        badge = ctx.bake(_BG_SPRITE[tier], scale=BADGE_SCALE)
-        if badge is not None:
-            badge = badge.copy()
-            badge.paste(text_img, (badge.w - text_img.w) // 2,
-                                  (badge.h - text_img.h) // 2)
-        else:
-            badge = text_img
+    if tier != "none":
+        shield = ctx.bake(_BG_SPRITE[tier], scale=BADGE_SCALE)
+        if shield is not None:
+            result.append(Placement(
+                E.SORT_UNIT_STATUS, shield,
+                round(_HP_DX + _SHIELD_DX - shield.w / 2),
+                round(_HP_DY + _SHIELD_DY - shield.h / 2),
+            ))
 
     result.append(Placement(
-        E.SORT_UNIT_STATUS, badge,
-        round(_BADGE_CX - badge.w / 2),
-        round(_BADGE_CY - badge.h / 2),
+        E.SORT_UNIT_STATUS, text_img,
+        round(_HP_DX - text_img.w / 2),
+        round(_HP_DY - text_img.h / 2),
     ))
 
     # ── type-icon badge ───────────────────────────────────────────────────────
     passenger = unit.passenger_unit
     icon_type = passenger.type if passenger is not None else unit.type
     team = ctx.player_color(unit.owner)
-    icon_badge = _build_icon_badge(ctx, icon_type, team)
+    # White ring only for the perspective player's untouched units
+    # (UnitStatusDisplay.SetState: CanMove && CanAttack && local owner).
+    show_white = ctx.is_perspective_owner(unit.owner) and CU.unit_is_untouched(unit)
+    icon_badge = _build_icon_badge(ctx, icon_type, team, show_outline=show_white)
     if icon_badge is not None:
         result.append(Placement(
             E.SORT_UNIT_STATUS, icon_badge,
-            round(_ICON_CX - icon_badge.w / 2),
-            round(_ICON_CY - icon_badge.h / 2),
+            round(_ICON_DX - icon_badge.w / 2),
+            round(_ICON_DY - icon_badge.h / 2),
         ))
 
     return result

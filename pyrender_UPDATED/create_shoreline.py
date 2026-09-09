@@ -42,6 +42,7 @@ import math
 from typing import Dict, List, Optional, Tuple
 
 import context
+import create_terrain
 import enums as E
 import projection as P
 from context import Placement
@@ -71,24 +72,21 @@ _EDGES: Dict[str, Tuple[float, float, float]] = {
     "W": (+_EDGE_ANGLE,        -_HALF_QW, +_HALF_QH),   # lower-left  edge
 }
 
-# Water surfaces are drawn recessed below the geometric diamond (create_terrain
-# _water_recess); foam must sit on that surface, so drop it by the same amount.
-_WATER_RECESS = 17
-
 # Cache rotated strips: (name, edge) -> (rotated_image, raw_sprite_height).
 # raw_sprite_height is the pre-rotation height; it gives the perpendicular screen
 # extent of the band (rotation preserves distances).
 _rot_cache: Dict[Tuple[str, str], Tuple[Image, int]] = {}
 
-
-# Per-edge position nudge knobs (pixels, applied after all geometry).
+# Per-edge along-edge nudge (px). Prefab child localPositions are not in the
+# binary; these keep the foam crest centred on each iso edge after rotation.
 # Positive dx = right, positive dy = down (screen coords).
 N_DX, N_DY = 8, -8
 S_DX, S_DY = -8, 8
 E_DX, E_DY = -8, -8
 W_DX, W_DY = 8, 8
 
-def _edge_offset(d: str):
+
+def _edge_offset(d: str) -> Tuple[int, int]:
     return {"N": (N_DX, N_DY), "S": (S_DX, S_DY),
             "E": (E_DX, E_DY), "W": (W_DX, W_DY)}[d]
 
@@ -212,12 +210,15 @@ def items(ctx, x: int, y: int) -> List[Placement]:
         # height so the foam crest lands right at the shoreline edge.  Rotation
         # preserves distances, so (sin θ, -cos θ) * raw_h/2 is the exact
         # inward displacement in screen pixels.
+        # Drop by the same art-derived recess as create_terrain so foam sits on
+        # the water surface (Unity: same tile transform; water block is shorter).
         ang = math.radians(_ang)
         half_h = raw_h / 2.0
         shift_x = math.sin(ang) * half_h
         shift_y = -math.cos(ang) * half_h
+        recess = create_terrain.water_recess(ctx, "water")
         odx, ody = _edge_offset(d)
         dx = round(mx + shift_x - strip.w / 2.0 + odx)
-        dy = round(my + shift_y - strip.h / 2.0 + _WATER_RECESS + ody)
+        dy = round(my + shift_y - strip.h / 2.0 + recess + ody)
         out.append(Placement(E.SORT_TRANSPORT, strip, dx, dy))
     return out

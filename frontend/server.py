@@ -11,8 +11,9 @@ import json
 import mimetypes
 import os
 import sys
+import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
@@ -83,6 +84,11 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/board/meta":
                 _, meta = get_session().board_image_and_meta()
                 self._json(200, meta)
+            elif path == "/api/tile":
+                q = parse_qs(urlparse(self.path).query)
+                x = int((q.get("x") or [None])[0])
+                y = int((q.get("y") or [None])[0])
+                self._json(200, get_session().inspect_tile(x, y))
             else:
                 self._json(404, {"error": "not found"})
         except Exception as e:
@@ -117,9 +123,21 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/reload":
                 get_session().reload(body.get("path"))
                 self._json(200, get_session().snapshot())
+            elif path == "/api/load_share":
+                link = body.get("share_link") or body.get("url") or ""
+                allow = body.get("allow_unfinished", True)
+                info = get_session().load_from_share(
+                    link, allow_unfinished=bool(allow)
+                )
+                snap = get_session().snapshot()
+                snap["loaded"] = info
+                self._json(200, snap)
             else:
                 self._json(404, {"error": "not found"})
         except Exception as e:
+            if path == "/api/load_share":
+                print(f"[load_share] {e}", file=sys.stderr)
+                traceback.print_exc()
             self._json(400, {"error": str(e)})
 
 

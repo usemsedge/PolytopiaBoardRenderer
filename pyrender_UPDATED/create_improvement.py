@@ -4,8 +4,8 @@ Renders the tile's ImprovementState into baked, tile-local Placements:
 
 - SIMPLE improvements pick ONE themed sprite via the IMPROVEMENT_BASE table (optionally
   leveled) or the Monument table, baked at its IMPROVEMENT_SCALES factor and pivot-seated
-  on the tile centre (ctx.seat_pivot, the port of layers._seat) at SORT_BUILDINGS, with an
-  IMPROVEMENT_Y_OFFSETS height-scaled vertical nudge.
+  on the tile centre (ctx.seat_pivot, the port of layers._seat) at SORT_BUILDINGS, with
+  IMPROVEMENT_DX / IMPROVEMENT_DY pixel nudges.
 
 - CITY / MARKET / LIGHTHOUSE are procedural composites from ``generated_improvements/``:
   each module's ``build(ctx, tile)`` returns a single Image + origin, seated on the
@@ -59,18 +59,104 @@ IMPROVEMENT_SCALES = {
     E.Improvement.LUMBER_HUT: 0.8,
 }
 
-# Extra vertical seat per improvement type, as a FRACTION of the drawn sprite's height
-# (negative = up, positive = down). Scaling by height keeps the nudge proportional across
-# sprites instead of being a hard pixel count. Applied in the simple-improvement path.
-# Generated towers are NOT listed here: their build() already returns the composite's
-# SpriteContainer origin (ox, oy), and we seat that on the diamond centre.
-IMPROVEMENT_Y_OFFSETS = {}
+# Per-type pixel nudge on top of seat_pivot / generated origin. +dx = right, +dy = down.
+# Missing keys → 0. Applies to both the simple sprite path and generated city/market/lighthouse.
+IMPROVEMENT_DX = {
+    E.Improvement.CITY: 0,
+    E.Improvement.RUIN: 0,
+    E.Improvement.CUSTOMS_HOUSE: 0,
+    E.Improvement.FARM: 0,
+    E.Improvement.WINDMILL: 0,
+    E.Improvement.PORT: 0,
+    E.Improvement.LUMBER_HUT: 0,
+    E.Improvement.SAWMILL: 0,
+    E.Improvement.TEMPLE: 0,
+    E.Improvement.FOREST_TEMPLE: 0,
+    E.Improvement.WATER_TEMPLE: 0,
+    E.Improvement.MOUNTAIN_TEMPLE: 0,
+    E.Improvement.MINE: 0,
+    E.Improvement.FORGE: 0,
+    E.Improvement.MONUMENT1: 0,
+    E.Improvement.MONUMENT2: 0,
+    E.Improvement.MONUMENT3: 0,
+    E.Improvement.MONUMENT4: 0,
+    E.Improvement.MONUMENT5: 0,
+    E.Improvement.MONUMENT6: 0,
+    E.Improvement.MONUMENT7: 0,
+    E.Improvement.SANCTUARY: 0,
+    E.Improvement.OUTPOST: 0,
+    E.Improvement.ICE_BANK: 0,
+    E.Improvement.ICE_TEMPLE: 0,
+    E.Improvement.FUNGI: 0,
+    E.Improvement.ALGAE: 0,
+    E.Improvement.MYCELIUM: 0,
+    E.Improvement.CLATHRUS: 0,
+    E.Improvement.HIDDEN_SANCTUARY: 0,
+    E.Improvement.LIGHTHOUSE: 0,
+    E.Improvement.AQUAFARM: 0,
+    E.Improvement.MARKET: 0,
+    E.Improvement.ATOLL: 0,
+}
+IMPROVEMENT_DY = {
+    E.Improvement.CITY: 0,
+    E.Improvement.RUIN: 0,
+    E.Improvement.CUSTOMS_HOUSE: 0,
+    E.Improvement.FARM: 0,
+    E.Improvement.WINDMILL: 0,
+    E.Improvement.PORT: 10,
+    E.Improvement.LUMBER_HUT: 0,
+    E.Improvement.SAWMILL: 0,
+    E.Improvement.TEMPLE: 0,
+    E.Improvement.FOREST_TEMPLE: 0,
+    E.Improvement.WATER_TEMPLE: 0,
+    E.Improvement.MOUNTAIN_TEMPLE: 0,
+    E.Improvement.MINE: 0,
+    E.Improvement.FORGE: 0,
+    E.Improvement.MONUMENT1: 0,
+    E.Improvement.MONUMENT2: 0,
+    E.Improvement.MONUMENT3: 0,
+    E.Improvement.MONUMENT4: 0,
+    E.Improvement.MONUMENT5: 0,
+    E.Improvement.MONUMENT6: 0,
+    E.Improvement.MONUMENT7: 0,
+    E.Improvement.SANCTUARY: 0,
+    E.Improvement.OUTPOST: 0,
+    E.Improvement.ICE_BANK: 0,
+    E.Improvement.ICE_TEMPLE: 0,
+    E.Improvement.FUNGI: 0,
+    E.Improvement.ALGAE: 0,
+    E.Improvement.MYCELIUM: 0,
+    E.Improvement.CLATHRUS: 0,
+    E.Improvement.HIDDEN_SANCTUARY: 0,
+    E.Improvement.LIGHTHOUSE: 0,
+    E.Improvement.AQUAFARM: 0,
+    E.Improvement.MARKET: 0,
+    E.Improvement.ATOLL: 0,
+}
+
+# Extra raise for ports on swamp / flooded field (+ = down, so negative = up).
+PORT_WETLAND_DY = -8
 
 
-def _y_offset_px(imp_type, height: float) -> float:
-    """Vertical nudge in pixels for ``imp_type``: its IMPROVEMENT_Y_OFFSETS fraction times the
-    sprite/render ``height`` (+ = down, - = up). 0.0 when the type has no configured offset."""
-    return IMPROVEMENT_Y_OFFSETS.get(imp_type, 0.0) * height
+def _is_swamp_or_flooded(tile) -> bool:
+    """Swamp-skin or flooded/wetland land — ports get a small extra lift here."""
+    if tile is None:
+        return False
+    if int(getattr(tile, "skin", 0) or 0) == int(E.Skin.SWAMP):
+        return True
+    effects = getattr(tile, "effects", ()) or ()
+    if int(E.TileEffect.FLOODED) in effects or int(E.TileEffect.SWAMPED) in effects:
+        return True
+    return tile.terrain in (E.Terrain.WETLAND, E.Terrain.MANGROVE)
+
+
+def _nudge(imp_type, tile=None) -> tuple:
+    """(dx, dy) pixel nudge for ``imp_type``. Missing keys are 0."""
+    dx = IMPROVEMENT_DX.get(imp_type, 0)
+    dy = IMPROVEMENT_DY.get(imp_type, 0)
+    if imp_type == E.Improvement.PORT and _is_swamp_or_flooded(tile):
+        dy += PORT_WETLAND_DY
+    return dx, dy
 
 
 # Monuments 23..29 -> Monument1..Monument7 (themed, no level).
@@ -81,12 +167,13 @@ _MONUMENTS = {
 }
 
 
-def _seat_generated(built, sublayer: int) -> List[Placement]:
+def _seat_generated(built, sublayer: int, imp_type) -> List[Placement]:
     """Seat a ``build()`` result so its world origin lands on the diamond centre."""
     if built is None:
         return []
     img, ox, oy = built
-    return [Placement(sublayer, img, round(-ox), round(-oy))]
+    ndx, ndy = _nudge(imp_type, None)
+    return [Placement(sublayer, img, round(-ox) + ndx, round(-oy) + ndy)]
 
 
 # ---------------------------------------------------------------- simple improvements
@@ -115,10 +202,8 @@ def _simple_items(ctx, tile) -> List[Placement]:
     if img is None:
         return []
     left, top = ctx.seat_pivot(name, img.w, img.h)
-    # IMPROVEMENT_Y_OFFSETS nudge: a fraction of the drawn height (+ = down), applied to dy.
-    top += round(_y_offset_px(t, img.h))
-
-    return [Placement(E.SORT_BUILDINGS, img, left, top)]
+    ndx, ndy = _nudge(t, tile)
+    return [Placement(E.SORT_BUILDINGS, img, left + ndx, top + ndy)]
 
 
 # ---------------------------------------------------------------- entry point
@@ -131,9 +216,9 @@ def items(ctx, x: int, y: int) -> List[Placement]:
     st = tile.improvement
     if st.type == E.Improvement.CITY:
         # Houses+wall composite; SORT_HOUSES keeps cities under SORT_BUILDINGS peers.
-        return _seat_generated(cities.build(ctx, tile), E.SORT_HOUSES)
+        return _seat_generated(cities.build(ctx, tile), E.SORT_HOUSES, st.type)
     if st.type == E.Improvement.MARKET:
-        return _seat_generated(markets.build(ctx, tile), E.SORT_BUILDINGS)
+        return _seat_generated(markets.build(ctx, tile), E.SORT_BUILDINGS, st.type)
     if st.type == E.Improvement.LIGHTHOUSE:
-        return _seat_generated(lighthouses.build(ctx, tile), E.SORT_BUILDINGS)
+        return _seat_generated(lighthouses.build(ctx, tile), E.SORT_BUILDINGS, st.type)
     return _simple_items(ctx, tile)

@@ -14,16 +14,19 @@ single Placement at E.SORT_UNIT. In tile-local space the SpriteContainer origin 
 sits at the diamond centre, so the placement top-left is ``(-origin_x, -origin_y)`` plus the
 seat-convention nudge ``UNIT_OFFSET_PX``.
 
-Visual modifiers (engine: Unit.UpdateObject / GetOverlayColorAndStrength):
-  Invisible enemy   → unit skipped entirely  (IsInvisibleForLocalPlayer)
-  Invisible owner   → unit at INVISIBLE_ALPHA  (Unit.SetAlpha)
-  Outline (untouched) → _Outline sprites at SORT_UNIT-1, tinted team colour
-  Frozen   (0) → lerp (204,230,255) @ 0.4   blue-white ice
-  Poisoned (1) → lerp (102,230, 26) @ 0.5   green
-  Boosted  (2) → lerp ( 77, 26,179) @ 0.5   purple (Mindbender boost)
-  Petrified(5) → lerp ( 26, 26, 26) @ 0.8   near-black stone
-  Exhausted    → lerp (128,128,128) @ 0.5   grey (TBD: pending pixel verification)
-  Priority: Petrified > Frozen > Poisoned > Boosted > Exhausted
+Centipede segments: prefab Connection parts are dropped; ``connector_items`` draws a
+dynamic ``cymanti_centipede_connector`` stretched toward ``unit.leader`` (SegmentConnector).
+
+Visual modifiers (engine: Unit.UpdateObject):
+  Tint — Unit.GetOverlayColorAndStrength → SkinVisualsRenderer.ColorizeUnit (lerp).
+  Particles — Unit.UpdateUnitEffectParticles (animated in-game; we paste one static
+    frame of the Unit*/bubble sprite, centered on the unit).
+  Invisible enemy → skip (IsInvisibleForLocalPlayer); owner → SetAlpha.
+  Outline (has action left) → cyan _Outline sprites at SORT_UNIT-1 for the
+    perspective player's units that can still move, or that moved but still
+    have a dash target next to them.
+  Exhausted local units → no outline + ColorizeUnit wash at strength 0.4.
+  Type-icon white ring is handled in create_labels (untouched only).
 """
 from __future__ import annotations
 
@@ -38,6 +41,7 @@ import projection as P
 import spritemeta as SM
 from context import Placement
 from image import Image
+from PIL import Image as PILImage
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(_HERE, "unit_parts.json")) as _f:
@@ -186,12 +190,17 @@ def _debase(sprite: str) -> str:
 # ---------------------------------------------------------------- prefab overrides
 # A few units don't render straight from their baked prefab transforms; the engine
 # special-cases them. We reproduce those here so the JSON stays a faithful raw dump.
-def _apply_overrides(prefab: str, parts):
+def _apply_overrides(prefab: str, parts, *, drop_connection: bool = False):
     """Return parts adjusted for engine special-cases (head scale / removed head /
     fixed un-themed sprites). Parts are copied before mutation."""
     out = []
     for part in parts:
         node = part["node"]
+        # SegmentConnector owns the connector at runtime (LateUpdate stretch/rotate
+        # toward leader). Drop the prefab's rest-pose Connection VisualPart whenever
+        # we draw the dynamic connector (or always on segment prefabs — see caller).
+        if drop_connection and str(node).lower().startswith("connection"):
+            continue
         # Rammership has no head — the engine leaves its head marker empty (the
         # crew is part of the baked ship art), so drop the inherited Head part.
         if prefab == "Rammership" and node.startswith("Head"):
@@ -215,29 +224,346 @@ def _apply_overrides(prefab: str, parts):
     return out
 
 
+# ---------------------------------------------------------------- centipede connector
+# SegmentConnector (dump TypeDef 1642) + Unit.UpdateConnector:
+#   leader = MapRenderer.GetUnitInstance(unitState.leader)
+#   LateUpdate: rotate connector toward leader, localScale.x = distance * 1.7
+# Connector VisualPart lives on the segment prefab; head has none. Any centipede
+# part with leader>0 gets a dynamic connector (same rule as polytopia.net).
+_CONNECTOR_BASE = "cymanti_centipede_connector"
+
+
+def _is_centipede_part(unit_type: int) -> bool:
+    return int(unit_type) in (int(E.Unit.CENTIPEDE), int(E.Unit.SEGMENT))
+
+
+def _find_unit_tile(ctx, unit_id: int):
+    """TileData that holds the unit with the given UnitState.id, or None."""
+    uid = int(unit_id)
+    if uid <= 0:
+        return None
+    for t in ctx.map.tiles:
+        u = getattr(t, "unit", None)
+        if u is not None and int(getattr(u, "id", 0) or 0) == uid:
+            return t
+    return None
+
+
+def _tile_center_delta_px(from_xy, to_xy) -> Tuple[float, float]:
+    """Pixel vector (Y-down) from from_xy's diamond centre to to_xy's."""
+    fx, fy = from_xy
+    tx, ty = to_xy
+    return (
+        ((tx - ty) - (fx - fy)) * P.HALF_W,
+        -((tx + ty) - (fx + fy)) * P.HALF_H,
+    )
+
+
+def _rotate_about_pivot(
+    img: Image, angle_deg: float, pvx: float, pvy: float
+) -> Tuple[Image, float, float]:
+    """Rotate ``img`` CCW by ``angle_deg`` about Unity-style pivot (pvx, pvy).
+
+    Returns (rotated_image, pivot_x, pivot_y) in the result's top-left pixel space.
+    """
+    pil = img.to_pil()
+    w, h = pil.size
+    # Pivot in top-left pixel coords (Unity pvy: 0=bottom, 1=top).
+    px = float(pvx) * w
+    py = (1.0 - float(pvy)) * h
+    # Pad so the pivot sits at the canvas centre, then rotate about centre.
+    pad_l = int(math.ceil(max(0.0, w - px)))
+    pad_r = int(math.ceil(max(0.0, px)))
+    pad_t = int(math.ceil(max(0.0, h - py)))
+    pad_b = int(math.ceil(max(0.0, py)))
+    # Extra margin so corners survive rotation.
+    diag = int(math.ceil(math.hypot(w, h)))
+    m = diag
+    canvas = PILImage.new("RGBA", (w + pad_l + pad_r + 2 * m, h + pad_t + pad_b + 2 * m), (0, 0, 0, 0))
+    ox, oy = m + pad_l, m + pad_t
+    canvas.paste(pil, (ox, oy), pil)
+    cx = ox + px
+    cy = oy + py
+    # Shift so (cx,cy) → image centre, rotate, track pivot (= centre).
+    recentered = PILImage.new("RGBA", canvas.size, (0, 0, 0, 0))
+    dx = canvas.size[0] / 2.0 - cx
+    dy = canvas.size[1] / 2.0 - cy
+    recentered.paste(canvas, (round(dx), round(dy)), canvas)
+    rotated = recentered.rotate(angle_deg, resample=PILImage.Resampling.BICUBIC, expand=True)
+    # Pivot is at the centre of ``recentered``; after expand, find that point.
+    # Pillow rotate(expand=True) keeps the old centre at the new centre.
+    piv_x = rotated.size[0] / 2.0
+    piv_y = rotated.size[1] / 2.0
+    # Trim transparent margins but keep pivot coordinates correct.
+    bbox = rotated.getbbox()
+    if bbox is None:
+        return Image.new(1, 1, (0, 0, 0, 0)), 0.0, 0.0
+    l, t, r, b = bbox
+    cropped = rotated.crop(bbox)
+    return Image.from_pil(cropped), piv_x - l, piv_y - t
+
+
+# Prefab Connection local pos on Centipede_segment (unit_parts.json).
+_CONNECTOR_PREFAB_POS = (0.021, 0.104)
+
+
+def connector_items(ctx, x: int, y: int) -> List[Placement]:
+    """Dynamic SegmentConnector for a centipede part with leader > 0.
+
+    Matches polytopia.net / SegmentConnector.LateUpdate:
+      translate to this unit, rotate toward leader, scale X by dist/nativeWidth
+      so the shaft spans tile-centre to tile-centre (Unity: localScale.x = worldDist×1.7
+      with native world width ≈ 1/1.7).
+    Pivot sits on the segment's Connection attachment (unit seat + prefab pos).
+    Drawn at SORT_UNIT_CONNECTOR (under the unit sprites).
+    """
+    tile = ctx.tile_at(x, y)
+    if tile is None or ctx.is_hidden(tile):
+        return []
+    unit = tile.unit
+    if unit is None or unit.type == E.Unit.NONE:
+        return []
+    if not _is_centipede_part(unit.type):
+        return []
+    leader_id = int(getattr(unit, "leader", 0) or 0)
+    if leader_id <= 0:
+        return []
+    # Invisible enemy: whole unit (and its connector) hidden.
+    if ctx.viewer_id != 0xFF and unit.owner != ctx.viewer_id:
+        if E.UnitEffect.INVISIBLE in (unit.effects or []):
+            return []
+
+    leader_tile = _find_unit_tile(ctx, leader_id)
+    if leader_tile is None:
+        return []
+
+    to_leader_x, to_leader_y = _tile_center_delta_px((x, y), (leader_tile.x, leader_tile.y))
+    dist = math.hypot(to_leader_x, to_leader_y)
+    if dist < 1.0:
+        return []
+
+    tribe, skin = ctx.player_tribe_skin(unit.owner)
+    name = ctx.resolve(_CONNECTOR_BASE, tribe, skin)[0]
+    if not name or not ctx.store.exists(name):
+        name = _CONNECTOR_BASE
+        if not ctx.store.exists(name):
+            return []
+    try:
+        spr = ctx.store.get(name)
+    except KeyError:
+        return []
+
+    # Website: ctx.scale(dist/naturalWidth, 1) then drawImage at native (w,h).
+    # Tile pixels match (~256), so keep the PNG's native height — applying
+    # render_scale here made the shaft ~20% thicker than the in-game look.
+    nw = max(1, spr.w)
+    nh = max(1, spr.h)
+    target_w = max(1, round(dist))
+    stretched = spr.resized(target_w, nh) if (target_w != nw or nh != spr.h) else spr
+
+    pvx, pvy = _pivot(name)
+    # Angle of vector from leader → this unit (website canvas rotate / Unity).
+    angle = math.degrees(math.atan2(-to_leader_y, -to_leader_x))
+    rot, piv_x, piv_y = _rotate_about_pivot(stretched, angle, pvx, pvy)
+    # Seat with the unit (UNIT_OFFSET) plus the prefab Connection local pos.
+    px, py = _CONNECTOR_PREFAB_POS
+    dx = round(-piv_x + UNIT_OFFSET_PX[0] + px * P.PPU)
+    dy = round(-piv_y + UNIT_OFFSET_PX[1] - py * P.PPU)
+    return [Placement(E.SORT_UNIT_CONNECTOR, rot, dx, dy)]
+
+
+# ---------------------------------------------------------------- action affordances
+# Player-perspective unit chrome (Unit.UpdateObject + UnitStatusDisplay.SetState):
+#   untouched  (!moved && !attacked) → cyan body outline + white typeOutline ring
+#   has action (can still move, or dash with an adjacent enemy) → cyan outline, no ring
+#   exhausted  (moved with no dash target, attacked && !can_move, or frozen)
+#              → no outline, no ring, grey wash
+#
+# Flag half of UnitState.CanMove / CanAttack (Frozen blocks both). After moving,
+# a remaining attack is only a dash into an orthogonally adjacent enemy.
+def unit_can_move(unit) -> bool:
+    if bool(getattr(unit, "moved", False)):
+        return False
+    effects = getattr(unit, "effects", None) or []
+    return E.UnitEffect.FROZEN not in {int(e) for e in effects}
+
+
+def unit_can_attack(unit) -> bool:
+    if bool(getattr(unit, "attacked", False)):
+        return False
+    effects = getattr(unit, "effects", None) or []
+    return E.UnitEffect.FROZEN not in {int(e) for e in effects}
+
+
+# UnitData.unitAbilities contains "dash" (GameLogicData28).
+_DASH_UNITS = {
+    int(E.Unit.SCOUT), int(E.Unit.WARRIOR), int(E.Unit.RIDER), int(E.Unit.KNIGHT),
+    int(E.Unit.ARCHER), int(E.Unit.SWORDSMAN), int(E.Unit.POLYTAUR),
+    int(E.Unit.BABY_DRAGON), int(E.Unit.FIRE_DRAGON), int(E.Unit.AMPHIBIAN),
+    int(E.Unit.TRIDENTION), int(E.Unit.BATTLE_SLED), int(E.Unit.ICE_ARCHER),
+    int(E.Unit.HEXAPOD), int(E.Unit.DOOMUX), int(E.Unit.PHYCHI),
+    int(E.Unit.CENTIPEDE), int(E.Unit.SEGMENT), int(E.Unit.RAYCHI),
+    int(E.Unit.DAGGER), int(E.Unit.CLOAK), int(E.Unit.CLOAK_BOAT),
+    int(E.Unit.PIRATE), int(E.Unit.SCOUTSHIP), int(E.Unit.RAMMERSHIP),
+    int(E.Unit.MERMAID_WARRIOR), int(E.Unit.MERMAID_ARCHER),
+    int(E.Unit.MERMAID_SWORDSMAN), int(E.Unit.MERMAID_CLOAK),
+    int(E.Unit.MERMAID_DAGGER), int(E.Unit.SHARK), int(E.Unit.BOOMCHI),
+    int(E.Unit.CIRU), int(E.Unit.MANTIS), int(E.Unit.MOTH), int(E.Unit.LARVA),
+}
+
+_ORTHO = ((0, 1), (0, -1), (1, 0), (-1, 0))
+
+
+def unit_has_dash(unit) -> bool:
+    return int(unit.type) in _DASH_UNITS
+
+
+def _enemy_adjacent(ctx, unit, x: int, y: int) -> bool:
+    """True when an enemy unit sits on an orthogonal neighbour tile."""
+    owner = int(unit.owner)
+    for dx, dy in _ORTHO:
+        t = ctx.tile_at(x + dx, y + dy)
+        if t is None:
+            continue
+        u = getattr(t, "unit", None)
+        if u is None or u.type == E.Unit.NONE:
+            continue
+        if int(u.owner) == owner:
+            continue
+        if E.UnitEffect.INVISIBLE in (u.effects or []):
+            continue
+        return True
+    return False
+
+
+def unit_can_perform_action(ctx, unit, x: int, y: int) -> bool:
+    """Any action left this turn (move, or dash into an adjacent enemy)."""
+    if unit_can_move(unit):
+        return True
+    if not unit_can_attack(unit):
+        return False
+    # moved && !attacked: grey unless dash and an enemy is next to the unit.
+    return unit_has_dash(unit) and _enemy_adjacent(ctx, unit, x, y)
+
+
+def unit_is_untouched(unit) -> bool:
+    """Neither moved nor attacked this turn (and not frozen)."""
+    return unit_can_move(unit) and unit_can_attack(unit)
+
+
 # ---------------------------------------------------------------- visual modifiers
-# ColorizeUnit overlay: (RGB 0-255, strength 0-1) per UnitEffect.
-# Values confirmed from recon/units.md §6 IEEE-754 constant pool decode.
-# Priority list is ordered most-to-least dominant; first match wins.
-_EFFECT_OVERLAYS = [
-    (E.UnitEffect.PETRIFIED, (26,  26,  26), 0.8),   # ~(0.1,0.1,0.1)
-    (E.UnitEffect.FROZEN,    (204, 230, 255), 0.4),   # ~(0.8,0.9,1.0)
-    (E.UnitEffect.POISONED,  (102, 230,  26), 0.5),   # ~(0.4,0.9,0.1)
-    (E.UnitEffect.BOOSTED,   (77,   26, 179), 0.5),   # ~(0.3,0.1,0.7)
+# Unit.GetOverlayColorAndStrength (RVA 0x2B7E5C4) — IEEE-754 constants from the
+# fcsel chain. Later checks overwrite earlier ones; Petrified wins. When
+# canPerformAction is false, strength is forced to 0.4 (keeps effect RGB).
+def _get_overlay_color_and_strength(
+    can_perform_action: bool, effects
+) -> Tuple[Tuple[int, int, int], float]:
+    """Mirror Unit.GetOverlayColorAndStrength → (rgb 0-255, strength)."""
+    eff = {int(e) for e in (effects or [])}
+    # Boosted(2)
+    if E.UnitEffect.BOOSTED in eff:
+        s9, s11, s13 = 0.3, 0.0, 0.5
+    else:
+        s9, s11, s13 = 1.0, 1.0, 0.0
+    s8, s10, s12 = 1.0, 0.0, 0.5
+    # Swift(6)
+    if E.UnitEffect.SWIFT in eff:
+        s9, s11, s13 = 0.7, 0.1, 0.4
+    # Poisoned(1)
+    if E.UnitEffect.POISONED in eff:
+        s14, s9, s10, s11 = 0.4, 0.9, 0.0, 0.3
+    else:
+        s14, s10, s11 = s8, s11, s13
+    # Frozen(0)
+    if E.UnitEffect.FROZEN in eff:
+        s13, s9, s8, s10 = 0.4, 0.9, 1.0, 0.5
+    else:
+        s13, s8, s10 = s14, s10, s11
+    # Petrified(5)
+    if E.UnitEffect.PETRIFIED in eff:
+        rf, gf, bf, strength = 0.1, 0.1, 0.1, 0.6
+    else:
+        rf, gf, bf, strength = s13, s9, s8, s10
+    if not can_perform_action:
+        strength = 0.4
+    return (
+        (min(255, int(rf * 255 + 0.5)),
+         min(255, int(gf * 255 + 0.5)),
+         min(255, int(bf * 255 + 0.5))),
+        float(strength),
+    )
+
+
+# UpdateUnitEffectParticles — pool id is Enum.ToString(UnitEffect); particle
+# textures are Unit<Name> (plus bubble for Bubble). Frozen is suppressed while
+# Petrified is active (UpdateObject). Static renderer pastes one frame.
+_EFFECT_PARTICLES: List[Tuple[int, str]] = [
+    (E.UnitEffect.SWIFT, "UnitSwift"),
+    (E.UnitEffect.POISONED, "UnitPoisoned"),
+    (E.UnitEffect.BOOSTED, "UnitBoosted"),
+    (E.UnitEffect.PETRIFIED, "UnitPetrified"),
+    (E.UnitEffect.FROZEN, "UnitFrozen"),  # skipped if Petrified present
 ]
-# Grey overlay applied when the unit has moved (canPerformAction=false, no status effect).
-# High-value grey so the additive lerp lightens (washes out) the unit rather than darkening it.
-# Exact values TBD — pending pixel verification against live screenshot.
-_EXHAUSTED_OVERLAY = ((200, 200, 200), 0.5)
+_BUBBLE_SPRITE = "bubble"
 
 # Alpha for an invisible unit visible to its own owner (engine: Unit.SetAlpha).
-# Exact value TBD — pending pixel verification.
-_INVISIBLE_ALPHA = 0.5
+# Toolbox static renderer uses 0.45; game value not a literal in UpdateObject.
+_INVISIBLE_ALPHA = 0.45
 
 
 def _apply_alpha(img: Image, alpha: float) -> Image:
     """Return a copy of img with all pixel alphas multiplied by alpha."""
     return img.multiply_alpha(alpha)
+
+
+def _paste_particle_frame(
+    unit_img: Image, origin_x: float, origin_y: float, ctx, sprite_name: str
+) -> Tuple[Image, float, float]:
+    """Center one static particle frame on the unit composite (game particles
+    attach to the unit transform; we freeze a single sprite frame)."""
+    if not ctx.store.exists(sprite_name):
+        return unit_img, origin_x, origin_y
+    try:
+        pimg = ctx.store.get(sprite_name)
+    except KeyError:
+        return unit_img, origin_x, origin_y
+    rs = SM.render_scale(sprite_name)
+    dw = max(1, round(pimg.w * rs))
+    dh = max(1, round(pimg.h * rs))
+    if dw != pimg.w or dh != pimg.h:
+        pimg = pimg.resized(dw, dh)
+    # Unit image centre ≈ particle attach point.
+    cx = unit_img.w * 0.5
+    cy = unit_img.h * 0.5
+    tlx = cx - dw * 0.5
+    tly = cy - dh * 0.5
+    minx = min(0.0, tlx)
+    miny = min(0.0, tly)
+    maxx = max(float(unit_img.w), tlx + dw)
+    maxy = max(float(unit_img.h), tly + dh)
+    W = int(math.ceil(maxx - minx))
+    H = int(math.ceil(maxy - miny))
+    canvas = Image.new(W, H, (0, 0, 0, 0))
+    canvas.paste(unit_img, round(-minx), round(-miny))
+    canvas.paste(pimg, round(tlx - minx), round(tly - miny))
+    return canvas, origin_x - minx, origin_y - miny
+
+
+def _apply_effect_particles(
+    unit_img: Image, origin_x: float, origin_y: float, ctx, effects
+) -> Tuple[Image, float, float]:
+    """Static stand-in for UpdateUnitEffectParticles + ShowBubble."""
+    eff = {int(e) for e in (effects or [])}
+    img, ox, oy = unit_img, origin_x, origin_y
+    for effect, sprite in _EFFECT_PARTICLES:
+        if effect not in eff:
+            continue
+        if effect == E.UnitEffect.FROZEN and E.UnitEffect.PETRIFIED in eff:
+            continue
+        img, ox, oy = _paste_particle_frame(img, ox, oy, ctx, sprite)
+    if E.UnitEffect.BUBBLE in eff:
+        img, ox, oy = _paste_particle_frame(img, ox, oy, ctx, _BUBBLE_SPRITE)
+    return img, ox, oy
 
 
 # ---------------------------------------------------------------- skinning logic
@@ -433,32 +759,28 @@ def items(ctx, x, y) -> List[Placement]:
     parts = UNIT_PARTS.get(prefab) if prefab else None
     if not parts:
         return []
-    parts = _apply_overrides(prefab, parts)
+    # SegmentConnector drives the connector at runtime — never bake the prefab's
+    # rest-pose Connection part (dynamic connector_items draws it when leader>0).
+    drop_conn = bool(prefab and str(prefab).startswith("Centipede_segment"))
+    parts = _apply_overrides(prefab, parts, drop_connection=drop_conn)
 
     team = ctx.player_color(owner)
     flip = bool(unit.flipped)
 
-    # Outline: baseline-only — viewer's own unit, not yet moved, no active effects.
-    # Engine: ShowOutline / SetOutlineColor(team colour) in Unit.UpdateObject.
-    show_outline = (
-        ctx.viewer_id != 0xFF
-        and unit.owner == ctx.viewer_id
-        and not unit.moved
-        and not effects
+    # Action chrome is player-perspective only (IsPlayerLocal / perspective_id).
+    is_local = ctx.is_perspective_owner(owner)
+    can_perform = unit_can_perform_action(ctx, unit, x, y)
+
+    # Cyan body outline: own unit that still has any action left.
+    # Engine: ShowOutline(canPerformAction && IsPlayerLocal && !hideOutlines).
+    show_outline = is_local and can_perform
+
+    # GetOverlayColorAndStrength(canPerformAction, effects) → ColorizeUnit.
+    # Exhausted own units get the 0.4 wash; enemies keep effect tints only.
+    overlay_can_perform = can_perform if is_local else True
+    overlay_rgb, overlay_strength = _get_overlay_color_and_strength(
+        overlay_can_perform, effects
     )
-
-    # Status-effect overlay — first match in priority order wins.
-    overlay_rgb: Optional[Tuple[int, int, int]] = None
-    overlay_strength = 0.0
-    for effect, rgb, strength in _EFFECT_OVERLAYS:
-        if effect in effects:
-            overlay_rgb = rgb
-            overlay_strength = strength
-            break
-
-    # Exhausted grey — applied only when no status overlay and unit has moved.
-    if overlay_rgb is None and unit.moved:
-        overlay_rgb, overlay_strength = _EXHAUSTED_OVERLAY
 
     # Build main unit composite.
     built = _build_unit(ctx, parts, tribe, skin, team, climate, birth)
@@ -466,10 +788,12 @@ def items(ctx, x, y) -> List[Placement]:
         return []
     img, ox, oy = built
 
-    # Apply ColorizeUnit overlay (status effect or exhausted grey).
-    # Uses additive lerp (colorized), not multiply-lerp (tinted) — see image.py.
-    if overlay_rgb is not None:
+    # Apply ColorizeUnit overlay (status effect and/or exhausted wash).
+    if overlay_strength > 0.0:
         img = img.colorized(overlay_rgb, overlay_strength)
+
+    # Static particle frames (UpdateUnitEffectParticles / ShowBubble).
+    img, ox, oy = _apply_effect_particles(img, ox, oy, ctx, effects)
 
     if flip:
         img = img.flipped_x()

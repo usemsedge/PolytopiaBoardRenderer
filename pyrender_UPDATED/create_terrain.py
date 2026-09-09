@@ -50,8 +50,31 @@ except Exception:
 # +y = down. (0, 0) = exactly the trim-corrected pivot placement. Hand-tuned offset only.
 FOG_OFFSET_PX = (3, 17)
 
-# Per-mountain-sprite vertical nudge (pixels, + = down) on top of seat_base.
+# Per-mountain-sprite pixel nudge on top of seat_base. +dx = right, +dy = down.
 # Keyed by the resolved sprite name from DoSpriteLookup("mountain", …); missing → 0.
+MOUNTAIN_DX = {
+    "mountain_aimo": 0,
+    "mountain_aquarion": 0,
+    "mountain_bardur": 0,
+    "mountain_cute": 0,
+    "mountain_cymanti": 0,
+    "mountain_darkelf": 0,
+    "mountain_elyrion": 0,
+    "mountain_hoodrick": 0,
+    "mountain_imperius": 0,
+    "mountain_kickoo": 0,
+    "mountain_luxidoor": 0,
+    "mountain_magma": 0,
+    "mountain_mercenary": 0,
+    "mountain_oumaji": 0,
+    "mountain_polaris": 0,
+    "mountain_quetzali": 0,
+    "mountain_swamp": -12,
+    "mountain_vengir": 0,
+    "mountain_xinxi": 0,
+    "mountain_yadakk": 0,
+    "mountain_zebasi": 0,
+}
 MOUNTAIN_DY = {
     "mountain_aimo": 0,
     "mountain_aquarion": 0,
@@ -69,7 +92,7 @@ MOUNTAIN_DY = {
     "mountain_oumaji": 0,
     "mountain_polaris": 0,
     "mountain_quetzali": 0,
-    "mountain_swamp": 0,
+    "mountain_swamp": -10,
     "mountain_vengir": 0,
     "mountain_xinxi": 0,
     "mountain_yadakk": 0,
@@ -111,25 +134,52 @@ def _maybe_desat(img: Image, desat: bool) -> Image:
     return img.tinted((c, c, c))
 
 
-def _base_terrain_name(ctx: context.TileContext, tile) -> Optional[str]:
-    """Base surface sprite, faithful to TerrainRenderer.UpdateGraphics (0x2CDBD9C).
+def _water_sprite_variant(base: str, x: int, y: int, ctx: context.TileContext) -> str:
+    """``TerrainRenderer.WaterSpriteData.GetSpriteName`` (0x2AB616C).
 
-    Water(1)/Ocean(2)/Ice(6) each take their own sprite family. Every other terrain
+    Prefab fields map to catalog names:
+      defaultSprite → ``{base}``
+      leftSprite    → ``{base}_wall_left``
+      rightSprite   → ``{base}_wall_right``
+      cornerSprite  → ``{base}_wall_left_wall_right``
+
+    Selection is from ``tile.data.coordinates`` (not land neighbours): the visible
+    map-edge cliff faces are x==0 (left) and y==0 (right); (0,0) is the front corner.
+    Missing / null prefab sprites fall back to ``default`` (same null-checks as the
+    binary). Ice has no wall art in the atlas, so it always stays ``ice``.
+    """
+    if x == 0 and y == 0:
+        cand = f"{base}_wall_left_wall_right"
+    elif x == 0:
+        cand = f"{base}_wall_left"
+    elif y == 0:
+        cand = f"{base}_wall_right"
+    else:
+        return base
+    return cand if ctx.exists(cand) else base
+
+
+def _base_terrain_name(ctx: context.TileContext, tile) -> Optional[str]:
+    """Base surface sprite, faithful to TerrainRenderer.UpdateGraphics (0x2AB5EE0).
+
+    Water(1)/Ocean(2)/Ice(6) each take their own sprite family via WaterSpriteData
+    (default / map-edge wall left / right / corner). Every other terrain
     (Field/Mountain/Forest/Wetland/Mangrove/None) uses the land base, which is "ground"
-    unless the tile is Flooded -> "wetland" (or "wetland_swamp" when also Swamped). The
-    Flooded override lives ONLY in the land branch; water/ocean/ice are never reclassified.
-    Then DoSpriteLookup themes by the tile's climate tribe/skin.
+    unless the tile is Flooded -> "wetland" (or "wetland_swamp" when also Swamped), or
+    an Aquarion mountain (coral peaks always sit in the shallows). The Flooded /
+    Aquarion-mountain override lives ONLY in the land branch; water/ocean/ice are
+    never reclassified. Then DoSpriteLookup themes by the tile's climate tribe/skin.
     """
     t = tile.terrain
     tribe, skin = ctx.tile_theme(tile)
     if t == E.Terrain.WATER:
-        base = "water"
+        base = _water_sprite_variant("water", int(tile.x), int(tile.y), ctx)
     elif t == E.Terrain.OCEAN:
-        base = "ocean"
+        base = _water_sprite_variant("ocean", int(tile.x), int(tile.y), ctx)
     elif t == E.Terrain.ICE:
-        base = "ice"
+        base = _water_sprite_variant("ice", int(tile.x), int(tile.y), ctx)
     else:  # FIELD / MOUNTAIN / FOREST / WETLAND / MANGROVE / NONE -> land base
-        if E.TileEffect.FLOODED in tile.effects:
+        if _wetland_land_base(tile, tribe):
             base = "wetland_swamp" if E.TileEffect.SWAMPED in tile.effects else "wetland"
         else:
             base = "ground"
@@ -137,22 +187,73 @@ def _base_terrain_name(ctx: context.TileContext, tile) -> Optional[str]:
     return name
 
 
-def _water_recess(ctx: context.TileContext, water_name: str) -> int:
-    """Recession (px) of a water/ocean surface below the land surface.
+def _wetland_land_base(tile, tribe: int = 0) -> bool:
+    """Land tiles whose base sprite is wetland rather than dry ground."""
+    if tile is None:
+        return False
+    t = tile.terrain
+    if t in (E.Terrain.WATER, E.Terrain.OCEAN, E.Terrain.ICE):
+        return False
+    if E.TileEffect.FLOODED in getattr(tile, "effects", ()):
+        return True
+    if t in (E.Terrain.WETLAND, E.Terrain.MANGROVE):
+        return True
+    # Aquarion mountains are coral in the shallows, never a dry-ground block.
+    climate = int(tribe or getattr(tile, "climate", 0) or 0)
+    return t == E.Terrain.MOUNTAIN and climate == int(E.Tribe.AQUARION)
+
+
+def is_wetland_surface(tile) -> bool:
+    """True when this tile draws a wetland/flooded base (recessed like water).
+
+    Flooded land and Aquarion mountains use the ``wetland`` / ``wetland_swamp``
+    sprite; those blocks are the same height as water, not ground. Water/ocean/ice
+    keep their own path.
+    """
+    return _wetland_land_base(tile)
+
+
+def water_recess(ctx: context.TileContext, water_name: str = "water") -> int:
+    """Recession (px) of a water/ocean/wetland surface below the land surface.
 
     The game positions every terrain tile at the same world point with Z=0; the recession
     is encoded in the sprite art (land and water share a common underground base, the water
     block is shorter, so its surface sits lower by exactly the block-height difference).
     We recover that from the RAW sprites (no magic constant) and then scale it by the base
     sprite's render-scale so it stays proportional to the render-scaled (baked) base.
+
+    Shoreline foam must use this same value (create_shoreline) so strips sit on the water
+    surface rather than the geometric diamond. Wetland/flooded bases use the same offset
+    so their surface lines up with water; units and buildings stay at field height.
     """
-    if not (ctx.exists("ground") and ctx.exists(water_name)):
+    # Wall variants share the same block height as bare water/ocean; always measure
+    # against the family's default sprite so recess is stable across map edges.
+    if water_name.startswith("ocean"):
+        measure = "ocean"
+    elif water_name.startswith("ice"):
+        measure = "ice"
+    elif water_name.startswith("wetland"):
+        measure = "wetland"
+    else:
+        measure = "water"
+    if not (ctx.exists("ground") and ctx.exists(measure)):
         return 0
     g = ctx.store.get("ground")
-    w = ctx.store.get(water_name)
+    w = ctx.store.get(measure)
     surf = lambda im: im.h * P.diamond_center_pivot_y(im)  # surface above sprite bottom
     raw = max(0, round(surf(g) - surf(w)))
-    return round(raw * SM.render_scale(water_name))
+    return round(raw * SM.render_scale(measure))
+
+
+def wetland_recess(ctx: context.TileContext, tile) -> int:
+    """Pixels to drop a wetland/flooded tile so its surface matches water."""
+    if not is_wetland_surface(tile):
+        return 0
+    return water_recess(ctx, "wetland")
+
+
+# Back-compat alias for callers / tests that used the private name.
+_water_recess = water_recess
 
 
 def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
@@ -178,11 +279,12 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
         if img is not None:
             img = _maybe_desat(img, desat)
             left, top = ctx.seat_base(name, img.w, img.h)
-            if is_water_surface:
+            if is_water_surface or is_wetland_surface(tile):
                 # Recess by the art-derived block-height difference so a recessed water
-                # tile sits lower than its up-screen land neighbour (which then reads as
-                # shore/cliff). Same recess is reused by an algae overlay below.
-                recess = _water_recess(ctx, name)
+                # / wetland tile sits lower than its up-screen land neighbour (which then
+                # reads as shore/cliff). Objects on the tile stay at field height.
+                recess = (_water_recess(ctx, name) if is_water_surface
+                          else wetland_recess(ctx, tile))
                 top += recess
             out.append(Placement(E.SORT_TERRAIN, img, left, top))
 
@@ -197,6 +299,7 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
             if fimg is not None:
                 fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_base(feat, fimg.w, fimg.h)
+                fl += MOUNTAIN_DX.get(feat, 0)
                 ft += MOUNTAIN_DY.get(feat, 0)
                 out.append(Placement(E.SORT_TERRAIN_FEATURE, fimg, fl, ft))
     elif tile.terrain == E.Terrain.FOREST:

@@ -40,6 +40,7 @@ def _tile(x, y):
         imp = GS.ImprovementState(
             type=int(Improvement.CITY), level=city_level,
             name=_NAMES[idx], population=population, xp=leftover,
+            connected_to_capital_of_player=(0 if city_level == 1 else OWNER),
         )
     return GS.TileData(
         coordinates=GS.WorldCoordinates(x, y),

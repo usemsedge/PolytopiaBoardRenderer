@@ -171,6 +171,7 @@ SORT_BORDERS_FRONT = 99
 #   Units → CityStatusDisplays/Text → UnitStatusDisplays/Text
 # Flattened into sublayer ints so a single ascending sort matches layer order.
 SORT_UNIT = 100                 # Units sorting layer
+SORT_UNIT_CONNECTOR = 98        # Centipede SegmentConnector (under units)
 SORT_CITY_STATUS = 110          # CityStatusDisplays + CityStatusText
 SORT_UNIT_STATUS = 120          # UnitStatusDisplays + UnitStatusText
 

@@ -7,9 +7,10 @@ Two public entry points:
       Called by render.py in its first pass (all tile backgrounds, back-to-front).
 
   unit_placements(ctx, x, y) → List[Placement]
-      Unit + label placements in tile-local space (diamond centre = (0,0)).
-      Sublayers: SORT_UNIT, SORT_CITY_STATUS, SORT_UNIT_STATUS. render.py sorts
-      these globally by layer then depth (Unity: Units → CityStatus → UnitStatus).
+      Connector (SORT_UNIT_CONNECTOR) + unit + label placements in tile-local space.
+      Sublayers: SORT_UNIT_CONNECTOR, SORT_UNIT, SORT_CITY_STATUS, SORT_UNIT_STATUS.
+      render.py sorts these globally by layer then depth
+      (Unity: connectors under Units → CityStatus → UnitStatus).
 
   items(ctx, x, y) → (image, ox, oy)          [kept for tests / direct use]
       Full composite: background + units + labels in one image.
@@ -44,9 +45,6 @@ _BG_COMPONENTS = (
     create_border,
     create_improvement,
 )
-
-# Full component list (for items()).
-_ALL_COMPONENTS = _BG_COMPONENTS + (create_unit, create_labels)
 
 
 def _composite(placements):
@@ -84,6 +82,8 @@ def unit_placements(ctx, x, y):
     if tile is None or ctx.is_hidden(tile):
         return []
     result = []
+    # Connectors under units (SegmentConnector.LateUpdate / website draw order).
+    result.extend(create_unit.connector_items(ctx, x, y))
     result.extend(create_unit.items(ctx, x, y))
     result.extend(create_labels.items(ctx, x, y))
     return result
@@ -98,6 +98,9 @@ def items(ctx, x, y):
         placements = list(create_terrain.items(ctx, x, y))
     else:
         placements = []
-        for comp in _ALL_COMPONENTS:
+        for comp in _BG_COMPONENTS:
             placements.extend(comp.items(ctx, x, y))
+        placements.extend(create_unit.connector_items(ctx, x, y))
+        placements.extend(create_unit.items(ctx, x, y))
+        placements.extend(create_labels.items(ctx, x, y))
     return _composite(placements)

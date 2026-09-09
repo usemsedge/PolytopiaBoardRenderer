@@ -85,7 +85,7 @@ _CYAN = (0, 245, 245)
 RESOURCE_OFFSET = {
     E.Resource.GAME:     (0, 0),
     E.Resource.CROP:     (0, -10),
-    E.Resource.FISH:     (0, 20),
+    E.Resource.FISH:     (0, 10),
     E.Resource.WHALE:    (0, 0),
     E.Resource.METAL:    (0, -10),
     E.Resource.FRUIT:    (0, 5),

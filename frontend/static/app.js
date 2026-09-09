@@ -6,10 +6,18 @@
   const modLabel = document.getElementById("mod-label");
   const playerSelect = document.getElementById("player-select");
   const playerSwatch = document.getElementById("player-swatch");
+  const shareInput = document.getElementById("share-input");
+  const shareLoadBtn = document.getElementById("share-load");
+  const debugPanel = document.getElementById("debug-panel");
+  const debugTitle = document.getElementById("debug-title");
+  const debugBody = document.getElementById("debug-body");
+  const debugClose = document.getElementById("debug-close");
 
   let meta = null;
   let session = null;
   let painting = false;
+  let loadingShare = false;
+  let selected = null;
 
   function setStatus(msg) {
     statusEl.textContent = msg || "";
@@ -146,6 +154,31 @@
     }
     // Meta fetch already rendered+cached; image endpoint reuses that cache.
     await loadBoardImage();
+    drawSelection();
+  }
+
+  function drawSelection() {
+    const ctx = hit.getContext("2d");
+    ctx.clearRect(0, 0, hit.width, hit.height);
+    if (!selected || !meta) return;
+    const xy = meta.tile_centers[`${selected.x},${selected.y}`];
+    if (!xy) return;
+    const [cx, cy] = xy;
+    const hw = meta.half_w || meta.tile_size || 128;
+    const hh = meta.half_h || hw * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - hh);
+    ctx.lineTo(cx + hw, cy);
+    ctx.lineTo(cx, cy + hh);
+    ctx.lineTo(cx - hw, cy);
+    ctx.closePath();
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(32, 32, 32, 0.45)";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(196, 196, 196, 0.95)";
+    ctx.lineWidth = 2.25;
+    ctx.stroke();
   }
 
   function hitTest(clientX, clientY) {
@@ -176,14 +209,41 @@
     return best;
   }
 
-  async function paintAt(clientX, clientY) {
-    if (!session || !session.modification || !session.modification.category) {
-      setStatus("Select a modification first");
-      return;
-    }
+  function showDebug(payload) {
+    debugPanel.hidden = false;
+    debugTitle.textContent = `Tile (${payload.x}, ${payload.y})`;
+    const parts = [
+      "— tile —",
+      JSON.stringify(payload.tile, null, 2),
+      "",
+      "— unit —",
+      payload.unit == null ? "null" : JSON.stringify(payload.unit, null, 2),
+    ];
+    debugBody.textContent = parts.join("\n");
+  }
+
+  async function inspectAt(x, y) {
+    const payload = await api(`/api/tile?x=${x}&y=${y}`);
+    showDebug(payload);
+  }
+
+  async function onBoardClick(clientX, clientY) {
     const tile = hitTest(clientX, clientY);
     if (!tile) {
       setStatus("No tile under cursor");
+      return;
+    }
+    selected = { x: tile.x, y: tile.y };
+    drawSelection();
+    try {
+      await inspectAt(tile.x, tile.y);
+    } catch (e) {
+      setStatus(e.message);
+      return;
+    }
+    const hasBrush = session && session.modification && session.modification.category;
+    if (!hasBrush) {
+      setStatus(`Inspect (${tile.x}, ${tile.y})`);
       return;
     }
     if (painting) return;
@@ -193,8 +253,8 @@
         method: "POST",
         body: JSON.stringify({ x: tile.x, y: tile.y }),
       });
-      // Tile centers are stable; only re-fetch the composited image.
       await refreshBoard(false);
+      await inspectAt(tile.x, tile.y);
       setStatus(`Applied at (${tile.x}, ${tile.y}) · ${session.modification_label}`);
     } catch (e) {
       setStatus(e.message);
@@ -204,7 +264,11 @@
   }
 
   hit.addEventListener("click", (ev) => {
-    paintAt(ev.clientX, ev.clientY);
+    onBoardClick(ev.clientX, ev.clientY);
+  });
+
+  debugClose.addEventListener("click", () => {
+    debugPanel.hidden = true;
   });
 
   hit.addEventListener("mousemove", (ev) => {
@@ -219,9 +283,67 @@
         body: JSON.stringify({ player_id: Number(playerSelect.value) }),
       });
       syncPlayerUI();
+      // Perspective change updates fog + unit action chrome.
+      await refreshBoard(true);
       setStatus(`Player ${session.selected_player_id}`);
     } catch (e) {
       setStatus(e.message);
+    }
+  });
+
+  async function applySession(next) {
+    session = next;
+    syncPlayerUI();
+    buildMenus();
+    syncModUI();
+    selected = null;
+    meta = null;
+    await refreshBoard(true);
+  }
+
+  async function loadShareLink() {
+    const link = (shareInput.value || "").trim();
+    if (!link) {
+      setStatus("Paste a Polytopia share link first");
+      return;
+    }
+    if (loadingShare) return;
+    loadingShare = true;
+    shareLoadBtn.disabled = true;
+    setStatus("Fetching share link…");
+    try {
+      const next = await api("/api/load_share", {
+        method: "POST",
+        body: JSON.stringify({ share_link: link, allow_unfinished: true }),
+      });
+      await applySession(next);
+      const info = next.loaded || {};
+      const turn = info.current_turn != null ? info.current_turn : next.current_turn;
+      const size =
+        info.map_width != null
+          ? `${info.map_width}×${info.map_height}`
+          : `${next.map_width}×${next.map_height}`;
+      setStatus(
+        `Loaded ${info.game_id || "game"} · turn ${turn ?? "?"} · ${size}` +
+          (info.from_cache ? " · cached" : "")
+      );
+      if (info.share_link) shareInput.value = info.share_link;
+    } catch (e) {
+      setStatus(e.message || String(e));
+    } finally {
+      loadingShare = false;
+      shareLoadBtn.disabled = false;
+    }
+  }
+
+  shareLoadBtn.addEventListener("click", () => {
+    loadShareLink();
+  });
+
+  shareInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      loadShareLink();
     }
   });
 
