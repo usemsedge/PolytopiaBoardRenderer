@@ -50,7 +50,17 @@ except Exception:
 # +y = down. (0, 0) = exactly the trim-corrected pivot placement. Hand-tuned offset only.
 FOG_OFFSET_PX = (3, 17)
 
-# Per-mountain-sprite pixel nudge on top of seat_base. +dx = right, +dy = down.
+# Overall pixel nudge applied to every mountain / forest / algae overlay, on top of seating.
+# Per-sprite MOUNTAIN_DX/DY, FOREST_DX/DY, ALGAE_DX/DY add on top of these.
+# +dx = right, +dy = down.
+MOUNTAIN_OFFSET_DX = 0
+MOUNTAIN_OFFSET_DY = 0
+FOREST_OFFSET_DX = 0
+FOREST_OFFSET_DY = -10
+ALGAE_OFFSET_DX = 0
+ALGAE_OFFSET_DY = 0
+
+# Per-mountain-sprite pixel nudge on top of seat_base + MOUNTAIN_OFFSET_*.
 # Keyed by the resolved sprite name from DoSpriteLookup("mountain", …); missing → 0.
 MOUNTAIN_DX = {
     "mountain_aimo": 0,
@@ -97,6 +107,67 @@ MOUNTAIN_DY = {
     "mountain_xinxi": 0,
     "mountain_yadakk": 0,
     "mountain_zebasi": 0,
+}
+
+# Per-forest-sprite pixel nudge on top of seat_planted + FOREST_OFFSET_*.
+# Keyed by the resolved sprite name from DoSpriteLookup("Forest", …); missing → 0.
+FOREST_DX = {
+    "Forest_aibo": 0,
+    "Forest_aimo": 0,
+    "Forest_aquarion": 0,
+    "Forest_bardur": 0,
+    "Forest_cute": 0,
+    "Forest_cymanti": 0,
+    "Forest_darkelf": 0,
+    "Forest_elyrion": 0,
+    "Forest_hoodrick": 0,
+    "Forest_imperius": 0,
+    "Forest_kickoo": 0,
+    "Forest_luxidoor": 0,
+    "Forest_magma": 0,
+    "Forest_oumaji": 0,
+    "Forest_polaris": 0,
+    "Forest_quetzali": 0,
+    "Forest_swamp": 0,
+    "Forest_vengir": 0,
+    "Forest_xinxi": 0,
+    "Forest_yadakk": 0,
+    "Forest_zebasi": 0,
+}
+FOREST_DY = {
+    "Forest_aibo": 0,
+    "Forest_aimo": 0,
+    "Forest_aquarion": 0,
+    "Forest_bardur": 0,
+    "Forest_cute": -10,
+    "Forest_cymanti": 0,
+    "Forest_darkelf": 0,
+    "Forest_elyrion": 0,
+    "Forest_hoodrick": 0,
+    "Forest_imperius": 0,
+    "Forest_kickoo": 0,
+    "Forest_luxidoor": 0,
+    "Forest_magma": 0,
+    "Forest_oumaji": 0,
+    "Forest_polaris": 0,
+    "Forest_quetzali": 0,
+    "Forest_swamp": 0,
+    "Forest_vengir": 0,
+    "Forest_xinxi": 0,
+    "Forest_yadakk": 0,
+    "Forest_zebasi": 0,
+}
+
+# Per-algae-sprite pixel nudge on top of seat_base + ALGAE_OFFSET_*.
+# Keyed by the resolved sprite name from DoSpriteLookup("algae", …); missing → 0.
+# TileEffect.ALGAE overlay only — Improvement.ALGAE uses IMPROVEMENT_DX/DY.
+ALGAE_DX = {
+    "algae": 0,
+    "algae_cute": 0,
+}
+ALGAE_DY = {
+    "algae": 0,
+    "algae_cute": 0,
 }
 
 # RenderTerrain desaturate tint (packed ARGB 0x7FF3F3F3 ÷ 255).
@@ -299,8 +370,8 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
             if fimg is not None:
                 fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_base(feat, fimg.w, fimg.h)
-                fl += MOUNTAIN_DX.get(feat, 0)
-                ft += MOUNTAIN_DY.get(feat, 0)
+                fl += MOUNTAIN_OFFSET_DX + MOUNTAIN_DX.get(feat, 0)
+                ft += MOUNTAIN_OFFSET_DY + MOUNTAIN_DY.get(feat, 0)
                 out.append(Placement(E.SORT_TERRAIN_FEATURE, fimg, fl, ft))
     elif tile.terrain == E.Terrain.FOREST:
         # Forest is a tree cluster planted on the diamond surface (foot = FEATURE_FOOT).
@@ -310,10 +381,12 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
             if fimg is not None:
                 fimg = _maybe_desat(fimg, desat)
                 fl, ft = ctx.seat_planted(fimg.w, fimg.h, foot=context.FEATURE_FOOT)
+                fl += FOREST_OFFSET_DX + FOREST_DX.get(feat, 0)
+                ft += FOREST_OFFSET_DY + FOREST_DY.get(feat, 0)
                 out.append(Placement(E.SORT_TERRAIN_FEATURE, fimg, fl, ft))
 
-    # Algae is an EFFECT overlay (independent of terrain type), so it co-exists with the
-    # water/ocean base it rides — same base-diamond seat and the same water recess.
+    # Algae is an EFFECT overlay (independent of terrain type). Seat at field height
+    # like other objects — do not add water/wetland recess.
     if E.TileEffect.ALGAE in tile.effects:
         alg, _ = ctx.resolve("algae", tribe, skin)
         if alg:
@@ -321,7 +394,9 @@ def items(ctx: context.TileContext, x: int, y: int) -> List[Placement]:
             if aimg is not None:
                 aimg = _maybe_desat(aimg, desat)
                 al, at = ctx.seat_base(alg, aimg.w, aimg.h)
-                out.append(Placement(E.SORT_TERRAIN_FEATURE, aimg, al, at + recess))
+                al += ALGAE_OFFSET_DX + ALGAE_DX.get(alg, 0)
+                at += ALGAE_OFFSET_DY + ALGAE_DY.get(alg, 0)
+                out.append(Placement(E.SORT_TERRAIN_FEATURE, aimg, al, at))
 
     return out
 

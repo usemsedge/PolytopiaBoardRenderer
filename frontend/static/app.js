@@ -8,6 +8,7 @@
   const playerSwatch = document.getElementById("player-swatch");
   const shareInput = document.getElementById("share-input");
   const shareLoadBtn = document.getElementById("share-load");
+  const shareStart = document.getElementById("share-start");
   const debugPanel = document.getElementById("debug-panel");
   const debugTitle = document.getElementById("debug-title");
   const debugBody = document.getElementById("debug-body");
@@ -312,9 +313,14 @@
     shareLoadBtn.disabled = true;
     setStatus("Fetching share link…");
     try {
+      const which = shareStart.checked ? "start" : "end";
       const next = await api("/api/load_share", {
         method: "POST",
-        body: JSON.stringify({ share_link: link, allow_unfinished: true }),
+        body: JSON.stringify({
+          share_link: link,
+          allow_unfinished: true,
+          which,
+        }),
       });
       await applySession(next);
       const info = next.loaded || {};
@@ -323,8 +329,9 @@
         info.map_width != null
           ? `${info.map_width}×${info.map_height}`
           : `${next.map_width}×${next.map_height}`;
+      const snap = (info.which || which) === "start" ? "game start" : "game end";
       setStatus(
-        `Loaded ${info.game_id || "game"} · turn ${turn ?? "?"} · ${size}` +
+        `Loaded ${info.game_id || "game"} · ${snap} · turn ${turn ?? "?"} · ${size}` +
           (info.from_cache ? " · cached" : "")
       );
       if (info.share_link) shareInput.value = info.share_link;

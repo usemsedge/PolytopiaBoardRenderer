@@ -44,12 +44,52 @@ class Unit(IntEnum):
     SIREN = 54; AQUAPULT = 55; BOOMCHI = 56; ISLAND = 57; CIRU = 58
     MANTIS = 59; BUG_EGG = 60; MOTH = 61; LARVA = 62
 
+# Tribe IDs are mostly alphabetical now
+# GameState climate uses tribetype
+# Original Tribe IDs (legacy tribe order) is the same order as they are in the tribe choosing menu
 
 class Tribe(IntEnum):
     NONE = 0; NATURE = 1; AIMO = 2; AQUARION = 3; BARDUR = 4; ELYRION = 5
     HOODRICK = 6; IMPERIUS = 7; KICKOO = 8; LUXIDOOR = 9; OUMAJI = 10
     QUETZALI = 11; VENGIR = 12; XINXI = 13; YADAKK = 14; ZEBASI = 15
     POLARIS = 16; CYMANTI = 17
+
+# GameLogicData.legacyTribeTypesOrder — index is the serialized TileData.climate
+# "style", value is TribeType. Nature/None are not unique slots (they share
+# Bardur's index 3). Engine: GetTribeTypeFromLegacyIndex (0x6E817C).
+LEGACY_TRIBE_ORDER = (
+    Tribe.NONE,      # 0
+    Tribe.XINXI,     # 1
+    Tribe.IMPERIUS,  # 2
+    Tribe.BARDUR,    # 3
+    Tribe.OUMAJI,    # 4
+    Tribe.KICKOO,    # 5
+    Tribe.HOODRICK,  # 6
+    Tribe.LUXIDOOR,  # 7
+    Tribe.VENGIR,    # 8
+    Tribe.ZEBASI,    # 9
+    Tribe.AIMO,      # 10
+    Tribe.AQUARION,  # 11
+    Tribe.QUETZALI,  # 12
+    Tribe.ELYRION,   # 13
+    Tribe.YADAKK,    # 14
+    Tribe.POLARIS,   # 15
+    Tribe.CYMANTI,   # 16
+)
+
+
+def GetTribeTypeFromLegacyIndex(style: int) -> int:
+    """GameLogicData.GetTribeTypeFromLegacyIndex(int style).
+
+    Negative styles clamp to 0; indexes past the last entry clamp to Cymanti.
+    """
+    idx = int(style)
+    if idx < 0:
+        idx = 0
+    last = len(LEGACY_TRIBE_ORDER) - 1
+    if idx > last:
+        idx = last
+    return int(LEGACY_TRIBE_ORDER[idx])
 
 
 class Skin(IntEnum):
@@ -177,7 +217,8 @@ SORT_UNIT_STATUS = 120          # UnitStatusDisplays + UnitStatusText
 
 
 # Tribe value -> lowercase theme suffix (recon/asset_map.json tribe_theme).
-# climate is assumed to hold a Tribe value (the standard 1:1 Polytopia climate->tribe map).
+# Renderer GameState climate is a TribeType. Serialized TileData.climate is a
+# legacy index; map it with GetTribeTypeFromLegacyIndex before theming.
 TRIBE_THEME = {
     Tribe.NATURE: "nature", Tribe.AIMO: "aimo", Tribe.AQUARION: "aquarion",
     Tribe.BARDUR: "bardur", Tribe.ELYRION: "elyrion", Tribe.HOODRICK: "hoodrick",
@@ -195,3 +236,15 @@ SKIN_THEME = {
     Skin.DARKELF: "darkelf", Skin.SWAMP: "swamp", Skin.MAGMA: "magma",
     Skin.CUTE: "cute",
 }
+
+# style index -> TribeType (same table as LEGACY_TRIBE_ORDER, skipping 0).
+CLIMATE_STYLE_TO_TRIBE = {
+    i: t for i, t in enumerate(LEGACY_TRIBE_ORDER) if i > 0
+}
+
+
+def tribe_from_climate_style(climate: int) -> int:
+    """Map a serialized climate style to TribeType. 0 stays unset."""
+    if not climate:
+        return 0
+    return GetTribeTypeFromLegacyIndex(climate)

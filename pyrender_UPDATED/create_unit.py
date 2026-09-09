@@ -573,6 +573,19 @@ SKIN_USE_CLIMATE = 1     # owner tribe (+ skin) — engine uses tile climate; we
 SKIN_USE_BIRTH_CLIMATE = 2  # unit.birth_climate when set, else owner tribe
 SKIN_DONT_CHANGE = 3     # keep the prefab's literal sprite (no re-skin at all)
 
+
+def _as_tribe(value, fallback: int) -> int:
+    """TribeType from a serialized climate/tribe field. 0 and Skin.NONE (65535) are unset."""
+    try:
+        v = int(value or 0)
+    except (TypeError, ValueError):
+        return int(fallback)
+    if v < 0:
+        v &= 0xFFFF
+    if v == 0 or v == 0xFFFF or v not in E.TRIBE_THEME:
+        return int(fallback)
+    return v
+
 # (tribe, skin) pairs whose ``animal_<skin>`` sprite is a placeholder, not a real mount.
 # Kept for any other (tribe, skin) pairs added in future; the ELYRION/DARKELF rider now
 # routes to Rider_Wolf (see _TRIBE_SKIN_PREFAB) so this set no longer affects it.
@@ -744,13 +757,12 @@ def items(ctx, x, y) -> List[Placement]:
 
     owner = unit.owner
     # Unit art themes from the owning player only — never the tile's climate/skin.
-    # (birth_climate_skin_type of Skin.NONE is serialized as 65535 and must not win over
-    # the owner's skin_type.)
+    # birth_climate / birth_climate_skin_type of Skin.NONE serialize as 65535
+    # and must not win over the owner's tribe/skin (that looks up no theme and
+    # falls through to generic Nature sprites).
     tribe, skin = ctx.player_tribe_skin(owner)
     climate = tribe
-    birth = (unit.birth_climate
-             if unit.birth_climate and unit.birth_climate > 0
-             else tribe)
+    birth = _as_tribe(unit.birth_climate, tribe)
 
     prefab = _skinned_prefab(ENUM_TO_PREFAB.get(unit.type), skin)
     ts_overrides = _TRIBE_SKIN_PREFAB.get((int(tribe), int(skin)), {})

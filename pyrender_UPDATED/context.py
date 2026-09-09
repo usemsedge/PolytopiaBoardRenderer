@@ -102,7 +102,11 @@ class TileContext:
         return self.viewer_id not in tile.explorers
 
     def tile_theme(self, tile) -> Tuple[int, int]:
-        """(tribe, skin) for a tile's terrain art — climate holds a Tribe value."""
+        """(tribe, skin) for a tile's terrain art.
+
+        ``tile.climate`` is a TribeType (deserialize maps the live-game climate
+        style through ``GetTribeTypeFromLegacyIndex`` first).
+        """
         tribe = tile.climate if tile.climate else 0
         skin = tile.skin if tile.skin and tile.skin > 0 else 0
         return tribe, skin
@@ -111,8 +115,12 @@ class TileContext:
         p = self.gs.player_by_id(pid)
         if p is None:
             return None
-        if p.color:
-            c = p.color & 0xFFFFFF
+        # Packed ARGB. Replays often serialize 0 or -1 (0xFFFFFFFF) and the live
+        # client fills the real colour in SetPlayerColors from tribe/skin.
+        # -1 is truthy, so treating it as a stored colour tints every unit white.
+        packed = int(p.color) & 0xFFFFFFFF
+        if packed not in (0, 0xFFFFFFFF):
+            c = packed & 0xFFFFFF
             return ((c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF)
         skin = p.skin_type if p.skin_type and p.skin_type > 0 else 0
         return TC.get_tribe_rgb(p.tribe, skin)

@@ -126,8 +126,11 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/load_share":
                 link = body.get("share_link") or body.get("url") or ""
                 allow = body.get("allow_unfinished", True)
+                which = body.get("which") or body.get("snapshot") or "end"
+                if body.get("start") is True:
+                    which = "start"
                 info = get_session().load_from_share(
-                    link, allow_unfinished=bool(allow)
+                    link, allow_unfinished=bool(allow), which=which
                 )
                 snap = get_session().snapshot()
                 snap["loaded"] = info

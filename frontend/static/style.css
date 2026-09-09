@@ -225,6 +225,26 @@ html, body {
   cursor: wait;
 }
 
+.check-row {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.check-row input {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+}
+
 .hint {
   margin: 6px 0 0;
   font-size: 11px;

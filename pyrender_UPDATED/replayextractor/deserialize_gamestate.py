@@ -16,7 +16,6 @@ Usage
 from __future__ import annotations
 
 import argparse
-import base64
 import json
 import struct
 import sys
@@ -28,6 +27,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+from enums import GetTribeTypeFromLegacyIndex  # noqa: E402
 from gamestate import (  # noqa: E402
     ActionRecord,
     CommandRecord,
@@ -166,9 +166,15 @@ def _read_unit(r: BinaryReader, version: int) -> UnitState:
     passenger = _read_unit(r, version) if r.bool() else None
     n_effects = r.u16()
     effects = [r.u16() for _ in range(n_effects)]
-    birth_climate = r.i16() & 0xFFFF  # stored as int16; TribeType is unsigned-ish
+    # i16 TribeType; Skin.NONE (-1) is stored as 65535 after a uint mask and
+    # must not be treated as a real tribe (that falls through to Nature art).
+    birth_climate = r.i16()
+    if birth_climate < 0:
+        birth_climate = 0
     direction = r.u8()
     birth_skin = r.u16() if version >= 0x57 else 0
+    if birth_skin == 0xFFFF:
+        birth_skin = 0
     return UnitState(
         id=uid,
         leader=leader,
@@ -195,7 +201,8 @@ def _read_unit(r: BinaryReader, version: int) -> UnitState:
 def _read_tile(r: BinaryReader, version: int) -> TileData:
     coordinates = r.coords()
     terrain = r.u16()
-    climate = r.i16() & 0xFFFF
+    # TileData.climate is a legacy tribe index (aimo=10, xinxi=1, …), not TribeType.
+    climate = GetTribeTypeFromLegacyIndex(r.i16() & 0xFFFF)
     altitude = r.i16()
     owner = r.u8()
     capital_of = r.u8()
@@ -336,7 +343,7 @@ def _read_player(r: BinaryReader, version: int) -> PlayerState:
                 if version >= 0x5D:
                     resigned_turn = r.i32()
                     if version >= 0x79:
-                        climate = r.u8()
+                        climate = GetTribeTypeFromLegacyIndex(r.u8())
 
     return PlayerState(
         id=pid,
@@ -612,14 +619,15 @@ def deserialize(data: bytes) -> GameState:
     )
 
 
-def load_bytes(path: Path) -> bytes:
+def load_bytes(path: Path, *, which: str = "end") -> bytes:
     raw = path.read_bytes()
     if path.suffix.lower() == ".json" or raw[:1] in (b"{", b"["):
         obj = json.loads(raw.decode("utf-8"))
-        b64 = obj.get("current_game_state_data") or obj.get("currentGameStateData")
-        if not b64:
-            raise ValueError(f"no current_game_state_data in {path}")
-        return base64.b64decode(b64)
+        try:
+            from .get_game_data import game_state_bytes
+        except ImportError:
+            from get_game_data import game_state_bytes
+        return game_state_bytes(obj, which=which)
     return raw
 
 
@@ -814,7 +822,7 @@ def main() -> int:
         "input",
         type=Path,
         help="Raw .bin from get_game_data.py --bin, or JSON containing "
-        "current_game_state_data",
+        "current_game_state_data / initial_game_state_data",
     )
     parser.add_argument(
         "-o",
@@ -827,10 +835,16 @@ def main() -> int:
         action="store_true",
         help="Print a short summary on stdout (default: full JSON)",
     )
+    parser.add_argument(
+        "--which",
+        choices=("start", "end"),
+        default="end",
+        help="When input is API JSON, decode start or end blob (default end)",
+    )
     args = parser.parse_args()
 
     try:
-        raw = load_bytes(args.input)
+        raw = load_bytes(args.input, which=args.which)
         gs = deserialize(raw)
     except Exception as e:
         print(f"deserialize failed: {e}", file=sys.stderr)

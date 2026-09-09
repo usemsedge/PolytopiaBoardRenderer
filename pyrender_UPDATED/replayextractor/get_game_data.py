@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Fetch a finished Polytopia game's GameState blob from a share link.
+"""Fetch a Polytopia game's GameState blob from a share link.
 
 Uses the local jwtToken (see get_jwt.py) and POSTs to
 ``api/game/get_game_view_model``. Writes JSON containing metadata plus the
-server's ``currentGameStateData`` (finished board) as base64.
+server's ``currentGameStateData`` (finished / latest board) and
+``initialGameStateData`` (game start) as base64.
 
 The binary GameState is the same payload ``ClientBase.OpenSession`` loads.
 Convert it with ``deserialize_gamestate.py``.
@@ -13,6 +14,7 @@ Usage
     python3 get_game_data.py https://share.polytopia.io/g/<uuid>
     python3 get_game_data.py <uuid> -o out.json
     python3 get_game_data.py <uuid> --bin out.gamestate.bin
+    python3 get_game_data.py <uuid> --which start --bin start.bin
 """
 
 from __future__ import annotations
@@ -64,11 +66,26 @@ def read_cached_game_data(game_id: UUID) -> Optional[dict[str, Any]]:
 
 
 def write_cached_game_data(game_id: UUID, out: dict[str, Any]) -> None:
-    """Save the first snapshot only — later duplicate links keep the older file."""
+    """Save the first snapshot only — later duplicate links keep the older file.
+
+    If an existing cache is missing ``initial_game_state_data`` and ``out`` has
+    it, merge that field so start-of-game loads can reuse the file.
+    """
     path = cache_path(game_id)
-    if path.exists():
-        return
     payload = {k: v for k, v in out.items() if not str(k).startswith("_")}
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            existing = None
+        if isinstance(existing, dict) and existing.get("initial_game_state_data"):
+            return
+        initial = payload.get("initial_game_state_data")
+        if isinstance(existing, dict) and initial:
+            existing["initial_game_state_data"] = initial
+            payload = existing
+        elif path.exists() and not initial:
+            return
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(payload), encoding="utf-8")
@@ -234,8 +251,9 @@ def build_output(resp: dict[str, Any]) -> dict[str, Any]:
         "current_game_state_data": current_b64,
         "initial_game_state_data": data.get("initialGameStateData"),
         "_comment": (
-            "current_game_state_data is the finished IBinarySerializable GameState "
-            "(base64). Decode with deserialize_gamestate.py."
+            "current_game_state_data is the finished/latest IBinarySerializable "
+            "GameState (base64); initial_game_state_data is the opening board. "
+            "Decode with deserialize_gamestate.py --which start|end."
         ),
     }
 
@@ -251,28 +269,43 @@ def fetch_game_data(
     jwt: Optional[str] = None,
     allow_unfinished: bool = False,
     use_cache: bool = True,
+    which: str = "end",
 ) -> dict[str, Any]:
-    """Share URL/UUID → metadata dict with base64 ``current_game_state_data``.
+    """Share URL/UUID → metadata dict with start and end GameState blobs.
 
     Raises ``RuntimeError`` if the game is not Ended unless ``allow_unfinished``.
     Uses ``load_jwt()`` when ``jwt`` is omitted.
 
     When ``use_cache`` is true (default), a previously saved snapshot for this
-    game id is returned and the Polytopia API is not called.
+    game id is returned and the Polytopia API is not called. ``which`` is
+    ``"start"`` or ``"end"`` (aliases accepted); a cached file missing the
+    requested blob is ignored so the API can fill it in.
     """
     game_id = parse_game_id(share_link)
+    snapshot = normalize_snapshot(which)
     if use_cache:
         cached = read_cached_game_data(game_id)
         if cached is not None:
-            state = cached.get("state")
-            if state != STATE_ENDED and not allow_unfinished:
-                raise RuntimeError(
-                    f"Game state is {state}, expected Ended ({STATE_ENDED}). "
-                    f"Pass allow_unfinished=True to fetch anyway."
+            if snapshot == "start":
+                has_blob = (
+                    cached.get("initial_game_state_data")
+                    or cached.get("initialGameStateData")
                 )
-            cached = dict(cached)
-            cached["_from_cache"] = True
-            return cached
+            else:
+                has_blob = (
+                    cached.get("current_game_state_data")
+                    or cached.get("currentGameStateData")
+                )
+            if has_blob:
+                state = cached.get("state")
+                if state != STATE_ENDED and not allow_unfinished:
+                    raise RuntimeError(
+                        f"Game state is {state}, expected Ended ({STATE_ENDED}). "
+                        f"Pass allow_unfinished=True to fetch anyway."
+                    )
+                cached = dict(cached)
+                cached["_from_cache"] = True
+                return cached
 
     token = jwt if jwt is not None else load_jwt()
     out = build_output(fetch_game_view_model(game_id, token))
@@ -289,8 +322,28 @@ def fetch_game_data(
     return out
 
 
-def game_state_bytes(out: dict[str, Any]) -> bytes:
-    """Decode ``current_game_state_data`` from a ``fetch_game_data`` / ``build_output`` dict."""
+def normalize_snapshot(which: Optional[str] = None) -> str:
+    """Map UI/CLI aliases onto ``"start"`` or ``"end"`` (default end)."""
+    if which is None or which is False:
+        return "end"
+    if which is True:
+        return "start"
+    text = str(which).strip().lower()
+    if text in ("", "end", "current", "final", "finished"):
+        return "end"
+    if text in ("start", "initial", "begin", "beginning"):
+        return "start"
+    raise ValueError(f"unknown snapshot {which!r}; use 'start' or 'end'")
+
+
+def game_state_bytes(out: dict[str, Any], *, which: str = "end") -> bytes:
+    """Decode start (``initial_game_state_data``) or end (``current_game_state_data``)."""
+    snapshot = normalize_snapshot(which)
+    if snapshot == "start":
+        b64 = out.get("initial_game_state_data") or out.get("initialGameStateData")
+        if not b64:
+            raise KeyError("no initial_game_state_data in response")
+        return base64.b64decode(b64)
     b64 = out.get("current_game_state_data") or out.get("currentGameStateData")
     if not b64:
         raise KeyError("no current_game_state_data in response")
@@ -316,7 +369,7 @@ def main() -> int:
         "--bin",
         type=Path,
         dest="bin_path",
-        help="Also write decoded currentGameStateData bytes to this path",
+        help="Also write decoded GameState bytes (start or end, see --which) to this path",
     )
     parser.add_argument(
         "--allow-unfinished",
@@ -328,13 +381,26 @@ def main() -> int:
         action="store_true",
         help="Ignore the local share-link cache and call the API",
     )
+    parser.add_argument(
+        "--start",
+        action="store_true",
+        help="Decode the opening board (initialGameStateData) instead of the end",
+    )
+    parser.add_argument(
+        "--which",
+        choices=("start", "end"),
+        default=None,
+        help="Which board snapshot to decode for --bin: start or end (default end)",
+    )
     args = parser.parse_args()
 
+    which = args.which or ("start" if args.start else "end")
     try:
         out = fetch_game_data(
             args.share_link,
             allow_unfinished=args.allow_unfinished,
             use_cache=not args.no_cache,
+            which=which,
         )
     except ValueError as e:
         print(e, file=sys.stderr)
@@ -355,14 +421,16 @@ def main() -> int:
         print(text)
 
     if args.bin_path:
-        raw = game_state_bytes(out)
+        raw = game_state_bytes(out, which=which)
         args.bin_path.write_bytes(raw)
-        print(f"wrote {args.bin_path} ({len(raw)} bytes)", file=sys.stderr)
+        print(f"wrote {args.bin_path} ({len(raw)} bytes) [{which}]", file=sys.stderr)
 
+    current_n = len(out.get("current_game_state_data") or "")
+    initial_n = len(out.get("initial_game_state_data") or "")
     print(
-        f"game {out['id']} state={state} "
+        f"game {out['id']} state={state} which={which} "
         f"{'cache-hit' if out.get('_from_cache') else 'fetched'} "
-        f"currentGameStateData={len(out['current_game_state_data'])} b64 chars",
+        f"current={current_n} initial={initial_n} b64 chars",
         file=sys.stderr,
     )
     return 0

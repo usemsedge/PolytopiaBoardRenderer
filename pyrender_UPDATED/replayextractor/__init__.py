@@ -5,6 +5,7 @@ Typical use (with ``pyrender_UPDATED`` on ``sys.path``)::
     from replayextractor import fetch_gamestate, game_state_to_dict
 
     gs = fetch_gamestate("https://share.polytopia.io/g/<uuid>")
+    start = fetch_gamestate(share_link, which="start")
     print(gs.current_turn, len(gs.command_stack))
 
 Or step by step::
@@ -27,6 +28,7 @@ from .get_game_data import (
     fetch_game_data,
     fetch_game_view_model,
     game_state_bytes,
+    normalize_snapshot,
     parse_game_id,
     read_cached_game_data,
     write_cached_game_data,
@@ -58,6 +60,7 @@ __all__ = [
     "build_output",
     "fetch_game_data",
     "game_state_bytes",
+    "normalize_snapshot",
     # Deserialize
     "BinaryReader",
     "deserialize",
@@ -75,16 +78,20 @@ def fetch_gamestate(
     jwt: Optional[str] = None,
     allow_unfinished: bool = False,
     use_cache: bool = True,
+    which: str = "end",
 ) -> "GameState":
     """Share URL/UUID → deserialized ``gamestate.GameState``.
 
     Duplicate share links reuse the first local snapshot (no second API call)
-    unless ``use_cache`` is false.
+    unless ``use_cache`` is false. ``which`` is ``"start"`` (opening board) or
+    ``"end"`` (finished / latest board, default).
     """
+    snapshot = normalize_snapshot(which)
     out = fetch_game_data(
         share_link,
         jwt=jwt,
         allow_unfinished=allow_unfinished,
         use_cache=use_cache,
+        which=snapshot,
     )
-    return deserialize(game_state_bytes(out))
+    return deserialize(game_state_bytes(out, which=snapshot))

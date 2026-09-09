@@ -41,8 +41,12 @@
             spellcheck="false"
           />
           <button type="button" id="share-load" class="primary-btn">Load</button>
+          <label class="check-row" for="share-start">
+            <input id="share-start" type="checkbox" />
+            Beginning of the game
+          </label>
         </div>
-        <p id="share-hint" class="hint">Replaces the current board with that game’s state.</p>
+        <p id="share-hint" class="hint">Unchecked loads the finished board; checked loads the opening turn.</p>
       </section>
 
       <section class="panel" id="player-panel">

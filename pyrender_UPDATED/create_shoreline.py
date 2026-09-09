@@ -50,7 +50,9 @@ from image import Image
 
 # --- IsLand: terrain in {Field, Mountain, Forest, Ice} (get_IsLand 0x7DCBC4) ---
 _LAND = {E.Terrain.FIELD, E.Terrain.MOUNTAIN, E.Terrain.FOREST, E.Terrain.ICE}
-_FROZEN_CLIMATE = 15  # IsFrozen 0x7D9E3C: Water + climate==15
+# IsFrozen 0x7D9E3C: Water + Polaris climate. Live blobs store style 15;
+# after deserialize (and in mapgen) climate is Tribe.POLARIS (16).
+_FROZEN_CLIMATES = {15, int(E.Tribe.POLARIS)}
 
 # Iso edge slope: every diamond edge runs between two vertices of the
 # HALF_W x HALF_H diamond, so it makes this angle with the horizontal.
@@ -104,7 +106,7 @@ def _is_swamp_neighbour(t) -> bool:
 
 
 def _frozen_water(tile) -> bool:
-    return tile.terrain == E.Terrain.WATER and tile.climate == _FROZEN_CLIMATE
+    return tile.terrain == E.Terrain.WATER and int(tile.climate or 0) in _FROZEN_CLIMATES
 
 
 def _rotated(img: Image, degrees: float) -> Image:

@@ -181,8 +181,12 @@ class EditorSession:
         share_link: str,
         *,
         allow_unfinished: bool = True,
+        which: str = "end",
     ) -> dict:
-        """Fetch a share URL/UUID via replayextractor and populate the session."""
+        """Fetch a share URL/UUID via replayextractor and populate the session.
+
+        ``which`` is ``"start"`` (opening board) or ``"end"`` (finished / latest).
+        """
         link = (share_link or "").strip()
         if not link:
             raise ValueError("share link is required")
@@ -192,6 +196,7 @@ class EditorSession:
             deserialize,
             fetch_game_data,
             game_state_bytes,
+            normalize_snapshot,
             parse_game_id,
         )
         import urllib.error
@@ -201,9 +206,21 @@ class EditorSession:
         except ValueError as e:
             raise ValueError(str(e)) from e
 
+        snapshot = normalize_snapshot(which)
         try:
-            raw = fetch_game_data(link, allow_unfinished=allow_unfinished)
-            gs = deserialize(game_state_bytes(raw))
+            raw = fetch_game_data(
+                link, allow_unfinished=allow_unfinished, which=snapshot
+            )
+            gs = deserialize(game_state_bytes(raw, which=snapshot))
+        except KeyError as e:
+            print(f"[load_from_share] fetch failed for {game_id}: {e}", file=sys.stderr)
+            traceback.print_exc()
+            if snapshot == "start":
+                raise RuntimeError(
+                    "This game has no opening board (initialGameStateData) in "
+                    "the API response."
+                ) from e
+            raise RuntimeError(str(e)) from e
         except Exception as e:
             print(f"[load_from_share] fetch failed for {game_id}: {e}", file=sys.stderr)
             traceback.print_exc()
@@ -225,6 +242,7 @@ class EditorSession:
         return {
             "game_id": str(game_id),
             "share_link": source,
+            "which": snapshot,
             "current_turn": gs.current_turn,
             "map_width": gs.map.width,
             "map_height": gs.map.height,

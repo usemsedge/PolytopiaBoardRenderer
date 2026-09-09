@@ -17,54 +17,54 @@ from typing import Any, ClassVar, Dict, List, Optional
 
 @dataclass
 class WorldCoordinates:
-    """dump.cs WorldCoordinates — int x @0x0, int y @0x4."""
-    x: int = 0
-    y: int = 0
+    """dump.cs ``struct WorldCoordinates`` (TypeDef 10710)."""
+    x: int = 0                             # C#: int x
+    y: int = 0                             # C#: int y
 
 
 @dataclass
 class Shoreline:
-    """TileData.Shoreline."""
-    visible: bool = False
-    sprite_ext: str = ""          # "" or "_swamp"
+    """dump.cs ``class TileData.Shoreline`` (TypeDef 10585)."""
+    visible: bool = False                   # C#: bool visible
+    sprite_ext: str = ""                   # C#: string spriteExt  ("" or "_swamp")
 
 
 @dataclass
 class Shorelines:
-    """TileData.Shorelines."""
-    any: bool = False
-    N: Shoreline = field(default_factory=Shoreline)
-    S: Shoreline = field(default_factory=Shoreline)
-    E: Shoreline = field(default_factory=Shoreline)
-    W: Shoreline = field(default_factory=Shoreline)
+    """dump.cs ``class TileData.Shorelines`` (TypeDef 10586)."""
+    any: bool = False                       # C#: bool any
+    N: Shoreline = field(default_factory=Shoreline)  # C#: TileData.Shoreline N
+    S: Shoreline = field(default_factory=Shoreline)  # C#: TileData.Shoreline S
+    E: Shoreline = field(default_factory=Shoreline)  # C#: TileData.Shoreline E
+    W: Shoreline = field(default_factory=Shoreline)  # C#: TileData.Shoreline W
 
 
 @dataclass
 class ResourceState:
-    """dump.cs ResourceState — ResourceData.Type type @0x10."""
-    type: int
+    """dump.cs ``class ResourceState`` (TypeDef 10631)."""
+    type: int                               # C#: ResourceData.Type type
 
 
 @dataclass
 class ImprovementState:
-    """dump.cs ImprovementState (TypeDef 10628)."""
-    type: int
-    owner: int = 0                          # obsolete in C#; tile.owner is authoritative
-    founder: int = 0
-    level: int = 1
-    founded: int = 0
-    xp: int = 0
-    population: int = 0
-    production: int = 0
-    base_score: int = 0
-    border_size: int = 0
-    upgrade: int = 0
-    connected_to_capital_of_player: int = 0
-    name: str = ""
-    rewards: List[int] = field(default_factory=list)   # CityReward
-    effects: List[int] = field(default_factory=list)   # ImprovementEffect
-    # Ordered player ids who discovered this LightHouse (tower drums). Empty =
-    # fall back to players' built_unique_improvements. Not fog (tile.explorers).
+    """dump.cs ``class ImprovementState`` (TypeDef 10628)."""
+    type: int                               # C#: ImprovementData.Type type
+    owner: int = 0                          # C#: byte owner  (obsolete; tile.owner is authoritative)
+    founder: int = 0                       # C#: byte founder
+    level: int = 1                         # C#: ushort level
+    founded: int = 0                       # C#: ushort founded
+    xp: int = 0                            # C#: short xp
+    population: int = 0                    # C#: short population
+    production: int = 0                    # C#: ushort production
+    base_score: int = 0                    # C#: ushort baseScore
+    border_size: int = 0                    # C#: ushort borderSize
+    upgrade: int = 0                       # C#: ushort upgrade
+    connected_to_capital_of_player: int = 0  # C#: byte connectedToCapitalOfPlayer
+    name: str = ""                         # C#: string name
+    rewards: List[int] = field(default_factory=list)   # C#: List<CityReward> rewards
+    effects: List[int] = field(default_factory=list)   # C#: List<ImprovementEffect> effects
+    # Renderer-only (not in dump). Ordered player ids who discovered this
+    # LightHouse (tower drums). Empty = fall back to built_unique_improvements.
     discovered_by: List[int] = field(default_factory=list)
 
     def has_reward(self, reward: int) -> bool:
@@ -78,30 +78,30 @@ class ImprovementState:
 
 @dataclass
 class UnitState:
-    """dump.cs UnitState (TypeDef 10633)."""
-    id: int = 0
-    leader: int = 0
-    follower: int = 0
-    owner: int = 0
-    birth_climate: int = 0                  # TribeType
-    birth_climate_skin_type: int = 0        # SkinType
-    type: int = 0
+    """dump.cs ``class UnitState`` (TypeDef 10633)."""
+    id: int = 0                            # C#: uint id
+    leader: int = 0                        # C#: uint leader
+    follower: int = 0                      # C#: uint follower
+    owner: int = 0                         # C#: byte owner
+    birth_climate: int = 0                # C#: TribeType birthClimate
+    birth_climate_skin_type: int = 0      # C#: SkinType birthClimateSkinType
+    type: int = 0                          # C#: UnitData.Type type
     previous_turn_end_coordinates: WorldCoordinates = field(
-        default_factory=WorldCoordinates)
-    coordinates: WorldCoordinates = field(default_factory=WorldCoordinates)
-    home: WorldCoordinates = field(default_factory=WorldCoordinates)
-    passenger_unit: Optional["UnitState"] = None
-    health: int = 100                       # tenths (display HP = ceil(health/10))
-    promotion_level: int = 0
-    xp: int = 0
-    moved: bool = False
-    attacked: bool = False
-    direction: int = 8                      # GridDirection.NONE
-    flipped: bool = False
-    created_turn: int = 0
-    unit_data: Any = None                   # UnitData ref — not modeled
-    effects: List[int] = field(default_factory=list)
-    is_temporary_explorer_unit: bool = False
+        default_factory=WorldCoordinates)     # C#: WorldCoordinates previousTurnEndCoordinates
+    coordinates: WorldCoordinates = field(default_factory=WorldCoordinates)  # C#: WorldCoordinates coordinates
+    home: WorldCoordinates = field(default_factory=WorldCoordinates)  # C#: WorldCoordinates home
+    passenger_unit: Optional["UnitState"] = None  # C#: UnitState passengerUnit
+    health: int = 100                      # C#: ushort health  (tenths; display HP = ceil(health/10))
+    promotion_level: int = 0              # C#: ushort promotionLevel
+    xp: int = 0                            # C#: ushort xp
+    moved: bool = False                    # C#: bool moved
+    attacked: bool = False                  # C#: bool attacked
+    direction: int = 8                    # C#: GridDirection direction  (NONE=8)
+    flipped: bool = False                   # C#: bool flipped
+    created_turn: int = 0                 # C#: ushort createdTurn
+    unit_data: Any = None                   # C#: UnitData UnitData  (not modeled)
+    effects: List[int] = field(default_factory=list)  # C#: List<UnitEffect> effects
+    is_temporary_explorer_unit: bool = False  # C#: bool isTemporaryExplorerUnit
 
     # Ergonomic aliases for the embedded WorldCoordinates (not extra C fields).
     @property
@@ -115,55 +115,55 @@ class UnitState:
 
 @dataclass
 class WorldContinent:
-    """dump.cs WorldContinent — render does not consume these; kept for schema parity."""
-    tiles: List[WorldCoordinates] = field(default_factory=list)
-    climate: int = 0
-    skin_type: int = 0
-    crop: float = 0.0
-    fish: float = 0.0
-    fruit: float = 0.0
-    game: float = 0.0
-    metal: float = 0.0
-    whale: float = 0.0
-    spores: float = 0.0
-    aquacrop: float = 0.0
-    water: float = 0.0
-    ocean: float = 0.0
-    field: float = 0.0
-    mountain: float = 0.0
-    forest: float = 0.0
-    ice: float = 0.0
-    has_alien_climate: bool = False
-    land_tile_count: int = 0
-    number_of_capitals: int = 0
-    max_size: int = 0
+    """dump.cs ``class WorldContinent`` (TypeDef 10709)."""
+    tiles: List[WorldCoordinates] = field(default_factory=list)  # C#: List<WorldCoordinates> tiles
+    climate: int = 0                       # C#: TribeType climate
+    skin_type: int = 0                     # C#: SkinType skinType
+    crop: float = 0.0                      # C#: float crop
+    fish: float = 0.0                      # C#: float fish
+    fruit: float = 0.0                     # C#: float fruit
+    game: float = 0.0                      # C#: float game
+    metal: float = 0.0                     # C#: float metal
+    whale: float = 0.0                     # C#: float whale
+    spores: float = 0.0                    # C#: float spores
+    aquacrop: float = 0.0                  # C#: float aquacrop
+    water: float = 0.0                     # C#: float water
+    ocean: float = 0.0                     # C#: float ocean
+    field: float = 0.0                     # C#: float field
+    mountain: float = 0.0                  # C#: float mountain
+    forest: float = 0.0                    # C#: float forest
+    ice: float = 0.0                       # C#: float ice
+    has_alien_climate: bool = False         # C#: bool hasAlienClimate
+    land_tile_count: int = 0               # C#: int LandTileCount
+    number_of_capitals: int = 0            # C#: int NumberOfCapitals
+    max_size: int = 0                      # C#: int MaxSize
 
 
 @dataclass
 class TileData:
-    """dump.cs TileData (TypeDef 10588)."""
-    coordinates: WorldCoordinates
-    terrain: int
-    climate: int = 0
-    skin: int = 0                           # _skin
-    effects: List[int] = field(default_factory=list)
-    altitude: int = 0
-    owner: int = 0
-    capital_of: int = 0
-    explorers: List[int] = field(default_factory=list)
-    shorelines: Shorelines = field(default_factory=Shorelines)
+    """dump.cs ``class TileData`` (TypeDef 10588)."""
+    coordinates: WorldCoordinates            # C#: WorldCoordinates coordinates
+    terrain: int                            # C#: TerrainData.Type terrain
+    climate: int = 0                       # C#: TribeType climate  (in-memory; save file is legacy index)
+    skin: int = 0                          # C#: SkinType _skin
+    effects: List[int] = field(default_factory=list)  # C#: List<TileData.EffectType> effects
+    altitude: int = 0                      # C#: int altitude
+    owner: int = 0                         # C#: byte owner
+    capital_of: int = 0                    # C#: byte capitalOf
+    explorers: List[int] = field(default_factory=list)  # C#: List<byte> explorers
+    shorelines: Shorelines = field(default_factory=Shorelines)  # C#: TileData.Shorelines shorelines
     ruling_city_coordinates: WorldCoordinates = field(
-        default_factory=lambda: WorldCoordinates(-1, -1))
-    improvement: Optional[ImprovementState] = None
-    resource: Optional[ResourceState] = None
-    unit: Optional[UnitState] = None
-    has_road: bool = False
-    has_route: bool = False
-    continent: Optional[WorldContinent] = None
-    had_route: bool = False
-    upgrade_tech: Dict[int, float] = field(default_factory=dict)
-    last_population_check: int = 0
-    available_population: int = 0
+        default_factory=lambda: WorldCoordinates(-1, -1))  # C#: WorldCoordinates rulingCityCoordinates
+    improvement: Optional[ImprovementState] = None  # C#: ImprovementState improvement
+    resource: Optional[ResourceState] = None  # C#: ResourceState resource
+    unit: Optional[UnitState] = None        # C#: UnitState unit
+    has_road: bool = False                   # C#: bool hasRoad
+    has_route: bool = False                  # C#: bool hasRoute
+    continent: Optional[WorldContinent] = None  # C#: WorldContinent continent
+    had_route: bool = False                  # C#: bool hadRoute
+    upgrade_tech: Dict[int, float] = field(default_factory=dict)  # C#: Dictionary<TechData.Type, float> upgradeTech
+    last_population_check: int = 0         # C#: long lastPopulationCheck
+    available_population: int = 0         # C#: int availablePopulation
 
     @property
     def x(self) -> int:
@@ -185,55 +185,55 @@ class TileData:
 
 @dataclass
 class PlayerState:
-    """dump.cs PlayerState (TypeDef 10630) — full field list; unused stay at defaults."""
-    NO_PLAYER_ID: ClassVar[int] = 0
-    NATURE_PLAYER_ID: ClassVar[int] = 255
+    """dump.cs ``class PlayerState`` (TypeDef 10630)."""
+    NO_PLAYER_ID: ClassVar[int] = 0        # C#: const byte NO_PLAYER_ID
+    NATURE_PLAYER_ID: ClassVar[int] = 255  # C#: const byte NATURE_PLAYER_ID
 
-    id: int = 0
-    user_name: str = ""
-    account_id: Any = None
-    auto_play: bool = False
-    start_tile: WorldCoordinates = field(default_factory=WorldCoordinates)
-    tribe: int = 0
-    tribe_mix: int = 0
-    climate: int = 0                        # _climate
-    has_chosen_tribe: bool = False
-    handicap: int = 0
-    resigned_turn: int = 0
-    resigned_at_command_index: int = 0
-    wiped_at_command_index: int = 0
-    available_tech: List[int] = field(default_factory=list)
-    tasks: List[Any] = field(default_factory=list)
-    aggressions: Dict[int, int] = field(default_factory=dict)
-    known_players: List[int] = field(default_factory=list)
-    built_unique_improvements: List[int] = field(default_factory=list)
-    relations: Dict[int, Any] = field(default_factory=dict)
-    messages: List[Any] = field(default_factory=list)
-    skin_type: int = 0
-    currency: int = 0
-    score: int = 0
-    end_score: int = 0
-    cities: int = 0
-    kills: int = 0
-    casualities: int = 0
-    wipe_outs: int = 0
-    killer_id: int = 0
-    killed_turn: int = 0
-    color: int = 0
-    ai_state: Any = None
-    unlocked_tech_cache: List[Any] = field(default_factory=list)
-    block_train_units: bool = False
-    capital_count_cache: int = 0
-    opinions: Any = None
+    id: int = 0                            # C#: byte Id
+    user_name: str = ""                    # C#: string UserName
+    account_id: Any = None                  # C#: Nullable<Guid> AccountId
+    auto_play: bool = False                 # C#: bool AutoPlay
+    start_tile: WorldCoordinates = field(default_factory=WorldCoordinates)  # C#: WorldCoordinates startTile
+    tribe: int = 0                         # C#: TribeType tribe
+    tribe_mix: int = 0                     # C#: TribeType tribeMix
+    climate: int = 0                      # C#: TribeType _climate
+    has_chosen_tribe: bool = False          # C#: bool hasChosenTribe
+    handicap: int = 0                     # C#: int handicap
+    resigned_turn: int = 0                # C#: int resignedTurn
+    resigned_at_command_index: int = 0      # C#: int resignedAtCommandIndex
+    wiped_at_command_index: int = 0        # C#: int wipedAtCommandIndex
+    available_tech: List[int] = field(default_factory=list)  # C#: List<TechData.Type> availableTech
+    tasks: List[Any] = field(default_factory=list)  # C#: List<TaskBase> tasks
+    aggressions: Dict[int, int] = field(default_factory=dict)  # C#: Dictionary<byte, int> aggressions
+    known_players: List[int] = field(default_factory=list)  # C#: List<byte> knownPlayers
+    built_unique_improvements: List[int] = field(default_factory=list)  # C#: List<ImprovementData.Type> builtUniqueImprovements
+    relations: Dict[int, Any] = field(default_factory=dict)  # C#: Dictionary<byte, DiplomacyRelation> relations
+    messages: List[Any] = field(default_factory=list)  # C#: List<DiplomacyMessage> messages
+    skin_type: int = 0                     # C#: SkinType skinType
+    currency: int = 0                     # C#: int currency
+    score: int = 0                         # C#: uint score
+    end_score: int = 0                     # C#: uint endScore
+    cities: int = 0                        # C#: int cities
+    kills: int = 0                         # C#: uint kills
+    casualities: int = 0                   # C#: uint casualities
+    wipe_outs: int = 0                     # C#: uint wipeOuts
+    killer_id: int = 0                     # C#: byte killerId
+    killed_turn: int = 0                   # C#: uint killedTurn
+    color: int = 0                         # C#: int color
+    ai_state: Any = None                    # C#: AIState aiState
+    unlocked_tech_cache: List[Any] = field(default_factory=list)  # C#: List<TechData> unlockedTechCache
+    block_train_units: bool = False          # C#: bool blockTrainUnits
+    capital_count_cache: int = 0          # C#: int capitalCountCache
+    opinions: Any = None                   # C#: OpinionManager opinions
 
 
 @dataclass
 class MapData:
-    """dump.cs MapData (TypeDef 10577)."""
-    width: int
-    height: int
-    tiles: List[TileData]
-    continents: List[WorldContinent] = field(default_factory=list)
+    """dump.cs ``class MapData`` (TypeDef 10577)."""
+    width: int                             # C#: ushort width
+    height: int                            # C#: ushort height
+    tiles: List[TileData]                  # C#: TileData[] tiles
+    continents: List[WorldContinent] = field(default_factory=list)  # C#: WorldContinent[] continents
 
     def tile_at(self, x: int, y: int) -> Optional[TileData]:
         if 0 <= x < self.width and 0 <= y < self.height:
@@ -243,14 +243,14 @@ class MapData:
 
 @dataclass
 class GameSettings:
-    """dump.cs GameSettings (TypeDef 10606) — fields needed for mapgen."""
-    map_preset: int = 0                     # MapPreset
-    map_size: int = 0                       # MapSize or raw width when > 6
-    game_name: str = ""
-    game_type: int = 0
-    opponent_count: int = 0
-    disabled_tribes: List[int] = field(default_factory=list)
-    west_map_placement_user_id: Any = None
+    """dump.cs ``sealed class GameSettings`` (TypeDef 10606) — mapgen subset."""
+    map_preset: int = 0                    # C#: MapPreset mapPreset
+    map_size: int = 0                      # C#: int MapSize  (enum or raw width when > 6)
+    game_name: str = ""                     # C#: string GameName
+    game_type: int = 0                     # C#: GameType GameType
+    opponent_count: int = 0                # C#: int OpponentCount
+    disabled_tribes: List[int] = field(default_factory=list)  # C#: List<TribeType> disabledTribes
+    west_map_placement_user_id: Any = None   # C#: Nullable<Guid> WestMapPlacementUserId
 
     def GetMapGeneratorSettings(self):
         """GameSettings.GetMapGeneratorSettings → CreateFromPreset(mapPreset)."""
@@ -273,51 +273,51 @@ class GameSettings:
 
 @dataclass
 class CommandTrigger:
-    """dump.cs CommandTrigger (TypeDef 10610)."""
-    player_id: int = 0
-    opponent_id: int = 0
-    type: int = 0  # CommandTriggerType
-    coordinates: WorldCoordinates = field(default_factory=WorldCoordinates)
+    """dump.cs ``struct CommandTrigger`` (TypeDef 10610)."""
+    player_id: int = 0                      # C#: byte playerId
+    opponent_id: int = 0                    # C#: byte opponentId
+    type: int = 0                          # C#: CommandTriggerType type
+    coordinates: WorldCoordinates = field(default_factory=WorldCoordinates)  # C#: WorldCoordinates coordinates
 
 
 @dataclass
 class CommandRecord:
-    """One entry from GameState.CommandStack (type ushort + CommandBase body)."""
-    type: int  # CommandType
-    player_id: int = 0
-    fields: Dict[str, Any] = field(default_factory=dict)
+    """One ``GameState.CommandStack`` entry: ``CommandType`` ushort + ``CommandBase`` body."""
+    type: int                              # C#: CommandType  (ushort on the wire)
+    player_id: int = 0                     # C#: from CommandBase.playerId (byte)
+    fields: Dict[str, Any] = field(default_factory=dict)  # flattened CommandBase subclass fields
 
 
 @dataclass
 class ActionRecord:
-    """One entry from GameState.ActionStack (type ushort + ActionBase body)."""
-    type: int  # ActionType
-    player_id: int = 0
-    fields: Dict[str, Any] = field(default_factory=dict)
+    """One ``GameState.ActionStack`` entry: ``ActionType`` ushort + ``ActionBase`` body."""
+    type: int                              # C#: ActionType  (ushort on the wire)
+    player_id: int = 0                     # C#: from ActionBase.playerId (byte)
+    fields: Dict[str, Any] = field(default_factory=dict)  # flattened ActionBase subclass fields
 
 
 @dataclass
 class GameState:
-    """dump.cs GameState (TypeDef 10622)."""
+    """dump.cs ``class GameState`` (TypeDef 10622)."""
     # GameState.State: Unknown=0 Lobby=1 Started=2 FinalTurn=3 Ended=4
-    version: int = 0
-    seed: int = 0
-    village_name_seed: int = 0
-    current_turn: int = 0
-    current_player_index: int = 0
-    current_unit_id: int = 0
-    current_state: int = 0
-    settings: Optional[GameSettings] = None
-    map: Optional[MapData] = None
-    player_states: List[PlayerState] = field(default_factory=list)
-    current_command: int = 0
-    command_stack: List[CommandRecord] = field(default_factory=list)
-    action_stack: List[ActionRecord] = field(default_factory=list)
-    pending_command_triggers: List[CommandTrigger] = field(default_factory=list)
-    has_flagged_need_for_update_routes: bool = False
-    random_hash: Any = None
-    village_name_hash: Any = None
-    mocked_game_logic_data: Any = None
+    version: int = 0                       # C#: int Version
+    seed: int = 0                          # C#: int Seed
+    village_name_seed: int = 0            # C#: int VillageNameSeed
+    current_turn: int = 0                 # C#: uint CurrentTurn
+    current_player_index: int = 0         # C#: byte CurrentPlayerIndex
+    current_unit_id: int = 0              # C#: uint CurrentUnitId
+    current_state: int = 0                # C#: GameState.State CurrentState
+    settings: Optional[GameSettings] = None  # C#: GameSettings Settings
+    map: Optional[MapData] = None           # C#: MapData Map
+    player_states: List[PlayerState] = field(default_factory=list)  # C#: List<PlayerState> PlayerStates
+    current_command: int = 0              # C#: ushort CurrentCommand
+    command_stack: List[CommandRecord] = field(default_factory=list)  # C#: List<CommandBase> CommandStack
+    action_stack: List[ActionRecord] = field(default_factory=list)  # C#: List<ActionBase> ActionStack
+    pending_command_triggers: List[CommandTrigger] = field(default_factory=list)  # C#: List<CommandTrigger> pendingCommandTriggers
+    has_flagged_need_for_update_routes: bool = False  # C#: bool HasFlaggedNeedForUpdateRoutes
+    random_hash: Any = None                 # C#: XXHash randomHash
+    village_name_hash: Any = None           # C#: XXHash villageNameHash
+    mocked_game_logic_data: Any = None       # C#: GameLogicData mockedGameLogicData
 
     def player_by_id(self, pid: int) -> Optional[PlayerState]:
         for p in self.player_states:

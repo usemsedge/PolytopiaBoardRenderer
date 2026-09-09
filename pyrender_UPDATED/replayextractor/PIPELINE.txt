@@ -13,7 +13,9 @@ Pipeline
 From this folder:
 
   python3 get_game_data.py https://share.polytopia.io/g/<uuid> --bin game.bin
+  python3 get_game_data.py https://share.polytopia.io/g/<uuid> --which start --bin start.bin
   python3 deserialize_gamestate.py game.bin -o state.json --summary
+  python3 deserialize_gamestate.py game.json --which start -o start.json
   python3 ../render.py state.json board.png   # optional
 
 get_game_data hits polytopia-prod (get_game_view_model, falls back to
